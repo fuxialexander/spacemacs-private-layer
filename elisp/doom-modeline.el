@@ -782,8 +782,8 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 ;;
 
 (def-modeline! main
-  (bar matches " " buffer-info "  ")
-  ;; (bar matches " " buffer-info "  " buffer-purpose " ")
+  ;; (bar matches " " buffer-info "  ")
+  (bar matches " " buffer-info "  " buffer-purpose " ")
   (major-mode vcs flycheck " " perspname " "))
 
 (def-modeline! minimal

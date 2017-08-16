@@ -86,7 +86,6 @@ This function should only modify configuration layer settings."
                                       fringe-helper
                                       org-super-agenda
                                       shackle
-                                      ;; ivy-rich
                                       kurecolor
                                       dired-narrow
                                       prodigy
