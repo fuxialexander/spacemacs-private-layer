@@ -141,8 +141,8 @@
                        (temp (make-temp-file "notmuch-message-" nil ".eml")))
                   (shell-command-to-string (format "cp '%s' '%s'; open '%s' -a Mail; l/bin/rm '%s'" msg-path temp temp temp))))
 
-              (defun notmuch-search-delete () (interactive) (notmuch-search-add-tag (list "+deleted")) (notmuch-search-next-thread))
-              (defun notmuch-tree-delete () (interactive) (notmuch-tree-add-tag (list "+deleted")) (notmuch-tree-next-message))
+              (defun notmuch-search-delete () (interactive) (notmuch-search-add-tag (list "+deleted" "-inbox" "-unread")) (notmuch-search-next-thread))
+              (defun notmuch-tree-delete () (interactive) (notmuch-tree-add-tag (list "+deleted" "-inbox" "-unread")) (notmuch-tree-next-message))
 
 
               (setq message-send-mail-function 'message-send-mail-with-sendmail)
