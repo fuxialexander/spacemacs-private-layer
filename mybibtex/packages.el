@@ -30,29 +30,35 @@
 ;;; Code:
 
 (setq mybibtex-packages
-  '(
-    auctex
-    org
-    (org-ref-ivy :location local)
-    (ivy-bibtex :depends ivy)
-    biblio
-    biblio-core
-    )
-)
+      '(
+        auctex
+        org
+        (org-ref-ivy :location local)
+        (ivy-bibtex :depends ivy)
+        biblio
+        biblio-core
+        )
+      )
 
 (defun mybibtex/post-init-auctex ()
-  ;; (spacemacs/set-leader-keys-for-major-mode 'latex-mode "ic" 'org-ref-ivy-insert-cite-link)
-  ;; (spacemacs/set-leader-keys-for-major-mode 'latex-mode "ib" 'ivy-bibtex)
+  (with-eval-after-load 'auctex
+    (spacemacs/set-leader-keys-for-major-mode 'latex-mode "ic" 'org-ref-ivy-insert-cite-link)
+    )
   )
 
 (defun mybibtex/post-init-org ()
-  ;; (spacemacs/set-leader-keys-for-major-mode 'org-mode "ic" 'org-ref-ivy-insert-cite-link)
-  ;; (spacemacs/set-leader-keys-for-major-mode 'org-mode "ib" 'ivy-bibtex)
+  (with-eval-after-load 'org
+    (spacemacs/set-leader-keys-for-major-mode 'org-mode "ic" 'org-ref-ivy-insert-cite-link)
+    (defun org-mac-papers-open (papers-link)
+      (start-process "open papers" nil "/usr/bin/open" (concat "papers3:" papers-link )))
+    (org-add-link-type "papers3" 'org-mac-papers-open)
+    )
   )
 
 (defun mybibtex/init-org-ref-ivy ()
   (use-package org-ref-ivy
     :defer t
+    :after org ivy-bibtex
     :commands (org-ref-bibtex-next-entry
                org-ref-bibtex-previous-entry
                org-ref-open-in-browser
@@ -94,25 +100,85 @@
         "lA" 'arxiv-get-pdf-add-bibtex-entry
         "ld" 'doi-utils-add-bibtex-entry-from-doi
         "li" 'isbn-to-bibtex
-        "lp" 'pubmed-insert-bibtex-from-pmid))))
+        "lp" 'pubmed-insert-bibtex-from-pmid))
+    :config
+    (progn
+      (setf (cdr (assoc "p" org-ref-ivy-cite-actions)) '(ivy-bibtex-open-papers "Open in Papers"))
+      (setq org-ref-completion-library 'org-ref-ivy-cite
+            org-ref-default-bibliography '("/Users/xfu/Dropbox/org/ref.bib")
+            org-ref-bibliography-notes "/Users/xfu/Dropbox/org/ref.org"
 
-(defun mybibtex/setup-org-ref-ivy ()
-  (setq org-ref-completion-library 'org-ref-ivy-cite)
-  (require 'org-ref-ivy)
-  )
-(defun mybibtex/post-init-org-ref-ivy ()
-  (add-hook 'org-mode-hook 'mybibtex/setup-org-ref-ivy))
 
-(defun mybibtex/post-init-markdown-mode ()
-  ;; (spacemacs/set-leader-keys-for-major-mode 'markdown-mode "ic" 'org-ref-ivy-insert-cite-link)
-  )
+            )
+      )
+    ))
+
 
 (defun mybibtex/init-ivy-bibtex ()
   (use-package ivy-bibtex
     :defer t
+    :after (:any org auctex)
+    :init
+    :config
+    (with-eval-after-load 'ivy-bibtex
+;;; bibtex-completion customize function
+      (defun bibtex-completion-find-pdf-in-library (key-or-entry)
+        "Searches the directories in `bibtex-completion-library-path' for a
+PDF whose names is composed of the BibTeX key plus \".pdf\".  The
+path of the first matching PDF is returned."
+        (interactive)
+        (let* ((key (if (stringp key-or-entry)
+                        key-or-entry
+                      (bibtex-completion-get-value "=key=" key-or-entry)))
+               (key (s-replace ":" "" key))
+               (path (-first 'f-file?
+                             (--map (f-join it (s-concat key ".pdf"))
+                                    (-flatten (list bibtex-completion-library-path))))))
+          (when path (list path))))
+
+      (defun bibtex-completion-open-uri (keys)
+        "Open the associated URL or DOI in a browser."
+        (dolist (key keys)
+          (let* ((entry (bibtex-completion-get-entry key))
+                 (uri (bibtex-completion-get-value "uri" entry))
+                 (uri (s-replace "\\url{" "" uri))
+                 (uri (s-replace "}" "" uri))
+                 )
+            (start-process "open papers" nil "/usr/bin/open" uri)
+            )))
+
+;;; Ivy-bibtex customize function
+      (ivy-bibtex-ivify-action bibtex-completion-open-uri ivy-bibtex-open-papers)
+      (setq ivy-bibtex-default-action 'ivy-bibtex-insert-key)
+      (ivy-set-actions
+       'ivy-bibtex '(
+                     ("p" ivy-bibtex-open-papers "Open in Papers")
+                     ("n" ivy-bibtex-edit-notes "Edit notes")
+                     ("c" ivy-bibtex-insert-citation "Insert citation")
+                     ("u" ivy-bibtex-open-url-or-doi "Open URL or DOI in browser")
+                     ("r" ivy-bibtex-insert-reference "Insert Reference")
+                     ("b" ivy-bibtex-insert-key "Insert Bibtex Key")
+                     )
+       )
+
+      (setq bibtex-completion-format-citation-functions
+            '((org-mode      . bibtex-completion-format-citation-pandoc-citeproc)
+              (default       . bibtex-completion-format-citation-default))
+
+            bibtex-completion-bibliography "/Users/xfu/Dropbox/org/ref.bib"
+            bibtex-completion-library-path "/Users/xfu/Dropbox/Library.papers3/Files/"
+            bibtex-completion-notes-path "/Users/xfu/Dropbox/org/ref.org"
+            bibtex-completion-pdf-field nil
+            bibtex-completion-pdf-open-function (lambda (fpath) (start-process "open" "*open*" "open" fpath))
+            )
+
+      )
+
     )
   )
-(defun mybibtex/init-biblio ())
+
+(defun mybibtex/init-biblio ()
+  )
 (defun mybibtex/init-biblio-core ())
 
 ;;; packages.el ends here

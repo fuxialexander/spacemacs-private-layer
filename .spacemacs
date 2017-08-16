@@ -60,8 +60,6 @@ This function should only modify configuration layer settings."
             )
      ivy
      mybibtex
-     ;; helm
-     ;; bibtex
      (latex :variables latex-build-command "LatexMk")
      (ess :variables ess-enable-smart-equals t)
      (ranger :variables ranger-show-preview nil)
@@ -204,9 +202,9 @@ It should only modify the values of Spacemacs settings."
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(
-                         doom-one
                          (modern-dark :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-light :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
+                         doom-one
                          )
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
@@ -400,7 +398,7 @@ It should only modify the values of Spacemacs settings."
    ;; `trailing' to delete only the whitespace at end of lines, `changed' to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup nil
+   dotspacemacs-whitespace-cleanup 'all
    ;; Either nil or a number of seconds. If non-nil zone out after the specified
    ;; number of seconds. (default nil)
    dotspacemacs-zone-out-when-idle nil
@@ -444,24 +442,12 @@ you should place your code here."
   ;; Use variable width font faces in current buffer
   ;; Use monospaced font faces in current buffer
 
-  ;; (with-eval-after-load 'spaceline
-  ;;   (spaceline-toggle-minor-modes-off)
-  ;;   (spaceline-toggle-column-off)
-  ;;   (spaceline-toggle-buffer-position-off)
-  ;;   (spaceline-toggle-hud-off)
-  ;;   (spaceline-toggle-purpose-off)
-  ;;   (spaceline-toggle-line-column-off)
-  ;;   (spaceline-toggle-buffer-size-off)
-  ;;   (spaceline-toggle-buffer-encoding-abbrev-off)
-  ;;   (spaceline-toggle-org-clock-on)
-  ;;   (spaceline-toggle-selection-info-off)
-  ;;   (spaceline-toggle-projectile-root-off)
-  ;;   )
-
-  (use-package shrink-path
-    :commands (shrink-path-prompt shrink-path-file-mixed))
-
 ;;;; UI
+;;;;; Term line-spacing
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (setq line-spacing nil)))
+
   (setf (cdr (assq 'continuation fringe-indicator-alist))
         '(nil nil) ;; no continuation indicators
         ;; '(nil right-curly-arrow) ;; right indicator only
@@ -475,7 +461,12 @@ you should place your code here."
         ;; '(left-curly-arrow right-curly-arrow) ;; default
         )
 
+;;;;; Doom
+  (use-package shrink-path
+    :commands (shrink-path-prompt shrink-path-file-mixed))
+
   (setq-default
+   mac-mouse-wheel-smooth-scroll nil
    bidi-display-reordering nil ; disable bidirectional text for tiny performance boost
    blink-matching-paren nil    ; don't blink--too distracting
    cursor-in-non-selected-windows nil  ; hide cursors in other windows
@@ -553,29 +544,46 @@ you should place your code here."
       "XXX....."
       "XXXX...."))
 
-;;;; Prodigy
-  (use-package prodigy
-    :ensure t
-    :init
-    ;; After initialization, start these services
-    :config
-    ;; Tag
-    ;; Define a new tag with ARGS.
-    (prodigy-define-tag
-      :name 'email
-      :ready-message "Checking Email using IMAP IDLE. Ctrl-C to shutdown.")
-    ;; Service
-    ;; Define a new service with ARGS.
-    (prodigy-define-service
-      :name "imapnotify-gmail"
-      :command "/usr/local/bin/imapnotify"
-      :args (list "-c" (expand-file-name "./imapnotify.js" (getenv "HOME")))
-      :tags '(email)
-      :kill-signal 'sigkill)
-    )
+  (evil-snipe-override-mode 1)
 
-  (prodigy-start-service (prodigy-find-service "imapnotify-gmail"))
+;;;; Keybindings
+  (spacemacs/set-leader-keys "TAB" 'ivy-switch-buffer)
+  (global-set-key (kbd "C-H-M-!") 'spacemacs/custom-perspective-@Research )
+  (global-set-key (kbd "C-H-M-@") 'spacemacs/custom-perspective-@Notmuch )
+  (global-set-key (kbd "C-H-M-#") 'spacemacs/custom-perspective-@Elfeed )
+  (global-set-key (kbd "C-H-M-$") 'spacemacs/custom-perspective-@Lisp )
 
+  (global-set-key (kbd "H-1") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-1-and-exit)
+  (global-set-key (kbd "H-2") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-2-and-exit)
+  (global-set-key (kbd "H-3") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-3-and-exit)
+  (global-set-key (kbd "H-4") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-4-and-exit)
+  (global-set-key (kbd "H-5") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-5-and-exit)
+  (global-set-key (kbd "H-6") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-6-and-exit)
+  (global-set-key (kbd "H-7") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-7-and-exit)
+  (global-set-key (kbd "H-8") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-8-and-exit)
+  (global-set-key (kbd "H-9") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-9-and-exit)
+
+
+  (global-set-key (kbd "H-,") 'customize )
+  (global-set-key (kbd "H-f") 'ace-window )
+  (global-set-key (kbd "H-l") 'org-store-link )
+  (global-set-key (kbd "H-d") 'split-window-right-and-focus )
+  (global-set-key (kbd "H-D") 'split-window-below-and-focus )
+  (global-set-key (kbd-mac-command "h") 'ns-do-hide-emacs)
+  (global-set-key (kbd "<f11>") nil)
+  ;; (global-set-key (kbd "C-H-f") 'spacemacs/toggle-fullscreen)
+  (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "C-.") nil))
+  (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "C-;") nil))
+  (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
+  (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") nil))
+  (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
+  (eval-after-load "org" '(define-key org-mode-map (kbd "H-i") 'org-ref-ivy-insert-cite-link))
+  (eval-after-load "org" '(define-key org-mode-map (kbd "C-j") 'counsel-org-goto))
+  (eval-after-load "org" '(define-key org-mode-map (kbd "C-H-j") 'counsel-org-goto-all))
+  (eval-after-load "org" '(define-key org-mode-map (kbd "H-k") 'org-insert-link))
+  (eval-after-load "auctex" '(define-key latex-mode-map (kbd "H-i") 'ivy-bibtex))
+  (eval-after-load "eshell" '(eshell-git-prompt-use-theme 'powerline))
+  (define-key evil-hybrid-state-map (kbd "C-;") 'hippie-expand)
 
 ;;;; Layout
   (with-eval-after-load 'persp-mode
@@ -583,11 +591,8 @@ you should place your code here."
     (push (lambda (b) (with-current-buffer b (eq major-mode 'elfeed-search-mode))) persp-filter-save-buffers-functions)
     (push (lambda (b) (with-current-buffer b (eq major-mode 'elfeed-show-mode))) persp-filter-save-buffers-functions)
 
-    ;; see documentation for other possible values
     (setq persp-add-buffer-on-after-change-major-mode nil)
 
-    ;; above setting will not discriminate and bring ephemeral buffers e.g.
-    ;; *magit* which you probably don't want. You can filter them out.
     (add-hook 'persp-common-buffer-filter-functions
               ;; there is also `persp-add-buffer-on-after-change-major-mode-filter-functions'
               #'(lambda (b) (or
@@ -658,6 +663,29 @@ you should place your code here."
   ;;   ;; NOTE: This is necessary for themes in the doom-themes package!
 
 
+;;;; Prodigy
+  (use-package prodigy
+    :ensure t
+    :init
+    ;; After initialization, start these services
+    :config
+    ;; Tag
+    ;; Define a new tag with ARGS.
+    (prodigy-define-tag
+      :name 'email
+      :ready-message "Checking Email using IMAP IDLE. Ctrl-C to shutdown.")
+    ;; Service
+    ;; Define a new service with ARGS.
+    (prodigy-define-service
+      :name "imapnotify-gmail"
+      :command "/usr/local/bin/imapnotify"
+      :args (list "-c" (expand-file-name "./imapnotify.js" (getenv "HOME")))
+      :tags '(email)
+      :kill-signal 'sigkill)
+    )
+
+  (prodigy-start-service (prodigy-find-service "imapnotify-gmail"))
+
 ;;;; ESS
   (with-eval-after-load 'ess
     (defun ess-indent-region-with-formatR-tidy-source (beg end)
@@ -722,7 +750,7 @@ you should place your code here."
          export (every publication item of application id \"com.mekentosj.papers3\" as list) to outFile
        end tell"
       )))
-  ;; ;;;;; Tyme2
+;;;;; Tyme2
   ;;   ;; (defun start-tyme ()
   ;;   ;;   (setq taskname (nth 4 (org-heading-components)))
   ;;   ;;   (do-applescript
@@ -790,91 +818,13 @@ you should place your code here."
     (add-to-list 'tramp-remote-path "/uac/gds/xfu/bin")
     )
 
-;;;; Keybindings
-  (spacemacs/set-leader-keys "TAB" 'ivy-switch-buffer)
-  (global-set-key (kbd "C-H-M-!") 'spacemacs/custom-perspective-@Research )
-  (global-set-key (kbd "C-H-M-@") 'spacemacs/custom-perspective-@Notmuch )
-  (global-set-key (kbd "C-H-M-#") 'spacemacs/custom-perspective-@Elfeed )
-  (global-set-key (kbd "C-H-M-$") 'spacemacs/custom-perspective-@Lisp )
-
-  (global-set-key (kbd "H-1") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-1-and-exit)
-  (global-set-key (kbd "H-2") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-2-and-exit)
-  (global-set-key (kbd "H-3") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-3-and-exit)
-  (global-set-key (kbd "H-4") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-4-and-exit)
-  (global-set-key (kbd "H-5") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-5-and-exit)
-  (global-set-key (kbd "H-6") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-6-and-exit)
-  (global-set-key (kbd "H-7") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-7-and-exit)
-  (global-set-key (kbd "H-8") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-8-and-exit)
-  (global-set-key (kbd "H-9") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-9-and-exit)
-
-
-  (global-set-key (kbd "H-,") 'customize )
-  (global-set-key (kbd "H-f") 'ace-window )
-  (global-set-key (kbd "H-l") 'org-store-link )
-  (global-set-key (kbd "H-d") 'split-window-right-and-focus )
-  (global-set-key (kbd "H-D") 'split-window-below-and-focus )
-  (global-set-key (kbd-mac-command "h") 'ns-do-hide-emacs)
-  (global-set-key (kbd "<f11>") nil)
-  ;; (global-set-key (kbd "C-H-f") 'spacemacs/toggle-fullscreen)
-  (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "C-.") nil))
-  (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "C-;") nil))
-  (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
-  (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") nil))
-  (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
-  (eval-after-load "org" '(define-key org-mode-map (kbd "H-i") 'org-ref-ivy-insert-cite-link))
-  (eval-after-load "org" '(define-key org-mode-map (kbd "C-j") 'counsel-org-goto))
-  (eval-after-load "org" '(define-key org-mode-map (kbd "C-H-j") 'counsel-org-goto-all))
-  (eval-after-load "org" '(define-key org-mode-map (kbd "H-k") 'org-insert-link))
-  (eval-after-load "auctex" '(define-key latex-mode-map (kbd "H-i") 'ivy-bibtex))
-  (eval-after-load "eshell" '(eshell-git-prompt-use-theme 'powerline))
-  (define-key evil-hybrid-state-map (kbd "C-;") 'hippie-expand)
-
-
-;;;; Emacs-mac settings
-  ;; (when (and (spacemacs/system-is-mac) (display-graphic-p))
-  ;; (mac-auto-operator-composition-mode)
-
-  ;; (defface ligature-operator-face
-  ;;   '((t (:inherit default :family "fira code")))
-  ;;   "Face to use for birthday tags in org-mode"
-  ;;   :group 'ligature)
-  ;; (mapc (lambda (mode)
-  ;;         (font-lock-add-keywords mode '(
-  ;;            (" \\([!#$%&'()+,./;<=>?@^_`{|}~-]+\\) " 1 'ligature-operator-face)
-  ;;            )))
-  ;;       '(text-mode
-  ;;         latex-mode
-  ;;         html-mode
-  ;;         org-mode
-  ;;         python-mode
-  ;;         lua-mode
-  ;;         javascript-mode
-  ;;         shell-script-mode
-  ;;         emacs-lisp-mode
-  ;;         texinfo-mode))
-  ;; (add-hook 'ess-mode-hook
-  ;;           (lambda ()
-  ;;             (font-lock-add-keywords nil '(
-  ;;                                           (" \\([!#$%&'()+,./;<=>?@^_`{|}~-]+\\) " 1 'ligature-operator-face)
-  ;;                                       ))))
-
-  ;; Disable pixel-by-pixel scrolling, since it's extremely choppy.
-  (setq mac-mouse-wheel-smooth-scroll nil)
-  ;; )
-
-;;;; Term line-spacing
-  (add-hook 'eshell-mode-hook
-            (lambda ()
-              (setq line-spacing nil)))
-
-
-;;;; Org-mode settings
+;;;; Org-mode
   (with-eval-after-load 'org
 
-    (setq
-     org-tags-column 0
-     org-indirect-buffer-display 'current-window
-     )
+    (spacemacs/set-leader-keys-for-major-mode 'org-mode
+      "sc" 'org-copy
+      "n" 'org-modify-and-clock-current-heading
+      )
 
 ;;;;; Org-mode clock
     (defun org-modify-and-clock-current-heading ()
@@ -960,9 +910,6 @@ Returns the new TODO keyword, or nil if no state change should occur."
                                ))
 
 
-;;;;; Org-web
-    (require 'org-web-tools)
-    (require 'org-protocol-capture-html)
 ;;;;; Org-tag-with-ivy
     (defun spacemacs//org-ctrl-c-ctrl-c-counsel-org-tag ()
       "Hook for `org-ctrl-c-ctrl-c-hook' to use `counsel-org-tag'."
@@ -998,51 +945,17 @@ Returns the new TODO keyword, or nil if no state change should occur."
     (add-hook 'org-ctrl-c-ctrl-c-hook 'spacemacs//org-ctrl-c-ctrl-c-counsel-org-tag)
     (add-hook 'org-capture-before-finalize-hook 'counsel-org-tag)
 
-
-
-;;;;; Org-deprecated
-    ;; here goes your Org config :)
-    ;; (add-to-list 'load-path "~/scimax")
-    ;; (add-to-list 'load-path "~/scimax/ob-ipython")
-    ;; (require 'ob-ipython)
-    ;; (require 'scimax-org-babel-ipython)
-    ;; (require 'scimax-org-babel-python)
-    ;; (setq org-babel-python-command "python")
-    ;; (require 'ox-ipynb)
-;;;;; Org-hook
-    (defun my-org-mode-hook ()
-      ;; (org-edit-latex-mode 1)
-      )
-    (defun my-redo-all-agenda-buffers ()
-      (interactive)
-      (dolist (buffer (buffer-list))
-        (with-current-buffer buffer
-          (when (derived-mode-p 'org-agenda-mode)
-            (org-agenda-redo t)))
-        )
-      )
-    ;; (add-hook 'org-mode-hook #'my-org-mode-hook)
-    ;; (add-hook 'org-mode-hook (lambda() (add-hook 'after-save-hook 'my-org-save-hook nil 'make-it-local)))
-    (defun my-org-save-hook ()
-      ;; (my-redo-all-agenda-buffers)
-      ;; (org-store-agenda-views)
-      ;; (org-agenda nil "n")
-      )
 ;;;;; Org-babel
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((emacs-lisp . t)
-       ;; (ipython . t)
        (python . t)
-       (ditaa . t)
-       (dot . t)
        (R . t)
-       (gnuplot . t)
        (shell . t)
        (org . t)
        (latex . t)))
+
 ;;;;; Org-latex
-    ;; set up tikz as one of the default packages for LaTeX
     (setq
      org-latex-pdf-process '("latexmk -pdflatex='%latex -shell-escape -interaction nonstopmode' -pdf -output-directory=%o -f %f")
      org-latex-create-formula-image-program 'dvisvgm
@@ -1052,21 +965,18 @@ Returns the new TODO keyword, or nil if no state change should occur."
              ("" "parskip" t)
              ("" "tikz" t)))
      )
-    (advice-add 'org-agenda-goto :after
-                (lambda (&rest args)
-                  (org-narrow-to-subtree)))
 
-;;;;; Org-agenda
-    ;; (defun org-agenda-config ()
-    ;;   "Used for hook of org-agenda-mode"
-    ;;   (local-set-key "\C-w\C-w" 'evil-window-next)
-    ;;   )
-    ;; (add-hook 'org-agenda-mode-hook 'org-agenda-config)
+;;;;; Org-TODO
     (setq
      org-directory "/Users/xfu/Dropbox/org/"
      diary-file "/Users/xfu/Dropbox/org/cal.diary"
      org-default-notes-file "/Users/xfu/Dropbox/org/inbox.org"
      org-log-done 'time
+     org-log-note-clock-out t
+     org-log-redeadline 'note
+     org-log-reschedule 'note
+     org-indirect-buffer-display 'current-window
+     org-tags-column 0
      org-agenda-restore-windows-after-quit t
      org-agenda-files '("/Users/xfu/Dropbox/org/")
      org-refile-targets '((nil :maxlevel . 9)
@@ -1074,16 +984,14 @@ Returns the new TODO keyword, or nil if no state change should occur."
      org-refile-use-outline-path 'file
      org-outline-path-complete-in-steps nil
      org-columns-default-format "%50ITEM(Task) %10CLOCKSUM %16TIMESTAMP_IA"
-
      org-global-properties (quote (("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")))
-;;;;; Org-TODO
      org-use-fast-todo-selection t
      org-use-fast-tag-selection nil
      org-log-into-drawer t
      org-log-state-notes-into-drawer t
      org-todo-keywords '(
-                         (sequence "TODO(t!)"  "|" "DONE(d!)")
-                         (sequence "WAIT(w!)" "|" "OUTD(o!)" "KILL(k!)")
+                         (sequence "TODO(t!)"  "|" "DONE(d!/@)")
+                         (sequence "WAIT(w@/@)" "|" "OUTD(o@/@)" "KILL(k@/@)")
                          )
      org-todo-keyword-faces '(
                               ("TODO" :inherit default :foreground "#d34a65" :weight bold :box (:line-width 1 :color "#d34a65" :style nil))
@@ -1093,6 +1001,96 @@ Returns the new TODO keyword, or nil if no state change should occur."
                               ("OUTD" :inherit default :foreground "#6fa1f2" :weight bold :box (:line-width 1 :color "#6fa1f2" :style nil))
                               )
      )
+;;;;; Org-tools
+    (setq
+     org-download-screenshot-method "screencapture -i %s"
+     )
+;;;;; Org-brain
+    (setq
+     org-brain-path "/Users/xfu/Dropbox/org/brain"
+     org-id-track-globally t
+     org-id-locations-file "~/.emacs.d/.org-id-locations"
+     org-brain-visualize-default-choices 'all
+     )
+
+    ;;;;; Org-appearance
+    (setq
+     org-startup-with-inline-images nil
+     org-image-actual-width 800
+     org-fontify-whole-heading-line t
+     org-fontify-done-headline t
+     org-fontify-quote-and-verse-blocks t
+     org-ellipsis " + "
+     org-columns-ellipses " + "
+     org-bullets-bullet-list '("" "" "" "" "" "" "" "")
+     )
+    )
+
+;;;;; Org-capture
+  (with-eval-after-load 'org-capture
+    (defun my-org-move-point-to-capture ()
+      (cond ((org-at-heading-p) (org-beginning-of-line))
+            (t (org-previous-visible-heading 1))))
+    (setq org-capture-templates
+          (quote (
+                  ("j" "Journal" entry
+                   (function my-org-move-point-to-capture)
+                   "* %^{Logging for...} :logs:
+:PROPERTIES:
+:Created: %U
+:Linked: %a
+:END:
+%i
+%?" :empty-lines 2 :clock-in t :created t)
+
+                  ("a" "Article" entry
+                   (file "~/Dropbox/org/ref.org")
+                   "* %^{Title}  :article:
+:PROPERTIES:
+:Created: %U
+:Linked: %a
+:END:
+%i
+Brief description:
+%?" :prepend f :empty-lines 2 :created t)
+
+                  ("w" "Web site" entry
+                   (file "~/Dropbox/org/inbox.org")
+                   "* %a :website:\n%U %?\n%:initial
+:PROPERTIES:
+:Created: %U
+:Linked: %a
+:END:
+" :prepend f :empty-lines 2 :created t)
+                  ))
+          )
+    )
+
+;;;;; Org-agenda
+  (with-eval-after-load 'org-agenda
+    (advice-add 'org-agenda-goto :after
+                (lambda (&rest args)
+                  (org-narrow-to-subtree)))
+
+    (add-hook 'org-finalize-agenda-hook 'place-agenda-tags)
+    (defun place-agenda-tags ()
+      "Put the agenda tags by the right border of the agenda window."
+      (setq org-agenda-tags-column (- 4 (window-width)))
+      (org-agenda-align-tags))
+    (spacemacs/set-leader-keys-for-major-mode 'org-agenda-mode
+      "a" 'org-agenda
+      "," 'counsel-org-tag-agenda
+      "Cc" 'org-agenda-clock-cancel
+      "Ci" 'org-agenda-clock-in
+      "Co" 'org-agenda-clock-out
+      "dd" 'org-agenda-deadline
+      "ds" 'org-agenda-schedule
+      "ie" 'org-agenda-set-effort
+      "ip" 'org-agenda-set-property
+      "it" 'org-agenda-set-tags
+      "sr" 'org-agenda-refile
+      "sc" 'org-copy
+      )
     (setq org-super-agenda-groups
        '(;; Each group has an implicit boolean OR operator between its selectors.
          (:name "Today"  ; Optionally specify section name
@@ -1134,390 +1132,27 @@ Returns the new TODO keyword, or nil if no state change should occur."
          ;; After the last group, the agenda will display items that didn't
          ;; match any of these groups, with the default order position of 99
          ))
-;;;;; Org-tools
-    (setq
-     org-download-screenshot-method "screencapture -i %s"
-     )
-;;;;; Org-brain
-    (setq
-     org-brain-path "/Users/xfu/Dropbox/org/brain"
-     org-id-track-globally t
-     org-id-locations-file "~/.emacs.d/.org-id-locations"
-     org-brain-visualize-default-choices 'all
-     )
-
-;;;;; Org-reference
-    (setq
-     org-ref-default-bibliography '("/Users/xfu/Dropbox/org/ref.bib")
-     org-ref-bibliography-notes "/Users/xfu/Dropbox/org/ref.org"
-     org-ref-completion-library 'org-ref-ivy-cite
-     bibtex-completion-bibliography "/Users/xfu/Dropbox/org/ref.bib"
-     bibtex-completion-library-path "/Users/xfu/Dropbox/Library.papers3/Files/"
-     bibtex-completion-notes-path "/Users/xfu/Dropbox/org/ref.org"
-     bibtex-completion-pdf-field nil
-     bibtex-completion-pdf-open-function (lambda (fpath) (start-process "open" "*open*" "open" fpath))
-     ;; bibtex-completion-pdf-open-function (lambda (fpath) (call-process "open" nil 0 nil "-a" "/Applications/Skim.app" fpath))
-     )
-    (defun org-mac-papers-open (papers-link)
-      (start-process "open papers" nil "/usr/bin/open" (concat "papers3:" papers-link )))
-    (org-add-link-type "papers3" 'org-mac-papers-open)
-
-;;;;; Org-appearance
-    (setq
-     org-image-actual-width 800
-     org-fontify-whole-heading-line t
-     org-fontify-done-headline t
-     org-fontify-quote-and-verse-blocks t
-     org-ellipsis " + "
-     ;; org-ellipsis ""
-     ;; org-columns-ellipses "…"
-     org-bullets-bullet-list '("" "" "" "" "" "" "" "")
-     )
     )
-
-;;;;; Org-capture
-  (with-eval-after-load 'org-capture
-
-    (setq org-capture-templates
-          (quote (
-                  ("h" "HSCR Journal" entry
-                   (file+datetree "~/Dropbox/org/hscr.org")
-                   "* %^{Logging for...} :logs:hscr:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-%?" :empty-lines 2 :clock-in t :created t)
-                  ("n" "N2O Journal" entry
-                   (file+datetree "~/Dropbox/org/n2o.org")
-                   "* %^{Logging for...} :logs:n2o:
-:PROPERTIES:
-:Created: %U
-:END:
-%i
-%?" :empty-lines 2 :clock-in t :created t)
-
-                  ("f" "FANTOM Journal" entry
-                   (file+datetree "~/Dropbox/org/n2o.org")
-                   "* %^{Logging for...} :logs:fantom:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-%?" :empty-lines 2 :clock-in t :created t)
-
-                  ("l" "Life Journal" entry
-                   (file+datetree "~/Dropbox/org/life.org")
-                   "* %^{Logging for...} :logs:life:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-%?" :empty-lines 2 :clock-in t :created t)
-
-                  ("a" "Article" entry
-                   (file "~/Dropbox/org/ref.org")
-                   "* %^{Title}  :article:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-Brief description:
-%?" :prepend f :empty-lines 2 :created t)
-
-                  ("w" "Web site" entry
-                   (file "~/Dropbox/org/inbox.org")
-                   "* %a :website:\n%U %?\n%:initial
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-" :prepend f :empty-lines 2 :created t)
-                  ))
-          )
-    )
-
-  (with-eval-after-load 'org-datetree
-    (setq
-     org-datetree-base-level 2
-     org-datetree-add-timestamp nil
-          )
-    )
-  (with-eval-after-load 'org-agenda
-    (add-hook 'org-finalize-agenda-hook 'place-agenda-tags)
-    (defun place-agenda-tags ()
-      "Put the agenda tags by the right border of the agenda window."
-      (setq org-agenda-tags-column (- 4 (window-width)))
-      (org-agenda-align-tags))
-    (spacemacs/set-leader-keys-for-major-mode 'org-agenda-mode
-      "a" 'org-agenda
-      "," 'counsel-org-tag-agenda
-      "Cc" 'org-agenda-clock-cancel
-      "Ci" 'org-agenda-clock-in
-      "Co" 'org-agenda-clock-out
-      "dd" 'org-agenda-deadline
-      "ds" 'org-agenda-schedule
-      "ie" 'org-agenda-set-effort
-      "ip" 'org-agenda-set-property
-      "it" 'org-agenda-set-tags
-      "sr" 'org-agenda-refile
-      "sc" 'org-copy
-      )
-    )
-
-;;;; Reference settings
-;;;;; bibtex settings
-  (with-eval-after-load 'ivy-bibtex
-;;;;;; bibtex-completion customize function
-    (defun bibtex-completion-find-pdf-in-library (key-or-entry)
-      "Searches the directories in `bibtex-completion-library-path' for a
-PDF whose names is composed of the BibTeX key plus \".pdf\".  The
-path of the first matching PDF is returned."
-      (interactive)
-      (let* ((key (if (stringp key-or-entry)
-                      key-or-entry
-                    (bibtex-completion-get-value "=key=" key-or-entry)))
-             (key (s-replace ":" "" key))
-             (path (-first 'f-file?
-                           (--map (f-join it (s-concat key ".pdf"))
-                                  (-flatten (list bibtex-completion-library-path))))))
-        (when path (list path))))
-
-    (defun bibtex-completion-open-uri (keys)
-      "Open the associated URL or DOI in a browser."
-      (dolist (key keys)
-        (let* ((entry (bibtex-completion-get-entry key))
-               (uri (bibtex-completion-get-value "uri" entry))
-               (uri (s-replace "\\url{" "" uri))
-               (uri (s-replace "}" "" uri))
-               )
-          (start-process "open papers" nil "/usr/bin/open" uri)
-          )))
-
-    ;; (helm-bibtex-helmify-action bibtex-completion-open-uri helm-bibtex-open-papers)
-    ;; (helm-delete-action-from-source "Open Entry in Papers 3" helm-source-bibtex)
-    ;; (helm-add-action-to-source "Open Entry in Papers 3" 'helm-bibtex-open-papers helm-source-bibtex 0)
-;;;;;; Ivy-bibtex customize function
-    (ivy-bibtex-ivify-action bibtex-completion-open-uri ivy-bibtex-open-papers)
-    (setq ivy-bibtex-default-action 'ivy-bibtex-insert-key)
-    (ivy-set-actions
-     'ivy-bibtex '(
-                   ("p" ivy-bibtex-open-papers "Open in Papers")
-                   ("n" ivy-bibtex-edit-notes "Edit notes")
-                   ("c" ivy-bibtex-insert-citation "Insert citation")
-                   ("u" ivy-bibtex-open-url-or-doi "Open URL or DOI in browser")
-                   ("r" ivy-bibtex-insert-reference "Insert Reference")
-                   ("b" ivy-bibtex-insert-key "Insert Bibtex Key")
-                   )
-     )
-
-    (setq bibtex-completion-format-citation-functions
-          '((org-mode      . bibtex-completion-format-citation-pandoc-citeproc)
-            (default       . bibtex-completion-format-citation-default)))
-    )
-
-;;;;; Org-ref settings
-  (with-eval-after-load 'org-ref-ivy
-
-    ;;   ;; (defun my/org-ref-open-pdf-at-point ()
-    ;;   ;;   "Open the pdf for bibtex key under point if it exists."
-    ;;   ;;   (interactive)
-    ;;   ;;   (let* ((results (org-ref-get-bibtex-key-and-file))
-    ;;   ;;          (key (car results))
-    ;;   ;;          (pdf-file (car (bibtex-completion-find-pdf key))))
-    ;;   ;;     (if (file-exists-p pdf-file)
-    ;;   ;;         (org-open-file pdf-file)
-    ;;   ;;       (message "No PDF found for %s" key)))
-    ;;   ;;   )
-    ;; (defun my/org-ref-open-papers-at-point ()
-    ;;   "Open the pdf for bibtex key under point if it exists."
-    ;;   (interactive)
-    ;;   (let* ((results (org-ref-get-bibtex-key-and-file))
-    ;;          (key (car results))
-    ;;          (entry (bibtex-completion-get-entry key))
-    ;;          (uri (bibtex-completion-get-value "uri" entry))
-    ;;          (uri (s-replace "\\url{" "" uri))
-    ;;          (uri (s-replace "}" "" uri)))
-    ;;     (start-process "open papers" nil "/usr/bin/open" uri)
-    ;;     )
-    ;;   )
-
-    ;;   (defun org-ref-open-bibtex-pdf ()
-    ;;     "Open the pdf for bibtex key under point if it exists."
-    ;;     (interactive)
-    ;;     (let* ((results (org-ref-get-bibtex-key-and-file))
-    ;;            (key (car results))
-    ;;            (entry (bibtex-completion-get-entry key))
-    ;;            (uri (bibtex-completion-get-value "uri" entry))
-    ;;            (uri (s-replace "\\url{" "" uri))
-    ;;            (uri (s-replace "}" "" uri)))
-    ;;       (start-process "open papers" nil "/usr/bin/open" uri)
-    ;;       )
-    ;;     )
-
-
-    ;;   ;; (add-to-list 'org-ref-helm-user-candidates '("Open pdf in papers" . (lambda () (my/org-ref-open-papers-at-point))) t)
-    (setf (cdr (assoc "p" org-ref-ivy-cite-actions)) '(ivy-bibtex-open-papers "Open in Papers"))
-    ;;   ;; (ivy-set-actions
-    ;;   ;;  'org-ref-ivy-insert-cite-link '(
-    ;;   ;;                                  ("p" my/org-ref-open-papers-at-point "Open in Papers")
-    ;;   ;;                                  ("n" or-ivy-bibtex-open-notes "Open notes")
-    ;;   ;;                                  ("u" or-ivy-bibtex-open-url "Open url")
-    ;;   ;;                                  ("d" or-ivy-bibtex-open-doi "Open doi")
-    ;;   ;;                                  ("k" or-ivy-bibtex-set-keywords "Add keywords")
-    ;;   ;;                                  ("f" or-ivy-bibtex-insert-formatted-citation "Insert formatted citation")
-    ;;   ;;                                  ("F" or-ivy-bibtex-copy-formatted-citation "Copy formatted citation")
-    ;;   ;;                                  ("a" or-ivy-bibtex-add-entry "Add bibtex entry")
-    ;;   ;;                ))
-    )
-
-;;;; Misc
-;;;;; Ivy
+;;;; Ivy
   (with-eval-after-load 'ivy
 
     (setq
+     counsel-org-goto-face-style 'org
+     counsel-org-goto-separator " ➜ "
+     counsel-org-goto-display-style 'path
+
      ivy-use-virtual-buffers t
      ivy-re-builders-alist '((t . ivy--regex-plus)))
 
     (define-key ivy-minibuffer-map (kbd "<C-return>") 'ivy-call)
-    ;; (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
-    ;; (setq ivy-virtual-abbreviate 'full ivy-rich-switch-buffer-align-virtual-buffer t)
-    ;; (setq ivy-rich-abbreviate-paths t)
-    (setq swiper-font-lock-exclude
-          '(package-menu-mode
-            notmuch-tree-mode
-            notmuch-search-mode
-            gnus-summary-mode
-            gnus-article-mode
-            gnus-group-mode
-            emms-playlist-mode
-            emms-stream-mode
-            erc-mode
-            org-agenda-mode
-            dired-mode
-            jabber-chat-mode
-            elfeed-search-mode
-            elfeed-show-mode
-            fundamental-mode
-            Man-mode
-            woman-mode
-            mu4e-view-mode
-            mu4e-headers-mode
-            help-mode
-            debbugs-gnu-mode
-            occur-mode
-            occur-edit-mode
-            bongo-mode
-            bongo-library-mode
-            bongo-playlist-mode
-            eww-mode
-            twittering-mode
-            vc-dir-mode
-            rcirc-mode
-            sauron-mode
-            w3m-mode)
-          )
-    (setq counsel-org-goto-display-style 'path)
-    (setq counsel-org-goto-separator " ➜ ")
-    (setq counsel-org-goto-face-style 'org)
     )
-;;;;; Notmuch
-;;;;; Mu4e
-  ;;   (with-eval-after-load 'mu4e-alert
-  ;;     (mu4e-alert-set-default-style 'notifier))   ; For Mac OSX (through the ; terminal notifier app)
-  ;;   (with-eval-after-load 'mu4e
-  ;;     (setq mu4e-maildir "~/.mail"
-  ;;           mu4e-trash-folder "/trash"
-  ;;           mu4e-sent-folder "/sent"
-  ;;           mu4e-refile-folder "/all"
-  ;;           mu4e-get-mail-command "mbsync gmail"
-  ;;           mu4e-update-interval nil
-  ;;           mu4e-html2text-command "w3m -dump -T text/html"
-  ;;           mu4e-enable-notifications t
-  ;;           mu4e-compose-signature-auto-include nil
-  ;;           mu4e-view-show-images t
-  ;;           mu4e-view-show-addresses t)
-
-  ;;     (setq mu4e-maildir-shortcuts
-  ;;           '(("/all" . ?a)
-  ;;             ("/trash" . ?t)
-  ;;             ))
-  ;;     (fset 'my-move-to-trash "mt")
-  ;;     (define-key mu4e-headers-mode-map (kbd "d") 'my-move-to-trash)
-  ;;     (define-key mu4e-view-mode-map (kbd "d") 'my-move-to-trash)
-  ;;     (setq mu4e-change-filenames-when-moving t)
-  ;;     (setq mu4e-bookmarks
-  ;;           `(("flag:unread AND NOT flag:trashed" "Unread messages" ?u)
-  ;;             ("date:today..now" "Today's messages" ?t)
-  ;;             ("date:7d..now" "Last 7 days" ?w)
-  ;;             ("mime:image/*" "Messages with images" ?p)
-  ;;             (,(mapconcat 'identity
-  ;;                          (mapcar
-  ;;                           (lambda (maildir)
-  ;;                             (concat "maildir:" (car maildir)))
-  ;;                           mu4e-maildir-shortcuts) " OR ")
-  ;;              "All inboxes" ?i)))
-  ;;     (setq message-send-mail-function 'message-send-mail-with-sendmail)
-  ;;     (setq send-mail-function 'sendmail-send-it)
-  ;;     (setq sendmail-program "/usr/local/bin/msmtpq")
-
-  ;;     (defun open-message-with-mail-app ()
-  ;;       (interactive)
-  ;;       (let* ((msg-path (plist-get (mu4e-message-at-point) :path))
-  ;;              (temp (make-temp-file "mu4e-message-" nil ".eml")))
-  ;;         (shell-command-to-string (format "cp '%s' '%s'; open '%s' -a Mail; l/bin/rm '%s'" msg-path temp temp temp))))
-
-  ;;     (define-key mu4e-headers-mode-map (kbd "i") 'open-message-with-mail-app)
-  ;;     (define-key mu4e-headers-mode-map (kbd "TAB") 'mu4e-headers-toggle-thread-folding)
-  ;;     (define-key mu4e-headers-mode-map (kbd "<backtab>") 'mu4e-headers-fold-all)
-  ;;     (define-key mu4e-view-mode-map (kbd "i") 'open-message-with-mail-app)
-
-  ;;     )
-
-
-;;;;; Toggles
-  (evil-snipe-override-mode 1)
-
-;;;;; Dired
+;;;; Dired
   (with-eval-after-load 'dired
     (require 'ivy-dired-history)
-    ;; (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
-    (defun xfu-dired-rsync (dest)
-      (interactive
-       (list
-        (expand-file-name
-         (read-file-name
-          "Rsync to:"
-          (dired-dwim-target-directory)))))
-      ;; store all selected files into "files" list
-      (let ((files (dired-get-marked-files
-                    nil current-prefix-arg))
-            ;; the rsync command
-            (tmtxt/rsync-command
-             "rsync -arvz --progress "))
-        ;; add all selected file names as arguments
-        ;; to the rsync command
-        (dolist (file files)
-          (setq tmtxt/rsync-command
-                (concat tmtxt/rsync-command (shell-quote-argument file) " ")))
-        ;; append the destination
-        (setq tmtxt/rsync-command
-              (concat tmtxt/rsync-command
-                      (shell-quote-argument dest)))
-        ;; run the async shell command
-        (async-shell-command tmtxt/rsync-command "*rsync*")
-        ;; finally, switch to that window
-        (other-window 1)))
-
-    ;; (define-key dired-mode-map "Y" 'xfu-dired-rsync)
     (define-key dired-mode-map "f" 'dired-narrow)
     (define-key dired-mode-map "," 'dired))
 
-;;;;; EWW
+;;;; EWW
   (with-eval-after-load 'shr
     (require 'shr-tag-pre-highlight)
     (add-to-list 'shr-external-rendering-functions
@@ -1528,17 +1163,10 @@ path of the first matching PDF is returned."
       (advice-add 'eww-display-html :around
                   'eww-display-html--override-shr-external-rendering-functions)))
 
-;;;;; Org-image
-  ;; (load "~/.emacs.d/private/personal/local/org-image/org-image.el")
   )
 
 
 ;;; Customize
-(defun dotspacemacs/emacs-custom-settings ()
-  "Emacs custom settings.
-This is an auto-generated function, do not modify its content directly, use
-Emacs customize menu instead.
-This function is called at the very end of Spacemacs initialization."
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1562,6 +1190,7 @@ This function is called at the very end of Spacemacs initialization."
    (quote
     (spacemacs//company-transformer-cancel company-sort-by-occurrence)))
  '(compilation-message-face (quote default))
+ '(counsel-async-filter-update-time 50000)
  '(cua-global-mark-cursor-color "#2aa198")
  '(cua-normal-cursor-color "#657b83")
  '(cua-overwrite-cursor-color "#b58900")
@@ -1640,6 +1269,9 @@ This function is called at the very end of Spacemacs initialization."
  '(jdee-db-requested-breakpoint-face-colors ("#1B2229" . "#98be65"))
  '(jdee-db-spec-breakpoint-face-colors ("#1B2229" . "#3B3F46"))
  '(line-spacing 0.2)
+ '(magit-diff-section-arguments
+   (quote
+    ("--ignore-space-change" "--ignore-all-space" "--no-ext-diff")))
  '(magit-diff-use-overlays nil)
  '(modern-theme-comment-bg t)
  '(notmuch-archive-tags (quote ("-inbox" "-unread" "+archived")))
@@ -1861,6 +1493,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-download-image-dir "./image/")
  '(org-download-image-html-width 500)
  '(org-download-screenshot-method "screencapture -i %s")
+ '(org-ellipsis "  ")
  '(org-enforce-todo-dependencies t)
  '(org-fontify-done-headline t)
  '(org-fontify-quote-and-verse-blocks t)
@@ -1877,7 +1510,6 @@ This function is called at the very end of Spacemacs initialization."
  '(org-modules
    (quote
     (org-bibtex org-docview org-info org-protocol org-mac-link org-notmuch)))
- '(org-outline-path-complete-in-steps nil)
  '(org-pandoc-options (quote ((standalone . t) (self-contained . t))))
  '(org-pomodoro-finished-sound
    "/Users/xfu/.emacs.d/elpa/org-pomodoro-20161119.226/resources/bell.wav")
@@ -1885,8 +1517,6 @@ This function is called at the very end of Spacemacs initialization."
  '(org-pomodoro-long-break-sound-p nil)
  '(org-pomodoro-short-break-sound-p nil)
  '(org-preview-latex-default-process (quote dvisvgm))
- '(org-refile-use-outline-path (quote file))
- '(org-startup-with-inline-images nil)
  '(org-tag-persistent-alist
    (quote
     (("communication" . 99)
@@ -1895,17 +1525,13 @@ This function is called at the very end of Spacemacs initialization."
      ("analysis" . 97)
      ("read" . 114)
      ("idea" . 105))))
- '(org-todo-keywords
-   (quote
-    ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-     (sequence "WAIT(w!)" "|" "KILL(k!)"))))
  '(package-selected-packages
    (quote
     (doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
  '(paradox-github-token t)
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
- '(pos-tip-background-color "#eee8d5")
- '(pos-tip-foreground-color "#586e75")
+ '(pos-tip-background-color "#292B2C")
+ '(pos-tip-foreground-color "#ECEBE7")
  '(powerline-default-separator (quote arrow-fade))
  '(powerline-height 22 t)
  '(projectile-git-ignored-command "git ls-files -zcoi --exclude-standard | sed 's/ /\\\\ /g'")
@@ -1987,5 +1613,10 @@ This function is called at the very end of Spacemacs initialization."
  '(elfeed-search-tag-face ((t (:foreground "#80CABF" :family "input mono compressed"))))
  '(org-agenda-structure ((t (:inherit bold :foreground "#8CB6E1" :overline t :underline t :slant italic :family "input mono compressed"))))
  '(org-column ((t (:background "#000000" :foreground "#ECEBE7" :family "Input mono narrow"))))
- '(org-table ((t (:background "#000000" :foreground "#ECEBE7" :family "input mono narrow")))))
-)
+ '(org-table ((t (:background "#000000" :foreground "#ECEBE7" :family "input mono narrow"))))
+ '(variable-pitch ((t (:height 1.4 :family "Source sans pro")))))
+)(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
