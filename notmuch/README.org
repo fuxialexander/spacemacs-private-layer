@@ -1,0 +1,5 @@
+
+* ~counsel-notmuch~
+ Use @@html:<kbd>@@ SPC a i @@html:</kbd>@@ to search your mail in Ivy. Based on ~counsel-ag~ and ~helm-notmuch~.
+
+* Spacemacs Layouts for Notmuch

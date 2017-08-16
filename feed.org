@@ -1,0 +1,22 @@
+* Blogs                                                                 :elfeed:
+** Emacs                                                                 :emacs:
+*** entry-title: \(emacs\|org-mode\)
+*** [[http://planet.emacsen.org/atom.xml][Planet Emacsen]]
+*** [[http://irreal.org/blog/?feed=rss2][Irreal]]
+*** [[https://www.reddit.com/r/emacs/.rss][M-x Emacs]]
+*** [[http://oremacs.com/atom.xml][(or emacs irrelevant)]]
+** Literature                                                       :literature:
+*** entry-title: \(enhancer\|FANTOM\|ROADMAP\|regulatory\|promoter\|histone\|H3K\) :regulatory:
+*** entry-title: \(non-coding\|variants\|fine-mapping\)               :variants:
+*** entry-title: \(hirschsprung\)                                         :hscr:
+*** entry-title: \(hirschsprung\)                                         :hscr:
+*** [[http://connect.biorxiv.org/biorxiv_xml.php?subject=genomics+bioinformatics+developmental_biology][BioRxiv]]                                                           :preprint:
+*** [[http://feeds.nature.com/nature/rss/aop?format=usm][Nature AOP]]                                                          :nature:
+*** [[http://bioinformatics.oxfordjournals.org/rss/current.xml][Bioinformatics]]                                                     :bioinfo:
+*** [[http://www.cell.com/cell/inpress.rss][Cell]]                                                                  :cell:
+*** [[http://genome.cshlp.org/rss/ahead.xml][Genome Research AOP]]                                                 :genome:
+*** [[http://genomebiology.biomedcentral.com/articles/most-recent/rss.xml][Genome Biology]]                                                      :genome:
+*** [[http://feeds.nature.com/nbt/rss/aop][Nature Biotechnology]]                                                :nature:
+*** [[http://feeds.nature.com/ng/rss/aop][Nature Genetics]]                                                     :nature:
+** Bioinfo                                                             :bioinfo:
+*** [[http://jef.works/feed.xml][Jean Fan's blog]]
