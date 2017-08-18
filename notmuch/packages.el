@@ -214,6 +214,10 @@
               (defun notmuch-search-delete () (interactive) (notmuch-search-add-tag (list "+deleted" "-inbox" "-unread")) (notmuch-search-next-thread))
               (defun notmuch-tree-delete () (interactive) (notmuch-tree-add-tag (list "+deleted" "-inbox" "-unread")) (notmuch-tree-next-message))
 
+              (defun notmuch-search-killed () (interactive) (notmuch-search-add-tag (list "+killed" "-inbox" "-unread")) (notmuch-search-next-thread))
+              (defun notmuch-tree-killed () (interactive) (notmuch-tree-add-tag (list "+killed" "-inbox" "-unread")) (notmuch-tree-next-message))
+
+
 
               (setq message-send-mail-function 'message-send-mail-with-sendmail)
               (setq notmuch-search-oldest-first nil)
@@ -237,6 +241,7 @@
                 (kbd "t") 'notmuch-tree-from-search-thread
                 (kbd "T") 'notmuch-tree-from-search-current-query
                 (kbd "d") 'notmuch-search-delete
+                (kbd "x") 'notmuch-search-killed
                 )
               (evilified-state-evilify-map notmuch-tree-mode-map
                 :mode notmuch-tree-mode
@@ -248,6 +253,7 @@
                 (kbd "r") 'notmuch-search-reply-to-thread-sender
                 (kbd "i") 'open-message-with-mail-app-notmuch-tree
                 (kbd "d") 'notmuch-tree-delete
+                (kbd "x") 'notmuch-tree-killed
                 )
 
               (evilified-state-evilify-map notmuch-hello-mode-map
