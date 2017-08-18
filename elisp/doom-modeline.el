@@ -1,4 +1,3 @@
-
 ;; -*- lexical-binding: t; -*-
 
 
@@ -73,12 +72,10 @@ Body forms can access the hook's arguments through the let-bound variable
                 forms)))
       `(progn ,@(nreverse forms)))))
 
-;;;###autoload
 (defvar doom-memoized-table (make-hash-table :test 'equal :size 10)
   "A lookup table containing memoized functions. The keys are argument lists,
 and the value is the function's return value.")
 
-;;;###autoload
 (defun doom-memoize (name)
   "Memoizes an existing function. NAME is a symbol."
   (let ((func (symbol-function name)))
@@ -91,7 +88,6 @@ and the value is the function's return value.")
                    (puthash key (apply ',func args)
                             doom-memoized-table)))))))
 
-;;;###autoload
 (defmacro def-memoized! (name arglist &rest body)
   "Create a memoize'd function. NAME, ARGLIST, DOCSTRING and BODY
 have the same meaning as in `defun'."
@@ -232,6 +228,13 @@ DEFAULT is non-nil, set the default mode-line for all buffers."
   '((t (:inherit mode-line-buffer-id)))
   "Face used for the filename part of the mode-line buffer path."
   :group '+doom-modeline)
+
+(defface doom-modeline-project-root-dir
+  '((t (:inherit mode-line-buffer-id)))
+  "Face used for the filename part of the mode-line buffer path."
+  :group '+doom-modeline)
+
+
 
 (defface doom-modeline-perspname
   '((t (:inherit bold)))
@@ -480,8 +483,9 @@ buffer where knowing the current project directory is important."
 directory, the file name, and its state (modified, read-only or non-existent)."
   (let* ((all-the-icons-scale-factor 1.2)
          (modified-p (buffer-modified-p))
-         (active (active))
-         (faces (if modified-p 'doom-modeline-buffer-modified)))
+         ;; (active (active))
+         ;; (faces (if modified-p 'doom-modeline-buffer-modified))
+         )
     (concat (cond (buffer-read-only
                    (concat (all-the-icons-octicon
                             "lock"
