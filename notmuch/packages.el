@@ -6,6 +6,8 @@
       '(notmuch
         counsel
         org
+        avy
+        wid-edit
         persp-mode
         notmuch-labeler
         ))
@@ -39,6 +41,70 @@
 
 ;; For each package, define a function notmuch/init-<package-notmuch>
 (defun notmuch/post-init-counsel ())
+(defun notmuch/post-init-avy ()
+  (use-package avy
+    :ensure t
+    :config
+    (progn
+         (defun ace-link--notmuch-hello-collect ()
+                "Collect the positions of visible links in *notmuch-hello*."
+                (let (candidates pt)
+                  (save-excursion
+                    (save-restriction
+                      (goto-char (point-min))
+                      (setq pt (point))
+                      (while (progn (widget-forward 1)
+                                    (> (point) pt))
+                        (setq pt (point))
+                        (when (get-char-property (point) 'button)
+                          (push (point) candidates)))))
+                  (nreverse candidates)))
+
+              (defun ace-link--notmuch-hello-action (pt)
+                (when (number-or-marker-p pt)
+                  (goto-char (1+ pt))
+                  (widget-button-press (point))))
+
+              (defun ace-link-notmuch-hello ()
+                "Open a visible link in *notmuch-hello*."
+                (interactive)
+                (let ((pt (avy-with ace-link-notmuch-hello
+                            (avy--process
+                             (ace-link--notmuch-hello-collect)
+                             #'avy--overlay-pre))))
+                  (ace-link--notmuch-hello-action pt)))
+
+              (defun ace-link--notmuch-show-collect ()
+                "Collect the positions of visible links in `notmuch-show' buffer."
+                (let (candidates pt)
+                  (save-excursion
+                    (save-restriction
+                      (narrow-to-region
+                       (window-start)
+                       (window-end))
+                      (goto-char (point-min))
+                      (while (re-search-forward "https?://" nil t)
+                        (setq pt (- (point) (length (match-string 0))))
+                        (push pt candidates))))
+                  (nreverse candidates)))
+
+              (defun ace-link--notmuch-show-action  (pt)
+                (goto-char pt)
+                (browse-url-at-point))
+
+              (defun ace-link-notmuch-show ()
+                "Open a visible link in `notmuch-show' buffer."
+                (interactive)
+                (let ((pt (avy-with ace-link-notmuch-show
+                            (avy--process
+                             (ace-link--notmuch-show-collect)
+                             #'avy--overlay-pre))))
+                  (ace-link--notmuch-show-action pt)))
+      )
+    )
+  )
+
+(defun notmuch/post-init-wid-edit ())
 (defun notmuch/post-init-org ())
 (defun notmuch/init-notmuch-labeler ())
 (defun notmuch/init-notmuch ()
@@ -68,6 +134,10 @@
               ))
 
     :config (progn
+
+              (eval-after-load "notmuch-hello" `(define-key notmuch-hello-mode-map "o" 'ace-link-notmuch-hello))
+              (eval-after-load "notmuch-show" `(define-key notmuch-show-mode-map "o" 'ace-link-notmuch-show))
+
               (defun notmuch-update ()
                 (interactive)
                 (start-process-shell-command "manually update email" nil "afew -a -m && mbsync gmail && notmuch new && afew -a -t")

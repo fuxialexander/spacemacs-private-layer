@@ -3,7 +3,7 @@
 (setq personal-packages
       '(
         (outline-ivy :location local)
-        (dash-functional :location (recipe :fetcher github :repo "magnars/dash.el"))
+        ;; (dash-functional :location (recipe :fetcher github :repo "magnars/dash.el"))
         outshine
         ))
 
@@ -40,4 +40,3 @@
                   (lambda (&rest args) (unless (outline-on-heading-p t)
                                          (outline-previous-visible-heading 1))))
       )))
-
