@@ -46,60 +46,60 @@
     :ensure t
     :config
     (progn
-         (defun ace-link--notmuch-hello-collect ()
-                "Collect the positions of visible links in *notmuch-hello*."
-                (let (candidates pt)
-                  (save-excursion
-                    (save-restriction
-                      (goto-char (point-min))
-                      (setq pt (point))
-                      (while (progn (widget-forward 1)
-                                    (> (point) pt))
-                        (setq pt (point))
-                        (when (get-char-property (point) 'button)
-                          (push (point) candidates)))))
-                  (nreverse candidates)))
+      (defun ace-link--notmuch-hello-collect ()
+        "Collect the positions of visible links in *notmuch-hello*."
+        (let (candidates pt)
+          (save-excursion
+            (save-restriction
+              (goto-char (point-min))
+              (setq pt (point))
+              (while (progn (widget-forward 1)
+                            (> (point) pt))
+                (setq pt (point))
+                (when (get-char-property (point) 'button)
+                  (push (point) candidates)))))
+          (nreverse candidates)))
 
-              (defun ace-link--notmuch-hello-action (pt)
-                (when (number-or-marker-p pt)
-                  (goto-char (1+ pt))
-                  (widget-button-press (point))))
+      (defun ace-link--notmuch-hello-action (pt)
+        (when (number-or-marker-p pt)
+          (goto-char (1+ pt))
+          (widget-button-press (point))))
 
-              (defun ace-link-notmuch-hello ()
-                "Open a visible link in *notmuch-hello*."
-                (interactive)
-                (let ((pt (avy-with ace-link-notmuch-hello
-                            (avy--process
-                             (ace-link--notmuch-hello-collect)
-                             #'avy--overlay-pre))))
-                  (ace-link--notmuch-hello-action pt)))
+      (defun ace-link-notmuch-hello ()
+        "Open a visible link in *notmuch-hello*."
+        (interactive)
+        (let ((pt (avy-with ace-link-notmuch-hello
+                    (avy--process
+                     (ace-link--notmuch-hello-collect)
+                     #'avy--overlay-pre))))
+          (ace-link--notmuch-hello-action pt)))
 
-              (defun ace-link--notmuch-show-collect ()
-                "Collect the positions of visible links in `notmuch-show' buffer."
-                (let (candidates pt)
-                  (save-excursion
-                    (save-restriction
-                      (narrow-to-region
-                       (window-start)
-                       (window-end))
-                      (goto-char (point-min))
-                      (while (re-search-forward "https?://" nil t)
-                        (setq pt (- (point) (length (match-string 0))))
-                        (push pt candidates))))
-                  (nreverse candidates)))
+      (defun ace-link--notmuch-show-collect ()
+        "Collect the positions of visible links in `notmuch-show' buffer."
+        (let (candidates pt)
+          (save-excursion
+            (save-restriction
+              (narrow-to-region
+               (window-start)
+               (window-end))
+              (goto-char (point-min))
+              (while (re-search-forward "https?://" nil t)
+                (setq pt (- (point) (length (match-string 0))))
+                (push pt candidates))))
+          (nreverse candidates)))
 
-              (defun ace-link--notmuch-show-action  (pt)
-                (goto-char pt)
-                (browse-url-at-point))
+      (defun ace-link--notmuch-show-action  (pt)
+        (goto-char pt)
+        (browse-url-at-point))
 
-              (defun ace-link-notmuch-show ()
-                "Open a visible link in `notmuch-show' buffer."
-                (interactive)
-                (let ((pt (avy-with ace-link-notmuch-show
-                            (avy--process
-                             (ace-link--notmuch-show-collect)
-                             #'avy--overlay-pre))))
-                  (ace-link--notmuch-show-action pt)))
+      (defun ace-link-notmuch-show ()
+        "Open a visible link in `notmuch-show' buffer."
+        (interactive)
+        (let ((pt (avy-with ace-link-notmuch-show
+                    (avy--process
+                     (ace-link--notmuch-show-collect)
+                     #'avy--overlay-pre))))
+          (ace-link--notmuch-show-action pt)))
       )
     )
   )
@@ -160,6 +160,93 @@
                     (counsel-more-chars 3)
                   (counsel--async-command
                    (counsel-notmuch-cmd input)) '("" "working...")))
+
+              (defun counsel-notmuch-action-tree (thread)
+                "open search result in tree view"
+                (setq thread-id (car (split-string thread "\\ +")))
+                (notmuch-tree thread-id initial-input nil)
+                )
+
+              (defun my-notmuch-show (thread-id &optional elide-toggle parent-buffer query-context buffer-name)
+                "Run \"notmuch show\" with the given thread ID and display results.
+
+ELIDE-TOGGLE, if non-nil, inverts the default elide behavior.
+
+The optional PARENT-BUFFER is the notmuch-search buffer from
+which this notmuch-show command was executed, (so that the
+next thread from that buffer can be show when done with this
+one).
+
+The optional QUERY-CONTEXT is a notmuch search term. Only
+messages from the thread matching this search term are shown if
+non-nil.
+
+The optional BUFFER-NAME provides the name of the buffer in
+which the message thread is shown. If it is nil (which occurs
+when the command is called interactively) the argument to the
+function is used.
+
+Returns the buffer containing the messages, or NIL if no messages
+matched."
+                (interactive "sNotmuch show: \nP")
+                (let (
+                      ;; (buffer-name "*counsel-notmuch-show*")
+                      ;; We override mm-inline-override-types to stop application/*
+                      ;; parts from being displayed unless the user has customized
+                      ;; it themselves.
+                      (mm-inline-override-types
+                       (if (equal mm-inline-override-types
+                                  (eval (car (get 'mm-inline-override-types 'standard-value))))
+                           (cons "application/*" mm-inline-override-types)
+                         mm-inline-override-types)))
+                  (switch-to-buffer (get-buffer-create buffer-name))
+                  ;; No need to track undo information for this buffer.
+                  (let ((inhibit-read-only t))
+                    (erase-buffer))
+                  (setq buffer-undo-list t)
+
+                  (notmuch-show-mode)
+
+                  ;; Set various buffer local variables to their appropriate initial
+                  ;; state. Do this after enabling `notmuch-show-mode' so that they
+                  ;; aren't wiped out.
+                  (setq notmuch-show-thread-id thread-id
+                        notmuch-show-parent-buffer parent-buffer
+                        notmuch-show-query-context query-context
+
+                        notmuch-show-process-crypto notmuch-crypto-process-mime
+                        ;; If `elide-toggle', invert the default value.
+                        notmuch-show-elide-non-matching-messages
+                        (if elide-toggle
+                            (not notmuch-show-only-matching-messages)
+                          notmuch-show-only-matching-messages))
+
+                  (add-hook 'post-command-hook #'notmuch-show-command-hook nil t)
+                  (jit-lock-register #'notmuch-show-buttonise-links)
+
+                  (notmuch-tag-clear-cache)
+
+                  (let ((inhibit-read-only t))
+                    (if (notmuch-show--build-buffer)
+                        ;; Messages were inserted into the buffer.
+                        (current-buffer)
+
+                      ;; No messages were inserted - presumably none matched the
+                      ;; query.
+                      (kill-buffer (current-buffer))
+                      (ding)
+                      (message "No messages matched the query!")
+                      nil))))
+
+              (defun counsel-notmuch-action-show (thread)
+                "open search result in show view"
+                (setq thread-id (car (split-string thread "\\ +")))
+                (my-notmuch-show thread-id nil nil nil "*counsel-notmuch-show*")
+                )
+
+
+
+
               (defun counsel-notmuch (&optional initial-input)
                 "search for your email in notmuch"
                 (interactive)
@@ -170,14 +257,10 @@
                           :dynamic-collection t
                           ;; :keymap counsel-notmuch-map
                           :history 'counsel-notmuch-history
-                          :action (lambda (thread)
-                                    ;; get thread id and subject
-                                    ;; (setq thread "thread:000000000000065a   2015-08-20 [4/5] Ronald  Ma, Kevin Yip; Paper by Alex and Cecilia (attachment)")
-                                    (setq thread-id (car (split-string thread "\\ +")))
-                                    (notmuch-tree thread-id
-                                                  initial-input
-                                                  nil
-                                                  ))
+                          :action '(1
+                                    ("o" counsel-notmuch-action-show "Show")
+                                    ("t" counsel-notmuch-action-tree "Tree View")
+                                    )
                           :unwind (lambda ()
                                     (counsel-delete-process)
                                     (swiper--cleanup))
