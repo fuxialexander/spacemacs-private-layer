@@ -85,7 +85,6 @@ This function should only modify configuration layer settings."
                                       shrink-path
                                       ob-browser
                                       fringe-helper
-                                      org-super-agenda
                                       kurecolor
                                       dired-narrow
                                       prodigy
@@ -203,15 +202,17 @@ It should only modify the values of Spacemacs settings."
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(
+                         (modern-dawn :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-dark :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-light :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          doom-one
+                         solarized-light
                          )
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state nil
    ;;Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("input mono condensed"
+   dotspacemacs-default-font '("Input mono condensed"
                                :size 12
                                :weight normal
                                :width normal
@@ -443,8 +444,18 @@ you should place your code here."
   ;; Use variable width font faces in current buffer
   ;; Use monospaced font faces in current buffer
 
+;;;; Edit
+  (defun align-repeat (start end regexp)
+    "Repeat alignment with respect to
+     the given regular expression."
+    (interactive "r\nsAlign regexp: ")
+    (align-regexp start end
+                  (concat "\\(\\s-*\\)" regexp) 1 1 t))
+
+
 ;;;; UI
 ;;;;; Term line-spacing
+
   (add-hook 'eshell-mode-hook
             (lambda ()
               (setq line-spacing nil)))
@@ -573,7 +584,7 @@ you should place your code here."
 
 
   (global-set-key (kbd "H-,") 'customize )
-  (global-set-key (kbd "H-f") 'ace-window )
+  (global-set-key (kbd "M-w") 'ace-window )
   (global-set-key (kbd "H-l") 'org-store-link )
   (global-set-key (kbd "H-d") 'split-window-right-and-focus )
   (global-set-key (kbd "H-D") 'split-window-below-and-focus )
@@ -1311,47 +1322,7 @@ Brief description:
       "sr" 'org-agenda-refile
       "sc" 'org-copy
       )
-    (setq org-super-agenda-groups
-          '(;; Each group has an implicit boolean OR operator between its selectors.
-            (:name "Today"  ; Optionally specify section name
-                   :time-grid t  ; Items that appear on the time grid
-                   :todo "TODAY")  ; Items that have this TODO keyword
-            (:name "Important"
-                   ;; Single arguments given alone
-                   :tag "bills"
-                   :priority "A")
-            ;; Set order of multiple groups at once
-            (:order-multi (2 (:name "Shopping in town"
-                                    ;; Boolean AND group matches items that match all subgroups
-                                    :and (:tag "shopping" :tag "@town"))
-                             (:name "Food-related"
-                                    ;; Multiple args given in list with implicit OR
-                                    :tag ("food" "dinner"))
-                             (:name "Personal"
-                                    :habit t
-                                    :tag "personal")
-                             (:name "Space-related (non-moon-or-planet-related)"
-                                    ;; Regexps match case-insensitively on the entire entry
-                                    :and (:regexp ("space" "NASA")
-                                                  ;; Boolean NOT also has implicit OR between selectors
-                                                  :not (:regexp "moon" :tag "planet")))))
-            ;; Groups supply their own section names when none are given
-            (:todo "WAITING" :order 8)  ; Set order of this section
-            (:todo ("SOMEDAY" "TO-READ" "CHECK" "TO-WATCH" "WATCHING")
-                   ;; Show this group at the end of the agenda (since it has the
-                   ;; highest number). If you specified this group last, items
-                   ;; with these todo keywords that e.g. have priority A would be
-                   ;; displayed in that group instead, because items are grouped
-                   ;; out in the order the groups are listed.
-                   :order 9)
-            (:priority<= "B"
-                         ;; Show this section after "Today" and "Important", because
-                         ;; their order is unspecified, defaulting to 0. Sections
-                         ;; are displayed lowest-number-first.
-                         :order 1)
-            ;; After the last group, the agenda will display items that didn't
-            ;; match any of these groups, with the default order position of 99
-            ))
+
     )
 ;;;; Ivy
   (with-eval-after-load 'ivy
@@ -1434,6 +1405,7 @@ This function is called at the very end of Spacemacs initialization."
  '(display-time-default-load-average nil)
  '(display-time-mode t)
  '(elfeed-search-title-max-width 120)
+ '(elfeed-search-trailing-width 15)
  '(eshell-modules-list
    (quote
     (eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt eshell-script eshell-term eshell-tramp eshell-unix)))
@@ -1743,7 +1715,7 @@ This function is called at the very end of Spacemacs initialization."
      ("" "tabularx" t))))
  '(org-modules
    (quote
-    (org-bibtex org-docview org-info org-protocol org-mac-link org-notmuch)))
+    (org-bibtex org-docview org-info org-protocol org-mac-iCal org-mac-link org-notmuch)))
  '(org-pandoc-options (quote ((standalone . t) (self-contained . t))))
  '(org-pomodoro-finished-sound
    "/Users/xfu/.emacs.d/elpa/org-pomodoro-20161119.226/resources/bell.wav")
@@ -1773,7 +1745,7 @@ This function is called at the very end of Spacemacs initialization."
       . 105))))
  '(package-selected-packages
    (quote
-    (elfeed-goodies ace-jump-mode noflet powerline ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
+    (modern-dawn-theme solarized-theme origami elfeed-goodies ace-jump-mode noflet powerline ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
  '(paradox-github-token t)
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(pos-tip-background-color "#292B2C")
@@ -1812,6 +1784,8 @@ This function is called at the very end of Spacemacs initialization."
  '(sml/inactive-foreground-color "#34495e")
  '(split-height-threshold 100)
  '(split-width-threshold 100)
+ '(term-default-bg-color "#fdf6e3")
+ '(term-default-fg-color "#657b83")
  '(tool-bar-mode nil)
  '(tramp-remote-path
    (quote
@@ -1849,6 +1823,10 @@ This function is called at the very end of Spacemacs initialization."
  '(window-divider-default-right-width 1)
  '(window-divider-mode t)
  '(window-resize-pixelwise t)
+ '(xterm-color-names
+   ["#eee8d5" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#073642"])
+ '(xterm-color-names-bright
+   ["#fdf6e3" "#cb4b16" "#93a1a1" "#839496" "#657b83" "#6c71c4" "#586e75" "#002b36"])
  '(xterm-mouse-mode t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
