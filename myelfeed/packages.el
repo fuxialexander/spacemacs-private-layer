@@ -12,6 +12,7 @@
 (setq myelfeed-packages
       '(elfeed
         elfeed-org
+        avy
         ))
 
 (defun myelfeed/init-elfeed ()
@@ -36,6 +37,7 @@
         :eval-after-load elfeed-show
         :bindings
         (kbd "q") 'elfeed
+        (kbd "o") 'ace-link-elfeed
         (kbd "n") 'elfeed-show-next
         (kbd "p") 'elfeed-show-prev))))
 
@@ -46,3 +48,41 @@
     :init (spacemacs|use-package-add-hook elfeed
             :pre-config (elfeed-org))))
 
+(defun myelfeed/post-init-avy ()
+  (use-package avy
+    :ensure t
+    :config
+    (progn
+      (defun ace-link--elfeed-collect ()
+        "Collect the positions of visible links in `elfeed' buffer."
+        (let (candidates pt)
+          (save-excursion
+            (save-restriction
+              (narrow-to-region
+               (window-start)
+               (window-end))
+              (goto-char (point-min))
+              (setq pt (point))
+              (while (progn (shr-next-link)
+                            (> (point) pt))
+                (setq pt (point))
+                (when (plist-get (text-properties-at (point)) 'shr-url)
+                  (push (point) candidates)))
+              (nreverse candidates)))))
+
+
+      (defun ace-link--elfeed-action  (pt)
+        (goto-char pt)
+        (shr-browse-url))
+
+      (defun ace-link-elfeed ()
+        "Open a visible link in `elfeed' buffer."
+        (interactive)
+        (let ((pt (avy-with ace-link-elfeed
+                    (avy--process
+                     (ace-link--elfeed-collect)
+                     #'avy--overlay-pre))))
+          (ace-link--elfeed-action pt)))
+      )
+    )
+  )

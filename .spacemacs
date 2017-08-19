@@ -583,6 +583,7 @@ you should place your code here."
   (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "C-.") nil))
   (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "C-;") nil))
   (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
+  (eval-after-load "shr" '(define-key shr-map (kbd "o") nil))
   (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") nil))
   (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
   (eval-after-load "org" '(define-key org-mode-map (kbd "H-i") 'org-ref-ivy-insert-cite-link))
@@ -1393,176 +1394,176 @@ Brief description:
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-  (custom-set-variables
-   ;; custom-set-variables was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(ansi-color-faces-vector
-     [default default default italic underline success warning error])
-   '(ansi-color-names-vector
-     ["#d2ceda" "#f2241f" "#67b11d" "#b1951d" "#3a81c3" "#a31db1" "#21b8c7" "#655370"])
-   '(auto-revert-remote-files nil)
-   '(auto-revert-use-notify nil)
-   '(auto-revert-verbose nil)
-   '(blink-cursor-mode nil)
-   '(column-number-mode t)
-   '(company-dabbrev-downcase nil)
-   '(company-dabbrev-ignore-case nil)
-   '(company-idle-delay 0.2)
-   '(company-minimum-prefix-length 2)
-   '(company-quickhelp-mode t)
-   '(company-require-match nil)
-   '(company-tooltip-align-annotations t)
-   '(company-transformers
-     (quote
-      (spacemacs//company-transformer-cancel company-sort-by-occurrence)))
-   '(compilation-message-face (quote default))
-   '(counsel-async-filter-update-time 500000)
-   '(cua-global-mark-cursor-color "#2aa198")
-   '(cua-normal-cursor-color "#657b83")
-   '(cua-overwrite-cursor-color "#b58900")
-   '(cua-read-only-cursor-color "#859900")
-   '(custom-safe-themes
-     (quote
-      ("e3aa063583d12b9026aa0e12ef75db105355ab3ff2f345d3d077b17f3af2209a" default)))
-   '(display-line-number-width nil)
-   '(display-line-numbers nil)
-   '(display-line-numbers-current-absolute nil)
-   '(display-time-day-and-date nil)
-   '(display-time-default-load-average nil)
-   '(display-time-mode t)
-   '(elfeed-search-title-max-width 120)
-   '(eshell-modules-list
-     (quote
-      (eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt eshell-script eshell-term eshell-tramp eshell-unix)))
-   '(ess-R-font-lock-keywords
-     (quote
-      ((ess-R-fl-keyword:modifiers . t)
-       (ess-R-fl-keyword:fun-defs . t)
-       (ess-R-fl-keyword:keywords . t)
-       (ess-R-fl-keyword:assign-ops . t)
-       (ess-R-fl-keyword:constants . t)
-       (ess-fl-keyword:fun-calls . t)
-       (ess-fl-keyword:numbers . t)
-       (ess-fl-keyword:operators . t)
-       (ess-fl-keyword:delimiters . t)
-       (ess-fl-keyword:= . t)
-       (ess-R-fl-keyword:F&T . t)
-       (ess-R-fl-keyword:%op% . t))))
-   '(ess-eval-visibly (quote nowait))
-   '(evil-org-key-theme
-     (quote
-      (navigation textobjects insert rsi additional todo leader)))
-   '(evil-want-Y-yank-to-eol nil)
-   '(eww-search-prefix "https://www.google.com/search?q=")
-   '(exec-path-from-shell-check-startup-files nil)
-   '(fci-rule-character-color "#d9d9d9")
-   '(fci-rule-color "#d6d6d6" t)
-   '(flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id))
-   '(frame-resize-pixelwise t)
-   '(fringe-mode 4 nil (fringe))
-   '(git-gutter+-hide-gutter nil)
-   '(git-gutter+-modified-sign " ")
-   '(global-auto-revert-mode t)
-   '(global-auto-revert-non-file-buffers t)
-   '(global-git-gutter+-mode t)
-   '(global-hl-line-mode t)
-   '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
-   '(highlight-symbol-colors
-     (--map
-      (solarized-color-blend it "#fdf6e3" 0.25)
-      (quote
-       ("#b58900" "#2aa198" "#dc322f" "#6c71c4" "#859900" "#cb4b16" "#268bd2"))))
-   '(highlight-symbol-foreground-color "#586e75")
-   '(highlight-tail-colors
-     (quote
-      (("#eee8d5" . 0)
-       ("#B4C342" . 20)
-       ("#69CABF" . 30)
-       ("#69B7F0" . 50)
-       ("#DEB542" . 60)
-       ("#F2804F" . 70)
-       ("#F771AC" . 85)
-       ("#eee8d5" . 100))))
-   '(hl-bg-colors
-     (quote
-      ("#DEB542" "#F2804F" "#FF6E64" "#F771AC" "#9EA0E5" "#69B7F0" "#69CABF" "#B4C342")))
-   '(hl-fg-colors
-     (quote
-      ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
-   '(hl-paren-background-colors (quote ("#2492db" "#95a5a6" nil)))
-   '(hl-paren-colors (quote ("#ecf0f1" "#ecf0f1" "#c0392b")))
-   '(ispell-highlight-face (quote flyspell-incorrect))
-   '(ispell-program-name "aspell")
-   '(jdee-db-active-breakpoint-face-colors ("#1B2229" . "#51afef"))
-   '(jdee-db-requested-breakpoint-face-colors ("#1B2229" . "#98be65"))
-   '(jdee-db-spec-breakpoint-face-colors ("#1B2229" . "#3B3F46"))
-   '(line-spacing 0.2)
-   '(magit-diff-section-arguments
-     (quote
-      ("--ignore-space-change" "--ignore-all-space" "--no-ext-diff")))
-   '(magit-diff-use-overlays nil)
-   '(modern-theme-comment-bg t)
-   '(notmuch-archive-tags (quote ("-inbox" "-unread" "+archived")))
-   '(notmuch-fcc-dirs nil)
-   '(notmuch-hello-sections
-     (quote
-      (notmuch-hello-insert-saved-searches notmuch-hello-insert-alltags)))
-   '(notmuch-message-headers-visible nil)
-   '(notmuch-saved-searches
-     (quote
-      ((:name "fantom" :query "(to:kevin or from:kevin or to:qin or from:qin) and ((fantom near project) or (gentle near project) or (deep learning)) " :key "f")
-       (:name "n2o" :query "(from:shanglong or from:williamkkwu) or ((from:kevin or to:kevin or to:shanglong or to:williamkkwu) and (medip or MeDIP or n2o or rat))" :key "n")
-       (:name "hscr" :query "(from:hku or from:ellyngan or from:clara) or ((from:kevin or to:kevin or to:hku) and (hscr or hirschsprung or hku or variants))" :key "h")
-       (:name "inbox" :query "tag:inbox" :key "i")
-       (:name "unread" :query "tag:unread and tag:new" :key "u")
-       (:name "sent" :query "from:fuxialexander@gmail.com" :key "t")
-       (:name "drafts" :query "folder:drafts" :key "d"))))
-   '(notmuch-show-imenu-indent t)
-   '(notmuch-show-logo nil)
-   '(notmuch-tag-formats
-     (quote
-      (("unread"
-        (propertize tag
-                    (quote face)
-                    (quote notmuch-tag-unread)))
-       ("flagged"
-        (propertize tag
-                    (quote face)
-                    (quote notmuch-tag-flagged))))))
-   '(nrepl-message-colors
-     (quote
-      ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
-   '(ns-alternate-modifier (quote meta))
-   '(ns-command-modifier (quote hyper))
-   '(ns-function-modifier (quote none))
-   '(org-agenda-block-separator "")
-   '(org-agenda-clockreport-parameter-plist
-     (quote
-      (:link t :maxlevel 3 :fileskip0 t :stepskip0 t :tags "-COMMENT")))
-   '(org-agenda-custom-commands
-     (quote
-      (("n" "Agenda and all TODOs"
-        ((agenda ""
-                 ((org-agenda-overriding-header " Week Agenda
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(ansi-color-names-vector
+   ["#d2ceda" "#f2241f" "#67b11d" "#b1951d" "#3a81c3" "#a31db1" "#21b8c7" "#655370"])
+ '(auto-revert-remote-files nil)
+ '(auto-revert-use-notify nil)
+ '(auto-revert-verbose nil)
+ '(blink-cursor-mode nil)
+ '(column-number-mode t)
+ '(company-dabbrev-downcase nil)
+ '(company-dabbrev-ignore-case nil)
+ '(company-idle-delay 0.2)
+ '(company-minimum-prefix-length 2)
+ '(company-quickhelp-mode t)
+ '(company-require-match nil)
+ '(company-tooltip-align-annotations t)
+ '(company-transformers
+   (quote
+    (spacemacs//company-transformer-cancel company-sort-by-occurrence)))
+ '(compilation-message-face (quote default))
+ '(counsel-async-filter-update-time 500000)
+ '(cua-global-mark-cursor-color "#2aa198")
+ '(cua-normal-cursor-color "#657b83")
+ '(cua-overwrite-cursor-color "#b58900")
+ '(cua-read-only-cursor-color "#859900")
+ '(custom-safe-themes
+   (quote
+    ("e3aa063583d12b9026aa0e12ef75db105355ab3ff2f345d3d077b17f3af2209a" default)))
+ '(display-line-number-width nil)
+ '(display-line-numbers nil)
+ '(display-line-numbers-current-absolute nil)
+ '(display-time-day-and-date nil)
+ '(display-time-default-load-average nil)
+ '(display-time-mode t)
+ '(elfeed-search-title-max-width 120)
+ '(eshell-modules-list
+   (quote
+    (eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt eshell-script eshell-term eshell-tramp eshell-unix)))
+ '(ess-R-font-lock-keywords
+   (quote
+    ((ess-R-fl-keyword:modifiers . t)
+     (ess-R-fl-keyword:fun-defs . t)
+     (ess-R-fl-keyword:keywords . t)
+     (ess-R-fl-keyword:assign-ops . t)
+     (ess-R-fl-keyword:constants . t)
+     (ess-fl-keyword:fun-calls . t)
+     (ess-fl-keyword:numbers . t)
+     (ess-fl-keyword:operators . t)
+     (ess-fl-keyword:delimiters . t)
+     (ess-fl-keyword:= . t)
+     (ess-R-fl-keyword:F&T . t)
+     (ess-R-fl-keyword:%op% . t))))
+ '(ess-eval-visibly (quote nowait))
+ '(evil-org-key-theme
+   (quote
+    (navigation textobjects insert rsi additional todo leader)))
+ '(evil-want-Y-yank-to-eol nil)
+ '(eww-search-prefix "https://www.google.com/search?q=")
+ '(exec-path-from-shell-check-startup-files nil)
+ '(fci-rule-character-color "#d9d9d9")
+ '(fci-rule-color "#d6d6d6" t)
+ '(flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id))
+ '(frame-resize-pixelwise t)
+ '(fringe-mode 4 nil (fringe))
+ '(git-gutter+-hide-gutter nil)
+ '(git-gutter+-modified-sign " ")
+ '(global-auto-revert-mode t)
+ '(global-auto-revert-non-file-buffers t)
+ '(global-git-gutter+-mode t)
+ '(global-hl-line-mode t)
+ '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
+ '(highlight-symbol-colors
+   (--map
+    (solarized-color-blend it "#fdf6e3" 0.25)
+    (quote
+     ("#b58900" "#2aa198" "#dc322f" "#6c71c4" "#859900" "#cb4b16" "#268bd2"))))
+ '(highlight-symbol-foreground-color "#586e75")
+ '(highlight-tail-colors
+   (quote
+    (("#eee8d5" . 0)
+     ("#B4C342" . 20)
+     ("#69CABF" . 30)
+     ("#69B7F0" . 50)
+     ("#DEB542" . 60)
+     ("#F2804F" . 70)
+     ("#F771AC" . 85)
+     ("#eee8d5" . 100))))
+ '(hl-bg-colors
+   (quote
+    ("#DEB542" "#F2804F" "#FF6E64" "#F771AC" "#9EA0E5" "#69B7F0" "#69CABF" "#B4C342")))
+ '(hl-fg-colors
+   (quote
+    ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
+ '(hl-paren-background-colors (quote ("#2492db" "#95a5a6" nil)))
+ '(hl-paren-colors (quote ("#ecf0f1" "#ecf0f1" "#c0392b")))
+ '(ispell-highlight-face (quote flyspell-incorrect))
+ '(ispell-program-name "aspell")
+ '(jdee-db-active-breakpoint-face-colors ("#1B2229" . "#51afef"))
+ '(jdee-db-requested-breakpoint-face-colors ("#1B2229" . "#98be65"))
+ '(jdee-db-spec-breakpoint-face-colors ("#1B2229" . "#3B3F46"))
+ '(line-spacing 0.2)
+ '(magit-diff-section-arguments
+   (quote
+    ("--ignore-space-change" "--ignore-all-space" "--no-ext-diff")))
+ '(magit-diff-use-overlays nil)
+ '(modern-theme-comment-bg t)
+ '(notmuch-archive-tags (quote ("-inbox" "-unread" "+archived")))
+ '(notmuch-fcc-dirs nil)
+ '(notmuch-hello-sections
+   (quote
+    (notmuch-hello-insert-saved-searches notmuch-hello-insert-alltags)))
+ '(notmuch-message-headers-visible nil)
+ '(notmuch-saved-searches
+   (quote
+    ((:name "fantom" :query "(to:kevin or from:kevin or to:qin or from:qin) and ((fantom near project) or (gentle near project) or (deep learning)) " :key "f")
+     (:name "n2o" :query "(from:shanglong or from:williamkkwu) or ((from:kevin or to:kevin or to:shanglong or to:williamkkwu) and (medip or MeDIP or n2o or rat))" :key "n")
+     (:name "hscr" :query "(from:hku or from:ellyngan or from:clara) or ((from:kevin or to:kevin or to:hku) and (hscr or hirschsprung or hku or variants))" :key "h")
+     (:name "inbox" :query "tag:inbox" :key "i")
+     (:name "unread" :query "tag:unread and tag:new" :key "u")
+     (:name "sent" :query "from:fuxialexander@gmail.com" :key "t")
+     (:name "drafts" :query "folder:drafts" :key "d"))))
+ '(notmuch-show-imenu-indent t)
+ '(notmuch-show-logo nil)
+ '(notmuch-tag-formats
+   (quote
+    (("unread"
+      (propertize tag
+                  (quote face)
+                  (quote notmuch-tag-unread)))
+     ("flagged"
+      (propertize tag
+                  (quote face)
+                  (quote notmuch-tag-flagged))))))
+ '(nrepl-message-colors
+   (quote
+    ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
+ '(ns-alternate-modifier (quote meta))
+ '(ns-command-modifier (quote hyper))
+ '(ns-function-modifier (quote none))
+ '(org-agenda-block-separator "")
+ '(org-agenda-clockreport-parameter-plist
+   (quote
+    (:link t :maxlevel 3 :fileskip0 t :stepskip0 t :tags "-COMMENT")))
+ '(org-agenda-custom-commands
+   (quote
+    (("n" "Agenda and all TODOs"
+      ((agenda ""
+               ((org-agenda-overriding-header " Week Agenda
 ")))
-         (alltodo ""
-                  ((org-agenda-skip-function
-                    (quote
-                     (org-agenda-skip-entry-if
-                      (quote scheduled))))
-                   (org-agenda-overriding-header " TODOs
+       (alltodo ""
+                ((org-agenda-skip-function
+                  (quote
+                   (org-agenda-skip-entry-if
+                    (quote scheduled))))
+                 (org-agenda-overriding-header " TODOs
 ")
-                   (org-agenda-sorting-strategy
-                    (quote
-                     (todo-state-up deadline-up))))))
-        ((org-agenda-tag-filter-preset
-          (quote
-           ("-COMMENT"))))))))
-   '(org-agenda-dim-blocked-tasks (quote invisible))
-   '(org-agenda-export-html-style
-     "    <style type=\"text/css\">
+                 (org-agenda-sorting-strategy
+                  (quote
+                   (todo-state-up deadline-up))))))
+      ((org-agenda-tag-filter-preset
+        (quote
+         ("-COMMENT"))))))))
+ '(org-agenda-dim-blocked-tasks (quote invisible))
+ '(org-agenda-export-html-style
+   "    <style type=\"text/css\">
     <!--
       pre {
         font-family: \"Operator Mono\";
@@ -1713,146 +1714,146 @@ This function is called at the very end of Spacemacs initialization."
       }
     -->
     </style>")
-   '(org-agenda-files (quote ("/Users/xfu/Dropbox/org/")))
-   '(org-agenda-log-mode-items (quote (closed clock)))
-   '(org-agenda-restore-windows-after-quit t)
-   '(org-agenda-skip-deadline-if-done t)
-   '(org-agenda-skip-deadline-prewarning-if-scheduled (quote pre-scheduled))
-   '(org-agenda-start-with-log-mode nil)
-   '(org-clock-clocktable-default-properties (quote (:maxlevel 3 :scope agenda :tags "-COMMENT")))
-   '(org-clocktable-defaults
-     (quote
-      (:maxlevel 3 :lang "en" :scope file :block nil :wstart 1 :mstart 1 :tstart nil :tend nil :step nil :stepskip0 t :fileskip0 t :tags "-COMMENT" :emphasize nil :link nil :narrow 40! :indent t :formula nil :timestamp nil :level nil :tcolumns nil :formatter nil)))
-   '(org-download-image-dir "./image/")
-   '(org-download-image-html-width 500)
-   '(org-download-screenshot-method "screencapture -i %s")
-   '(org-ellipsis "  ")
-   '(org-enforce-todo-dependencies t)
-   '(org-fontify-done-headline t)
-   '(org-fontify-quote-and-verse-blocks t)
-   '(org-fontify-whole-heading-line t)
-   '(org-hide-block-startup t)
-   '(org-image-actual-width 800)
-   '(org-latex-packages-alist
-     (quote
-      (("" "color" t)
-       ("" "minted" t)
-       ("" "parskip" t)
-       ("" "tikz" t)
-       ("" "tabularx" t))))
-   '(org-modules
-     (quote
-      (org-bibtex org-docview org-info org-protocol org-mac-link org-notmuch)))
-   '(org-pandoc-options (quote ((standalone . t) (self-contained . t))))
-   '(org-pomodoro-finished-sound
-     "/Users/xfu/.emacs.d/elpa/org-pomodoro-20161119.226/resources/bell.wav")
-   '(org-pomodoro-finished-sound-p nil)
-   '(org-pomodoro-long-break-sound-p nil)
-   '(org-pomodoro-short-break-sound-p nil)
-   '(org-preview-latex-default-process (quote dvisvgm))
-   '(org-tag-persistent-alist
-     (quote
-      ((#("communication" 0 1
-          (idx 0))
-        . 99)
-       (#("logs" 0 1
-          (idx 1))
-        . 108)
-       (#("organize" 0 1
-          (idx 2))
-        . 111)
-       (#("analysis" 0 1
-          (idx 3))
-        . 97)
-       (#("read" 0 1
-          (idx 4))
-        . 114)
-       (#("idea" 0 1
-          (idx 5))
-        . 105))))
-   '(package-selected-packages
-     (quote
-      (ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
-   '(paradox-github-token t)
-   '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
-   '(pos-tip-background-color "#292B2C")
-   '(pos-tip-foreground-color "#ECEBE7")
-   '(powerline-default-separator (quote arrow-fade))
-   '(powerline-height 22 t)
-   '(projectile-git-ignored-command "git ls-files -zcoi --exclude-standard | sed 's/ /\\\\ /g'")
-   '(projectile-globally-ignored-file-suffixes (quote ("svg" "pdf" "png")))
-   '(projectile-indexing-method (quote alien))
-   '(python-shell-interpreter "python")
-   '(python-shell-interpreter-args "--simple-prompt -i")
-   '(safe-local-variable-values (quote ((eval progn (pp-buffer) (indent-buffer)))))
-   '(send-mail-function (quote mailclient-send-it))
-   '(sendmail-program "/usr/local/bin/msmtpq" t)
-   '(shr-tag-pre-highlight-lang-modes
-     (quote
-      (("ocaml" . tuareg)
-       ("elisp" . emacs-lisp)
-       ("ditaa" . artist)
-       ("asymptote" . asy)
-       ("dot" . fundamental)
-       ("sqlite" . sql)
-       ("calc" . fundamental)
-       ("C" . c)
-       ("cpp" . c++)
-       ("C++" . c++)
-       ("screen" . shell-script)
-       ("shell" . sh)
-       ("bash" . sh)
-       ("emacslisp" . emacs-lisp)
-       ("R" . r-mode))))
-   '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
-   '(sml/active-background-color "#34495e")
-   '(sml/active-foreground-color "#ecf0f1")
-   '(sml/inactive-background-color "#dfe4ea")
-   '(sml/inactive-foreground-color "#34495e")
-   '(split-height-threshold 100)
-   '(split-width-threshold 100)
-   '(tool-bar-mode nil)
-   '(tramp-remote-path
-     (quote
-      ("/uac/gds/xfu/bin" "/research/kevinyip10/xfu/miniconda3/bin" "/research/kevinyip10/xfu/miniconda2/bin" tramp-default-remote-path "/bin" "/usr/bin" "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin" "/local/bin" "/local/freeware/bin" "/local/gnu/bin" "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin" "/opt/bin" "/opt/sbin" "/opt/local/bin")))
-   '(truncate-lines t)
-   '(user-mail-address "fuxialexander@gmail.com")
-   '(vc-annotate-background "#181e26")
-   '(vc-annotate-background-mode nil)
-   '(vc-annotate-color-map
-     (quote
-      ((20 . "#98be65")
-       (40 . "#b4be6c")
-       (60 . "#d0be73")
-       (80 . "#ECBE7B")
-       (100 . "#e6ab6a")
-       (120 . "#e09859")
-       (140 . "#da8548")
-       (160 . "#d38079")
-       (180 . "#cc7cab")
-       (200 . "#c678dd")
-       (220 . "#d974b7")
-       (240 . "#ec7091")
-       (260 . "#ff6c6b")
-       (280 . "#d6696a")
-       (300 . "#ad6769")
-       (320 . "#836468")
-       (340 . "#5B6268")
-       (360 . "#5B6268"))))
-   '(vc-annotate-very-old-color nil)
-   '(weechat-color-list
-     (quote
-      (unspecified "#fdf6e3" "#eee8d5" "#990A1B" "#dc322f" "#546E00" "#859900" "#7B6000" "#b58900" "#00629D" "#268bd2" "#93115C" "#d33682" "#00736F" "#2aa198" "#657b83" "#839496")))
-   '(window-divider-default-bottom-width 0)
-   '(window-divider-default-places t)
-   '(window-divider-default-right-width 1)
-   '(window-divider-mode t)
-   '(window-resize-pixelwise t)
-   '(xterm-mouse-mode t))
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   )
-  )
+ '(org-agenda-files (quote ("/Users/xfu/Dropbox/org/")))
+ '(org-agenda-log-mode-items (quote (closed clock)))
+ '(org-agenda-restore-windows-after-quit t t)
+ '(org-agenda-skip-deadline-if-done t)
+ '(org-agenda-skip-deadline-prewarning-if-scheduled (quote pre-scheduled))
+ '(org-agenda-start-with-log-mode nil)
+ '(org-clock-clocktable-default-properties (quote (:maxlevel 3 :scope agenda :tags "-COMMENT")))
+ '(org-clocktable-defaults
+   (quote
+    (:maxlevel 3 :lang "en" :scope file :block nil :wstart 1 :mstart 1 :tstart nil :tend nil :step nil :stepskip0 t :fileskip0 t :tags "-COMMENT" :emphasize nil :link nil :narrow 40! :indent t :formula nil :timestamp nil :level nil :tcolumns nil :formatter nil)))
+ '(org-download-image-dir "./image/")
+ '(org-download-image-html-width 500)
+ '(org-download-screenshot-method "screencapture -i %s")
+ '(org-ellipsis "  ")
+ '(org-enforce-todo-dependencies t)
+ '(org-fontify-done-headline t)
+ '(org-fontify-quote-and-verse-blocks t)
+ '(org-fontify-whole-heading-line t)
+ '(org-hide-block-startup t)
+ '(org-image-actual-width 800)
+ '(org-latex-packages-alist
+   (quote
+    (("" "color" t)
+     ("" "minted" t)
+     ("" "parskip" t)
+     ("" "tikz" t)
+     ("" "tabularx" t))))
+ '(org-modules
+   (quote
+    (org-bibtex org-docview org-info org-protocol org-mac-link org-notmuch)))
+ '(org-pandoc-options (quote ((standalone . t) (self-contained . t))))
+ '(org-pomodoro-finished-sound
+   "/Users/xfu/.emacs.d/elpa/org-pomodoro-20161119.226/resources/bell.wav")
+ '(org-pomodoro-finished-sound-p nil)
+ '(org-pomodoro-long-break-sound-p nil)
+ '(org-pomodoro-short-break-sound-p nil)
+ '(org-preview-latex-default-process (quote dvisvgm))
+ '(org-tag-persistent-alist
+   (quote
+    ((#("communication" 0 1
+        (idx 0))
+      . 99)
+     (#("logs" 0 1
+        (idx 1))
+      . 108)
+     (#("organize" 0 1
+        (idx 2))
+      . 111)
+     (#("analysis" 0 1
+        (idx 3))
+      . 97)
+     (#("read" 0 1
+        (idx 4))
+      . 114)
+     (#("idea" 0 1
+        (idx 5))
+      . 105))))
+ '(package-selected-packages
+   (quote
+    (elfeed-goodies ace-jump-mode noflet powerline ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
+ '(paradox-github-token t)
+ '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
+ '(pos-tip-background-color "#292B2C")
+ '(pos-tip-foreground-color "#ECEBE7")
+ '(powerline-default-separator (quote arrow-fade))
+ '(powerline-height 22 t)
+ '(projectile-git-ignored-command "git ls-files -zcoi --exclude-standard | sed 's/ /\\\\ /g'")
+ '(projectile-globally-ignored-file-suffixes (quote ("svg" "pdf" "png")))
+ '(projectile-indexing-method (quote alien))
+ '(python-shell-interpreter "python" t)
+ '(python-shell-interpreter-args "--simple-prompt -i" t)
+ '(safe-local-variable-values (quote ((eval progn (pp-buffer) (indent-buffer)))))
+ '(send-mail-function (quote mailclient-send-it))
+ '(sendmail-program "/usr/local/bin/msmtpq" t)
+ '(shr-tag-pre-highlight-lang-modes
+   (quote
+    (("ocaml" . tuareg)
+     ("elisp" . emacs-lisp)
+     ("ditaa" . artist)
+     ("asymptote" . asy)
+     ("dot" . fundamental)
+     ("sqlite" . sql)
+     ("calc" . fundamental)
+     ("C" . c)
+     ("cpp" . c++)
+     ("C++" . c++)
+     ("screen" . shell-script)
+     ("shell" . sh)
+     ("bash" . sh)
+     ("emacslisp" . emacs-lisp)
+     ("R" . r-mode))))
+ '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
+ '(sml/active-background-color "#34495e")
+ '(sml/active-foreground-color "#ecf0f1")
+ '(sml/inactive-background-color "#dfe4ea")
+ '(sml/inactive-foreground-color "#34495e")
+ '(split-height-threshold 100)
+ '(split-width-threshold 100)
+ '(tool-bar-mode nil)
+ '(tramp-remote-path
+   (quote
+    ("/uac/gds/xfu/bin" "/research/kevinyip10/xfu/miniconda3/bin" "/research/kevinyip10/xfu/miniconda2/bin" tramp-default-remote-path "/bin" "/usr/bin" "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin" "/local/bin" "/local/freeware/bin" "/local/gnu/bin" "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin" "/opt/bin" "/opt/sbin" "/opt/local/bin")))
+ '(truncate-lines t)
+ '(user-mail-address "fuxialexander@gmail.com")
+ '(vc-annotate-background "#181e26")
+ '(vc-annotate-background-mode nil)
+ '(vc-annotate-color-map
+   (quote
+    ((20 . "#98be65")
+     (40 . "#b4be6c")
+     (60 . "#d0be73")
+     (80 . "#ECBE7B")
+     (100 . "#e6ab6a")
+     (120 . "#e09859")
+     (140 . "#da8548")
+     (160 . "#d38079")
+     (180 . "#cc7cab")
+     (200 . "#c678dd")
+     (220 . "#d974b7")
+     (240 . "#ec7091")
+     (260 . "#ff6c6b")
+     (280 . "#d6696a")
+     (300 . "#ad6769")
+     (320 . "#836468")
+     (340 . "#5B6268")
+     (360 . "#5B6268"))))
+ '(vc-annotate-very-old-color nil)
+ '(weechat-color-list
+   (quote
+    (unspecified "#fdf6e3" "#eee8d5" "#990A1B" "#dc322f" "#546E00" "#859900" "#7B6000" "#b58900" "#00629D" "#268bd2" "#93115C" "#d33682" "#00736F" "#2aa198" "#657b83" "#839496")))
+ '(window-divider-default-bottom-width 0)
+ '(window-divider-default-places t)
+ '(window-divider-default-right-width 1)
+ '(window-divider-mode t)
+ '(window-resize-pixelwise t)
+ '(xterm-mouse-mode t))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+)
