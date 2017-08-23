@@ -71,7 +71,7 @@ This function should only modify configuration layer settings."
      syntax-checking
      display
      personal
-     (languagetool :variables langtool-language-tool-jar "/usr/local/Cellar/languagetool/3.7/libexec/languagetool-commandline.jar")
+     (languagetool :variables langtool-language-tool-jar "/usr/local/Cellar/languagetool/3.8/libexec/languagetool-commandline.jar")
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
