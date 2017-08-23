@@ -1431,7 +1431,7 @@ This function is called at the very end of Spacemacs initialization."
  '(ess-eval-visibly (quote nowait))
  '(evil-org-key-theme
    (quote
-    (navigation textobjects insert rsi additional todo leader)))
+    (navigation textobjects insert rsi additional todo leader)) t)
  '(evil-want-Y-yank-to-eol nil)
  '(eww-search-prefix "https://www.google.com/search?q=")
  '(exec-path-from-shell-check-startup-files nil)
@@ -1695,7 +1695,9 @@ This function is called at the very end of Spacemacs initialization."
  '(org-agenda-log-mode-items (quote (closed clock)))
  '(org-agenda-restore-windows-after-quit t)
  '(org-agenda-skip-deadline-if-done t)
- '(org-agenda-skip-deadline-prewarning-if-scheduled (quote pre-scheduled))
+ '(org-agenda-skip-deadline-prewarning-if-scheduled t)
+ '(org-agenda-skip-scheduled-if-deadline-is-shown t)
+ '(org-agenda-skip-scheduled-if-done t)
  '(org-agenda-start-with-log-mode nil)
  '(org-clock-clocktable-default-properties (quote (:maxlevel 3 :scope agenda :tags "-COMMENT")))
  '(org-clocktable-defaults
@@ -1703,8 +1705,7 @@ This function is called at the very end of Spacemacs initialization."
     (:maxlevel 3 :lang "en" :scope file :block nil :wstart 1 :mstart 1 :tstart nil :tend nil :step nil :stepskip0 t :fileskip0 t :tags "-COMMENT" :emphasize nil :link nil :narrow 40! :indent t :formula nil :timestamp nil :level nil :tcolumns nil :formatter nil)))
  '(org-download-image-dir "./image/")
  '(org-download-image-html-width 500)
- '(org-download-screenshot-method "screencapture -i %s")
- '(org-ellipsis "  ")
+ '(org-download-screenshot-method "screencapture -i %s" t)
  '(org-enforce-todo-dependencies t)
  '(org-fontify-done-headline t)
  '(org-fontify-quote-and-verse-blocks t)
@@ -1748,11 +1749,17 @@ This function is called at the very end of Spacemacs initialization."
      (#("idea" 0 1
         (idx 5))
       . 105))))
+ '(org-todo-keywords
+   (quote
+    ((sequence "TODO(t!)" "|" "DONE(d!/@)")
+     (sequence "WAIT(w@/@)" "|" "OUTD(o@/@)" "KILL(k@/@)"))))
+ '(org-treat-insert-todo-heading-as-state-change t)
  '(package-selected-packages
    (quote
     (org-gcal request-deferred deferred calfw-org calfw modern-dawn-theme solarized-theme origami elfeed-goodies ace-jump-mode noflet powerline ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
  '(paradox-github-token t)
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
+ '(persp-add-buffer-on-find-file nil)
  '(pos-tip-background-color "#292B2C")
  '(pos-tip-foreground-color "#ECEBE7")
  '(powerline-default-separator (quote arrow-fade))
@@ -1760,11 +1767,10 @@ This function is called at the very end of Spacemacs initialization."
  '(projectile-git-ignored-command "git ls-files -zcoi --exclude-standard | sed 's/ /\\\\ /g'")
  '(projectile-globally-ignored-file-suffixes (quote ("svg" "pdf" "png")))
  '(projectile-indexing-method (quote alien))
- '(python-shell-interpreter "python")
- '(python-shell-interpreter-args "--simple-prompt -i")
+ '(python-shell-interpreter "python" t)
+ '(python-shell-interpreter-args "--simple-prompt -i" t)
  '(safe-local-variable-values (quote ((eval progn (pp-buffer) (indent-buffer)))))
  '(send-mail-function (quote mailclient-send-it))
- '(sendmail-program "/usr/local/bin/msmtpq" t)
  '(shr-tag-pre-highlight-lang-modes
    (quote
     (("ocaml" . tuareg)
