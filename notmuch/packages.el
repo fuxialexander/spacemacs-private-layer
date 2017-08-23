@@ -113,6 +113,7 @@
     :commands (notmuch-tree)
     :defer t
     :init (progn
+
             (defun my-buffer-face-mode-notmuch ()
               "Sets a fixed width (monospace) font in current buffer"
               (interactive)
@@ -135,6 +136,51 @@
 
     :config (progn
 
+
+              (defun notmuch-start-notmuch-sentinel (proc event)
+                "Process sentinel function used by `notmuch-start-notmuch'."
+                (let* ((err-file (process-get proc 'err-file))
+                       (err-buffer (or (process-get proc 'err-buffer)
+                                       (find-file-noselect err-file)))
+                       (err (when (not (zerop (buffer-size err-buffer)))
+                              (with-current-buffer err-buffer (buffer-string))))
+                       (sub-sentinel (process-get proc 'sub-sentinel))
+                       (real-command (process-get proc 'real-command)))
+                  (condition-case err
+                      (progn
+                        ;; Invoke the sub-sentinel, if any
+                        (when sub-sentinel
+                          (funcall sub-sentinel proc event))
+                        ;; Check the exit status.  This will signal an error if the
+                        ;; exit status is non-zero.  Don't do this if the process
+                        ;; buffer is dead since that means Emacs killed the process
+                        ;; and there's no point in telling the user that (but we
+                        ;; still check for and report stderr output below).
+                        (when (buffer-live-p (process-buffer proc))
+                          (notmuch-check-async-exit-status proc event real-command err))
+                        ;; If that didn't signal an error, then any error output was
+                        ;; really warning output.  Show warnings, if any.
+                        (let ((warnings
+                               (when err
+                                 (with-current-buffer err-buffer
+                                   (goto-char (point-min))
+                                   (end-of-line)
+                                   ;; Show first line; stuff remaining lines in the
+                                   ;; errors buffer.
+                                   (let ((l1 (buffer-substring (point-min) (point))))
+                                     (skip-chars-forward "\n")
+                                     (cons l1 (unless (eobp)
+                                                (buffer-substring (point) (point-max)))))))))
+                          (when warnings
+                            (notmuch-logged-error (car warnings) (cdr warnings)))))
+                    (error
+                     ;; Emacs behaves strangely if an error escapes from a sentinel,
+                     ;; so turn errors into messages.
+                     (message "%s" (error-message-string err))))
+                  (when err-buffer
+                    (set-process-query-on-exit-flag (get-buffer-process err-buffer) nil)
+                    (kill-buffer err-buffer))
+                  (when err-file (ignore-errors (delete-file err-file)))))
               (eval-after-load "notmuch-hello" `(define-key notmuch-hello-mode-map "o" 'ace-link-notmuch-hello))
               (eval-after-load "notmuch-show" `(define-key notmuch-show-mode-map "o" 'ace-link-notmuch-show))
 
@@ -302,17 +348,18 @@ matched."
 
 
 
-              (setq message-send-mail-function 'message-send-mail-with-sendmail)
-              (setq notmuch-search-oldest-first nil)
-              (setq send-mail-function 'sendmail-send-it)
-              (setq sendmail-program "/usr/local/bin/msmtp")
-              (define-key notmuch-tree-mode-map (kbd "i") 'open-message-with-mail-app-notmuch)
+              (setq notmuch-fcc-dirs nil
+                    notmuch-show-logo nil
+                    message-kill-buffer-on-exit t
+                    message-send-mail-function 'message-send-mail-with-sendmail
+                    notmuch-search-oldest-first nil
+                    send-mail-function 'sendmail-send-it
+                    sendmail-program "/usr/local/bin/msmtp"
+                    )
 
               (spacemacs/set-leader-keys-for-major-mode 'notmuch-message-mode
-                dotspacemacs-major-mode-leader-key 'message-send-and-exit
-                "c" 'message-send-and-exit
-                "k" 'message-kill-buffer
-                "a" 'message-kill-buffer
+                dotspacemacs-major-mode-leader-key 'notmuch-mua-send-and-exit
+                "k" 'notmuch-mua-kill-buffer
                 "s" 'message-dont-send         ; saves as draft
                 "f" 'mml-attach-file)
 
