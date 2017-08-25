@@ -274,8 +274,8 @@ environment, only %l is available."
                           (reftex-get-bib-names "editor" entry)
                           (or n 2)))
                ((= l ?E) (car (reftex-get-bib-names "editor" entry)))
-	       ((= l ?f) (concat (org-ref-reftex-get-bib-field "=key=" entry) ".pdf"))
-	       ((= l ?F) (concat org-ref-pdf-directory (org-ref-reftex-get-bib-field "=key=" entry) ".pdf"))
+         ((= l ?f) (concat (org-ref-reftex-get-bib-field "=key=" entry) ".pdf"))
+         ((= l ?F) (concat org-ref-pdf-directory (org-ref-reftex-get-bib-field "=key=" entry) ".pdf"))
                ((= l ?h) (org-ref-reftex-get-bib-field "howpublished" entry))
                ((= l ?i) (org-ref-reftex-get-bib-field "institution" entry))
                ((= l ?j) (let ((jt (reftex-get-bib-field "journal" entry)))
@@ -285,7 +285,7 @@ environment, only %l is available."
                ((= l ?k) (org-ref-reftex-get-bib-field "=key=" entry))
                ((= l ?m) (org-ref-reftex-get-bib-field "month" entry))
                ((= l ?n) (org-ref-reftex-get-bib-field "number" entry))
-	       ((= l ?N) (org-ref-reftex-get-bib-field "note" entry))
+         ((= l ?N) (org-ref-reftex-get-bib-field "note" entry))
                ((= l ?o) (org-ref-reftex-get-bib-field "organization" entry))
                ((= l ?p) (org-ref-reftex-get-bib-field "pages" entry))
                ((= l ?P) (car (split-string
@@ -354,9 +354,9 @@ Format according to the type in `org-ref-bibliography-entry-format'."
 If `org-ref-pdf-directory' is non-nil, put filename there."
   (if org-ref-pdf-directory
       (let ((pdf (-first 'f-file?
-			 (--map (f-join it (concat key ".pdf"))
-				(-flatten (list org-ref-pdf-directory))))))
-	(format "%s" pdf))
+       (--map (f-join it (concat key ".pdf"))
+        (-flatten (list org-ref-pdf-directory))))))
+  (format "%s" pdf))
     (format "%s.pdf" key)))
 
 
@@ -378,12 +378,25 @@ Argument KEY is the bibtex key."
             (let ((clean-field (replace-regexp-in-string "{\\|}\\|\\\\" "" e)))
               (let ((first-file (car (split-string clean-field ";" t))))
                 (format "/%s" (substring first-file 1
-					 (- (length first-file) 4)))))
+           (- (length first-file) 4)))))
           (format (concat
                    (file-name-as-directory org-ref-pdf-directory)
                    "%s.pdf")
                   key))))))
 
+
+;; (defun org-ref-open-pdf-at-point ()
+;;   "Open the pdf for bibtex key under point if it exists."
+;;   (interactive)
+;;   (let* ((results (org-ref-get-bibtex-key-and-file))
+;;          (key (car results))
+;;          (entry (bibtex-completion-get-entry key))
+;;          (uri (bibtex-completion-get-value "uri" entry))
+;;          (uri (s-replace "\\url{" "" uri))
+;;          (uri (s-replace "}" "" uri)))
+;;     (start-process "open papers" nil "/usr/bin/open" uri)
+;;     )
+;;   )
 
 ;;;###autoload
 (defun org-ref-open-pdf-at-point ()
@@ -391,13 +404,10 @@ Argument KEY is the bibtex key."
   (interactive)
   (let* ((results (org-ref-get-bibtex-key-and-file))
          (key (car results))
-         (entry (bibtex-completion-get-entry key))
-         (uri (bibtex-completion-get-value "uri" entry))
-         (uri (s-replace "\\url{" "" uri))
-         (uri (s-replace "}" "" uri)))
-    (start-process "open papers" nil "/usr/bin/open" uri)
-    )
-  )
+         (pdf-file (car (bibtex-completion-find-pdf key))))
+    (if (file-exists-p pdf-file)
+        (org-open-file pdf-file)
+      (message "No PDF found for %s" key))))
 
 
 ;;;###autoload
@@ -689,7 +699,7 @@ If SORT is non-nil the bibliography is alphabetically sorted."
                           (if (org-ref-key-in-file-p key (file-truename file))
                               (throw 'result file)
                             (message "%s not found in %s" key
-				     (file-truename file))))))
+             (file-truename file))))))
 
     (with-temp-buffer
       (insert-file-contents file)

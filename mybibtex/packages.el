@@ -49,9 +49,9 @@
 (defun mybibtex/post-init-org ()
   (with-eval-after-load 'org
     (spacemacs/set-leader-keys-for-major-mode 'org-mode "ic" 'org-ref-ivy-insert-cite-link)
-    (defun org-mac-papers-open (papers-link)
-      (start-process "open papers" nil "/usr/bin/open" (concat "papers3:" papers-link )))
-    (org-add-link-type "papers3" 'org-mac-papers-open)
+    ;; (defun org-mac-papers-open (papers-link)
+    ;;   (start-process "open papers" nil "/usr/bin/open" (concat "papers3:" papers-link )))
+    ;; (org-add-link-type "papers3" 'org-mac-papers-open)
     )
   )
 
@@ -103,13 +103,12 @@
         "lp" 'pubmed-insert-bibtex-from-pmid))
     :config
     (progn
-      (setf (cdr (assoc "p" org-ref-ivy-cite-actions)) '(ivy-bibtex-open-papers "Open in Papers"))
+      ;; (setf (cdr (assoc "p" org-ref-ivy-cite-actions)) '(ivy-bibtex-open-papers "Open in Papers"))
       (setq org-ref-completion-library 'org-ref-ivy-cite
             org-ref-default-bibliography '("/Users/xfu/Dropbox/org/ref.bib")
             org-ref-bibliography-notes "/Users/xfu/Dropbox/org/ref.org"
-
-
             )
+
       )
     ))
 
@@ -122,19 +121,19 @@
     :config
     (with-eval-after-load 'ivy-bibtex
 ;;; bibtex-completion customize function
-      (defun bibtex-completion-find-pdf-in-library (key-or-entry)
-        "Searches the directories in `bibtex-completion-library-path' for a
-PDF whose names is composed of the BibTeX key plus \".pdf\".  The
-path of the first matching PDF is returned."
-        (interactive)
-        (let* ((key (if (stringp key-or-entry)
-                        key-or-entry
-                      (bibtex-completion-get-value "=key=" key-or-entry)))
-               (key (s-replace ":" "" key))
-               (path (-first 'f-file?
-                             (--map (f-join it (s-concat key ".pdf"))
-                                    (-flatten (list bibtex-completion-library-path))))))
-          (when path (list path))))
+;;       (defun bibtex-completion-find-pdf-in-library (key-or-entry)
+;;         "Searches the directories in `bibtex-completion-library-path' for a
+;; PDF whose names is composed of the BibTeX key plus \".pdf\".  The
+;; path of the first matching PDF is returned."
+;;         (interactive)
+;;         (let* ((key (if (stringp key-or-entry)
+;;                         key-or-entry
+;;                       (bibtex-completion-get-value "=key=" key-or-entry)))
+;;                (key (s-replace ":" "" key))
+;;                (path (-first 'f-file?
+;;                              (--map (f-join it (s-concat key ".pdf"))
+;;                                     (-flatten (list bibtex-completion-library-path))))))
+;;           (when path (list path))))
 
       (defun bibtex-completion-open-uri (keys)
         "Open the associated URL or DOI in a browser."
@@ -147,19 +146,25 @@ path of the first matching PDF is returned."
             (start-process "open papers" nil "/usr/bin/open" uri)
             )))
 
+      (defun bibtex-completion-quicklook (keys)
+        "Open the associated URL or DOI in a browser."
+        (dolist (key keys)
+          (let* ((entry (bibtex-completion-get-entry key))
+                 (pdf (car (bibtex-completion-find-pdf entry)))
+                 )
+            (start-process "open papers" nil "/usr/bin/qlmanage" "-p" pdf)
+            )))
+
+
 ;;; Ivy-bibtex customize function
       (ivy-bibtex-ivify-action bibtex-completion-open-uri ivy-bibtex-open-papers)
+      (ivy-bibtex-ivify-action bibtex-completion-quicklook ivy-bibtex-quicklook)
       (setq ivy-bibtex-default-action 'ivy-bibtex-insert-key)
-      (ivy-set-actions
+      (ivy-add-actions
        'ivy-bibtex '(
-                     ("p" ivy-bibtex-open-papers "Open in Papers")
-                     ("n" ivy-bibtex-edit-notes "Edit notes")
-                     ("c" ivy-bibtex-insert-citation "Insert citation")
-                     ("u" ivy-bibtex-open-url-or-doi "Open URL or DOI in browser")
-                     ("r" ivy-bibtex-insert-reference "Insert Reference")
-                     ("b" ivy-bibtex-insert-key "Insert Bibtex Key")
-                     )
-       )
+                     ("P" ivy-bibtex-open-papers "Open in Papers")
+                     ("SPC" ivy-bibtex-quicklook "Quick look")
+                     ))
 
       (setq bibtex-completion-format-citation-functions
             '((org-mode      . bibtex-completion-format-citation-pandoc-citeproc)
@@ -168,7 +173,7 @@ path of the first matching PDF is returned."
             bibtex-completion-bibliography "/Users/xfu/Dropbox/org/ref.bib"
             bibtex-completion-library-path "/Users/xfu/Dropbox/Library.papers3/Files/"
             bibtex-completion-notes-path "/Users/xfu/Dropbox/org/ref.org"
-            bibtex-completion-pdf-field nil
+            bibtex-completion-pdf-field "file"
             bibtex-completion-pdf-open-function (lambda (fpath) (start-process "open" "*open*" "open" fpath))
             )
 

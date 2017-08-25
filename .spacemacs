@@ -212,7 +212,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-colorize-cursor-according-to-state nil
    ;;Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Input mono condensed"
+   dotspacemacs-default-font '("Input mono narrow"
                                :size 12
                                :weight normal
                                :width normal
@@ -601,7 +601,7 @@ you should place your code here."
   (eval-after-load "org" '(define-key org-mode-map (kbd "C-j") 'counsel-org-goto))
   (eval-after-load "org" '(define-key org-mode-map (kbd "C-H-j") 'counsel-org-goto-all))
   (eval-after-load "org" '(define-key org-mode-map (kbd "H-k") 'org-insert-link))
-  (eval-after-load "auctex" '(define-key latex-mode-map (kbd "H-i") 'ivy-bibtex))
+  (eval-after-load "auctex" '(define-key latex-mode-map (kbd "H-i") 'org-ref-ivy-insert-cite-link))
   (eval-after-load "eshell" '(eshell-git-prompt-use-theme 'powerline))
   (define-key evil-hybrid-state-map (kbd "C-;") 'hippie-expand)
 
@@ -769,7 +769,9 @@ you should place your code here."
          set outFile to \"/Users/xfu/Dropbox/org/ref.bib\"
          export (every publication item of application id \"com.mekentosj.papers3\" as list) to outFile
        end tell"
-      )))
+      ))
+    (start-process-shell-command "modify bib" nil "sleep 4;~/.emacs.d/private/local/cleanbib.sh")
+    )
 
 ;;;;; iTerm
   (defun mac-iTerm-shell-command (text)
@@ -1147,7 +1149,8 @@ Returns the new TODO keyword, or nil if no state change should occur."
 
 ;;;;; Org-latex
     (setq
-     org-latex-pdf-process '("latexmk -pdflatex='%latex -shell-escape -interaction nonstopmode' -pdf -output-directory=%o -f %f")
+     ;; org-latex-pdf-process '("latexmk -pdflatex='%latex -shell-escape -bibtex -interaction nonstopmode' -pdf -output-directory=%o -f %f")
+     org-latex-logfiles-extensions (quote ("lof" "lot" "tex~" "aux" "idx" "log" "out" "toc" "nav" "snm" "vrb" "dvi" "fdb_latexmk" "blg" "brf" "fls" "entoc" "ps" "spl" "bbl"))
      org-latex-create-formula-image-program 'dvisvgm
      org-latex-packages-alist
      (quote (("" "color" t)
@@ -1431,7 +1434,7 @@ This function is called at the very end of Spacemacs initialization."
  '(ess-eval-visibly (quote nowait))
  '(evil-org-key-theme
    (quote
-    (navigation textobjects insert rsi additional todo leader)) t)
+    (navigation textobjects insert rsi additional todo leader)))
  '(evil-want-Y-yank-to-eol nil)
  '(eww-search-prefix "https://www.google.com/search?q=")
  '(exec-path-from-shell-check-startup-files nil)
@@ -1705,7 +1708,7 @@ This function is called at the very end of Spacemacs initialization."
     (:maxlevel 3 :lang "en" :scope file :block nil :wstart 1 :mstart 1 :tstart nil :tend nil :step nil :stepskip0 t :fileskip0 t :tags "-COMMENT" :emphasize nil :link nil :narrow 40! :indent t :formula nil :timestamp nil :level nil :tcolumns nil :formatter nil)))
  '(org-download-image-dir "./image/")
  '(org-download-image-html-width 500)
- '(org-download-screenshot-method "screencapture -i %s" t)
+ '(org-download-screenshot-method "screencapture -i %s")
  '(org-enforce-todo-dependencies t)
  '(org-fontify-done-headline t)
  '(org-fontify-quote-and-verse-blocks t)
@@ -1719,6 +1722,7 @@ This function is called at the very end of Spacemacs initialization."
      ("" "parskip" t)
      ("" "tikz" t)
      ("" "tabularx" t))))
+ '(org-mac-Skim-highlight-selection-p nil)
  '(org-modules
    (quote
     (org-bibtex org-docview org-info org-protocol org-mac-iCal org-mac-link org-notmuch)))
@@ -1767,8 +1771,8 @@ This function is called at the very end of Spacemacs initialization."
  '(projectile-git-ignored-command "git ls-files -zcoi --exclude-standard | sed 's/ /\\\\ /g'")
  '(projectile-globally-ignored-file-suffixes (quote ("svg" "pdf" "png")))
  '(projectile-indexing-method (quote alien))
- '(python-shell-interpreter "python" t)
- '(python-shell-interpreter-args "--simple-prompt -i" t)
+ '(python-shell-interpreter "python")
+ '(python-shell-interpreter-args "--simple-prompt -i")
  '(safe-local-variable-values (quote ((eval progn (pp-buffer) (indent-buffer)))))
  '(send-mail-function (quote mailclient-send-it))
  '(shr-tag-pre-highlight-lang-modes
@@ -1844,5 +1848,5 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(org-warning ((t (:inherit org-scheduled-previously :foreground "#E46261")))))
 )

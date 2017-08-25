@@ -109,11 +109,14 @@ of ENTRY.  ENTRY is selected from `org-ref-bibtex-candidates'."
   "Open the pdf associated with ENTRY.
 ENTRY is selected from `org-ref-bibtex-candidates'."
   (with-ivy-window
-    (let ((pdf (expand-file-name (format "%s.pdf" (cdr (assoc "=key=" entry)))
-                                 org-ref-pdf-directory)))
-      (if (file-exists-p pdf)
-          (org-open-file pdf)
-        (message "No pdf found for %s" (cdr (assoc "=key=" entry)))))))
+    (let* (
+          (key (cdr (assoc "=key=" entry)))
+          (pdf-file (car (bibtex-completion-find-pdf key)))
+          )
+      (if (file-exists-p pdf-file)
+          (org-open-file pdf-file)
+        (message "No pdf found for %s" key)
+        ))))
 
 
 (defun org-ref-ivy-bibtex-open-notes (entry)
@@ -145,19 +148,21 @@ ENTRY is selected from `org-ref-bibtex-candidates'."
 (defun org-ref-ivy-bibtex-open-url (entry)
   "Open the URL associated with ENTRY.
 ENTRY is selected from `org-ref-bibtex-candidates'."
-  (let ((url (cdr (assoc "url" entry))))
+  (with-ivy-window
+  (let* ((url (cdr (assoc "=url=" entry))))
     (if url
         (browse-url url)
-      (message "No url found for %s" (cdr (assoc "=key=" entry))))))
+      (message "No url found for %s" (cdr (assoc "=key=" entry)))))))
 
 
 (defun org-ref-ivy-bibtex-open-doi (entry)
   "Open the DOI associated with ENTRY.
 ENTRY is selected from `org-ref-bibtex-candidates'."
-  (let ((doi (cdr (assoc "doi" entry))))
+  (with-ivy-window
+  (let* ((doi (cdr (assoc "doi" entry))))
     (if doi
         (browse-url (format "http://dx.doi.org/%s" doi))
-      (message "No doi found for %s" (cdr (assoc "=key=" entry))))))
+      (message "No doi found for %s" (cdr (assoc "=key=" entry)))))))
 
 
 (defun org-ref-ivy-bibtex-set-keywords (entry)
@@ -211,12 +216,12 @@ This uses a citeproc library."
 (defun org-ref-ivy-bibtex-insert-formatted-citation (entry)
   "Insert formatted citations at point for selected ENTRY."
   (with-ivy-window
-    (insert (org-ref-format-bibtex-entry entry))))
+    (insert (bibtex-completion-apa-format-reference (bibtex-completion-get-value "=key=" entry)))))
 
 
 (defun org-ref-ivy-bibtex-copy-formatted-citation (entry)
   "Copy formatted citation to clipboard for ENTRY."
-  (kill-new (org-ref-format-entry entry)))
+  (kill-new (bibtex-completion-apa-format-reference (bibtex-completion-get-value "=key=" entry))))
 
 
 (defun org-ref-ivy-bibtex-add-entry (_)
@@ -234,17 +239,17 @@ In order to add a new bibtex entry. The arg is selected from
 
 
 (defvar org-ref-ivy-cite-actions
-  '(("b" org-ref-ivy-bibtex-open-entry "Open bibtex entry")
-    ("B" org-ref-ivy-bibtex-copy-entry "Copy bibtex entry")
+  '(
     ("p" org-ref-ivy-bibtex-open-pdf "Open pdf")
     ("n" org-ref-ivy-bibtex-open-notes "Open notes")
-    ("u" org-ref-ivy-bibtex-open-url "Open url")
-    ("d" org-ref-ivy-bibtex-open-doi "Open doi")
+    ("u" ivy-bibtex-open-url-or-doi "Open url or doi")
+    ("P" ivy-bibtex-open-papers "Open Papers")
+    ("SPC" ivy-bibtex-quicklook "Quick look")
     ("k" org-ref-ivy-bibtex-set-keywords "Add keywords")
     ("e" org-ref-ivy-bibtex-email-entry "Email entry")
     ("f" org-ref-ivy-bibtex-insert-formatted-citation "Insert formatted citation")
     ("F" org-ref-ivy-bibtex-copy-formatted-citation "Copy formatted citation")
-    ("a" org-ref-ivy-bibtex-add-entry "Add bibtex entry"))
+    )
   "List of additional actions for `org-ref-ivy-insert-cite-link'.
 The default action being to insert a citation.")
 
@@ -412,10 +417,10 @@ Use a prefix ARG to select the ref type."
     (insert
      (or (when (looking-at "$") " ") "")
      (concat (if ivy-current-prefix-arg
-		 (ivy-read "type: " org-ref-ref-types)
-	       org-ref-default-ref-type)
-	     ":"
-	     label))))
+     (ivy-read "type: " org-ref-ref-types)
+         org-ref-default-ref-type)
+       ":"
+       label))))
 
 
 (defhydra org-ref-cite-hydra (:color blue :hint nil)
@@ -440,7 +445,7 @@ _o_: Open entry   _e_: Email entry  ^ ^                 _q_: quit
          (kill-new
           (car (org-ref-get-bibtex-key-and-file)))))
   ("f" (kill-new
-        (org-ref-format-entry (org-ref-get-bibtex-key-under-cursor))))
+        (org-ref-ivy-bibtex-formatted-citation (org-ref-get-bibtex-key-under-cursor))))
   ("e" (kill-new (save-excursion
                    (org-ref-open-citation-at-point)
                    (org-ref-email-bibtex-entry))))

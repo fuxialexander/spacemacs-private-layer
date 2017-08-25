@@ -175,10 +175,10 @@ function in `org-ref-completion-library'."
     (define-key map (kbd "H-r") 'org-ref-wos-related-at-point)
     (define-key map (kbd "H-c") 'org-ref-wos-citing-at-point)
     (define-key map (kbd "H-e") (lambda ()
-				  "Email entry at point"
-				  (interactive)
-				  (org-ref-open-citation-at-point)
-				  (org-ref-email-bibtex-entry)))
+          "Email entry at point"
+          (interactive)
+          (org-ref-open-citation-at-point)
+          (org-ref-email-bibtex-entry)))
     (define-key map (kbd "H-g") 'org-ref-google-scholar-at-point)
     (define-key map (kbd "H-f") 'org-ref-format-bibtex-entry-at-point)
     (define-key map
@@ -943,12 +943,12 @@ org-link if the files exist.
   (save-match-data
     (cond
      ((or (not org-ref-show-broken-links)
-	  (-every?
-	   'identity
-	   (mapcar
-	    (lambda (bibfile)
-	      (file-exists-p bibfile))
-	    (split-string path ","))))
+    (-every?
+     'identity
+     (mapcar
+      (lambda (bibfile)
+        (file-exists-p bibfile))
+      (split-string path ","))))
       'org-link)
      (t
       'font-lock-warning-face))))
@@ -959,13 +959,13 @@ org-link if the files exist.
   :export #'org-ref-bibliography-format
   :complete #'org-bibliography-complete-link
   :help-echo (lambda (window object position)
-	       (save-excursion
-		 (goto-char position)
-		 (let ((s (org-ref-link-message)))
-		   (with-temp-buffer
-		     (insert s)
-		     (fill-paragraph)
-		     (buffer-string)))))
+         (save-excursion
+     (goto-char position)
+     (let ((s (org-ref-link-message)))
+       (with-temp-buffer
+         (insert s)
+         (fill-paragraph)
+         (buffer-string)))))
   :face #'org-ref-bibliography-face-fn)
 
 
@@ -1249,8 +1249,8 @@ Ignore figures in COMMENTED sections."
   ;; First we have to make sure we are on a label link.
   (let* ((object (and (eq major-mode 'org-mode) (org-element-context))))
     (when (and
-	   (equal (org-element-type object) 'link)
-	   (equal (org-element-property :type object) "label"))
+     (equal (org-element-type object) 'link)
+     (equal (org-element-property :type object) "label"))
       (org-store-link-props
        :type "ref"
        :link (concat "ref:" (org-element-property :path object))))
@@ -1282,7 +1282,7 @@ Ignore figures in COMMENTED sections."
   (save-match-data
     (cond
      ((or (not org-ref-show-broken-links)
-	  (= 1 (org-ref-count-labels label)))
+    (= 1 (org-ref-count-labels label)))
       'org-ref-label-face)
      (t
       'font-lock-warning-face))))
@@ -1409,7 +1409,7 @@ The reference given by KEYWORD is formatted with description DESC in FORMAT"
   (save-match-data
     (cond
      ((or (not org-ref-show-broken-links)
-	  (member label (org-ref-get-labels)))
+    (member label (org-ref-get-labels)))
       'org-ref-ref-face)
      (t
       'font-lock-warning-face))))
@@ -1937,14 +1937,14 @@ Supported backends: 'html, 'latex, 'ascii, 'org, 'md, 'pandoc" type type)
       ((eq format 'ascii)
        (concat "["
          (mapconcat
-	  (lambda (key)
-	    (format "%s" key))
-	  (org-ref-split-and-strip-string keyword) ",") "]"))
+    (lambda (key)
+      (format "%s" key))
+    (org-ref-split-and-strip-string keyword) ",") "]"))
       ((eq format 'html)
        (mapconcat
-	(lambda (key)
-	  (format org-ref-ref-html key key))
-	(org-ref-split-and-strip-string keyword) ","))
+  (lambda (key)
+    (format org-ref-ref-html key key))
+  (org-ref-split-and-strip-string keyword) ","))
       ((eq format 'latex)
        (if (string= (substring ,type -1) "s")
      ;; biblatex format for multicite commands, which all end in s. These
@@ -1965,21 +1965,21 @@ Supported backends: 'html, 'latex, 'ascii, 'org, 'md, 'pandoc" type type)
       ;; for markdown and pandoc we generate pandoc citations
       ((or (eq format 'md) (eq format 'pandoc))
        (cond
-	(desc ;; pre and or post text
-	 (let* ((text (split-string desc "::"))
-		(pre (car text))
-		(post (cadr text)))
-	   (concat
-	    (format "[@%s," keyword)
-	    (when pre (format " %s" pre))
-	    (when post (format ", %s" post))
-	    "]")))
-	(t
-	 (format "[%s]"
-		 (mapconcat
-		  (lambda (key) (concat "@" key))
-		  (org-ref-split-and-strip-string keyword)
-		  "; "))))))))
+  (desc ;; pre and or post text
+   (let* ((text (split-string desc "::"))
+    (pre (car text))
+    (post (cadr text)))
+     (concat
+      (format "[@%s," keyword)
+      (when pre (format " %s" pre))
+      (when post (format ", %s" post))
+      "]")))
+  (t
+   (format "[%s]"
+     (mapconcat
+      (lambda (key) (concat "@" key))
+      (org-ref-split-and-strip-string keyword)
+      "; "))))))))
 
 
 (defun org-ref-format-citation-description (desc)
@@ -2062,14 +2062,14 @@ This is not smart enough yet to only highlight the bad key. If any key is bad, t
   (save-match-data
     (cond
      ((or (not org-ref-show-broken-links)
-	  (let ((bibtex-completion-bibliography (org-ref-find-bibliography)))
-	    (-every?
-	     'identity
-	     (mapcar
-	      (lambda (key)
-		(assoc "=key="
-		       (bibtex-completion-get-entry key)))
-	      (split-string keys ",")))))
+    (let ((bibtex-completion-bibliography (org-ref-find-bibliography)))
+      (-every?
+       'identity
+       (mapcar
+        (lambda (key)
+    (assoc "=key="
+           (bibtex-completion-get-entry key)))
+        (split-string keys ",")))))
       'org-ref-cite-face)
      (t
       'font-lock-warning-face))))
@@ -2234,7 +2234,7 @@ PATH is required for the org-link, but it does nothing here."
 ;;** create text citations from a bibtex entry
 (defun org-ref-bib-citation ()
   "From a bibtex entry, create and return a citation string."
-  (org-ref-format-entry (org-ref-get-bibtex-key-under-cursor)))
+  (bibtex-completion-apa-format-reference (org-ref-get-bibtex-key-under-cursor)))
 
 
 ;;** Open pdf in bibtex entry
