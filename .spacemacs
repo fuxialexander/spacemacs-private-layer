@@ -1696,7 +1696,7 @@ This function is called at the very end of Spacemacs initialization."
     </style>")
  '(org-agenda-files (quote ("/Users/xfu/Dropbox/org/")))
  '(org-agenda-log-mode-items (quote (closed clock)))
- '(org-agenda-restore-windows-after-quit t)
+ '(org-agenda-restore-windows-after-quit t t)
  '(org-agenda-skip-deadline-if-done t)
  '(org-agenda-skip-deadline-prewarning-if-scheduled t)
  '(org-agenda-skip-scheduled-if-deadline-is-shown t)
@@ -1733,6 +1733,21 @@ This function is called at the very end of Spacemacs initialization."
  '(org-pomodoro-long-break-sound-p nil)
  '(org-pomodoro-short-break-sound-p nil)
  '(org-preview-latex-default-process (quote dvisvgm))
+ '(org-ref-bibliography-notes "/Users/xfu/Dropbox/org/ref.org")
+ '(org-ref-note-title-format
+   "** %y - %t
+ :PROPERTIES:
+  :Custom_ID: %k
+  :AUTHOR: %9a
+  :JOURNAL: %j
+  :YEAR: %y
+  :VOLUME: %v
+  :PAGES: %p
+  :DOI: %D
+  :URL: %U
+ :END:
+
+")
  '(org-tag-persistent-alist
    (quote
     ((#("communication" 0 1
@@ -1771,8 +1786,8 @@ This function is called at the very end of Spacemacs initialization."
  '(projectile-git-ignored-command "git ls-files -zcoi --exclude-standard | sed 's/ /\\\\ /g'")
  '(projectile-globally-ignored-file-suffixes (quote ("svg" "pdf" "png")))
  '(projectile-indexing-method (quote alien))
- '(python-shell-interpreter "python")
- '(python-shell-interpreter-args "--simple-prompt -i")
+ '(python-shell-interpreter "python" t)
+ '(python-shell-interpreter-args "--simple-prompt -i" t)
  '(safe-local-variable-values (quote ((eval progn (pp-buffer) (indent-buffer)))))
  '(send-mail-function (quote mailclient-send-it))
  '(shr-tag-pre-highlight-lang-modes

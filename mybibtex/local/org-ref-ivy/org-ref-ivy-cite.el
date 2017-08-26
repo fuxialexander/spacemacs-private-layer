@@ -123,8 +123,8 @@ ENTRY is selected from `org-ref-bibtex-candidates'."
   "Open the notes associated with ENTRY.
 ENTRY is selected from `org-ref-bibtex-candidates'."
   (with-ivy-window
-    (find-file (expand-file-name (format "%s.org" (cdr (assoc "=key=" entry)))
-                                 org-ref-notes-directory))))
+    (org-ref-open-notes-at-point (cdr (assoc "=key=" entry)))
+    ))
 
 
 (defun org-ref-ivy-bibtex-open-entry (entry)
@@ -445,7 +445,7 @@ _o_: Open entry   _e_: Email entry  ^ ^                 _q_: quit
          (kill-new
           (car (org-ref-get-bibtex-key-and-file)))))
   ("f" (kill-new
-        (org-ref-ivy-bibtex-formatted-citation (org-ref-get-bibtex-key-under-cursor))))
+        (bibtex-completion-apa-format-reference (org-ref-get-bibtex-key-under-cursor))))
   ("e" (kill-new (save-excursion
                    (org-ref-open-citation-at-point)
                    (org-ref-email-bibtex-entry))))

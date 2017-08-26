@@ -3115,7 +3115,7 @@ move to the beginning of the previous cite link after this one."
             (cond
              ;; cite links
              ((-contains? org-ref-cite-types type)
-              (message (org-ref-format-entry
+              (message (bibtex-completion-apa-format-reference
                         (org-ref-get-bibtex-key-under-cursor))))
              ;; message some context about the label we are referring to
              ((or (string= type "ref")
