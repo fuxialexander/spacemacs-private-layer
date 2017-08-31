@@ -82,6 +82,7 @@ This function should only modify configuration layer settings."
 
    dotspacemacs-additional-packages '(
                                       ivy-dired-history
+                                      tiny
                                       shrink-path
                                       ob-browser
                                       fringe-helper
@@ -161,6 +162,7 @@ It should only modify the values of Spacemacs settings."
    ;; (default t)
    dotspacemacs-elpa-https t
    ;; Maximum allowed time in seconds to contact an ELPA repository.
+   ;; (default 5)
    dotspacemacs-elpa-timeout 5
    ;; If non-nil then spacemacs will check for updates at startup
    ;; when the current branch is not `develop'. Note that checking for
@@ -169,7 +171,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-check-for-update nil
    ;; If non-nil, a form that evaluates to a package directory. For example, to
    ;; use different package directories for different Emacs versions, set this
-   ;; to `emacs-version'.
+   ;; to `emacs-version'. (default nil)
    dotspacemacs-elpa-subdirectory nil
    ;; One of `vim', `emacs' or `hybrid'.
    ;; `hybrid' is like `vim' except that `insert state' is replaced by the
@@ -194,8 +196,8 @@ It should only modify the values of Spacemacs settings."
    ;; List sizes may be nil, in which case
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
    dotspacemacs-startup-lists nil
-   ;; True if the home buffer should respond to resize events.
-   dotspacemacs-startup-buffer-responsive t
+   ;; True if the home buffer should respond to resize events. (default t)
+dotspacemacs-startup-buffer-responsive t
    ;; Default major mode of the scratch buffer (default `text-mode')
    dotspacemacs-scratch-mode 'text-mode
    ;; List of themes, the first of the list is loaded when spacemacs starts.
@@ -205,15 +207,15 @@ It should only modify the values of Spacemacs settings."
                          (modern-dawn :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-dark :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-light :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
+                         doom-one-light
                          doom-one
-                         solarized-light
                          )
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state nil
    ;;Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Input mono narrow"
-                               :size 12
+   dotspacemacs-default-font '("Operator Mono"
+                               :size 13
                                :weight normal
                                :width normal
                                :powerline-scale 1.2
@@ -261,7 +263,7 @@ It should only modify the values of Spacemacs settings."
    ;; start. (default nil)
    dotspacemacs-auto-resume-layouts nil
    ;; If non-nil, auto-generate layout name when creating new layouts. Only has
-   ;; effect when using the "jump to layout by number" commands.
+   ;; effect when using the "jump to layout by number" commands. (default nil)
    dotspacemacs-auto-generate-layout-names nil
    ;; Size (in MB) above which spacemacs will prompt to open the large file
    ;; literally to avoid performance issues. Opening a file literally means that
@@ -287,8 +289,9 @@ It should only modify the values of Spacemacs settings."
    ;; source settings. Else, disable fuzzy matching in all sources.
    ;; (default 'always)
    dotspacemacs-helm-use-fuzzy 'always
-   ;; If non-nil the paste micro-state is enabled. When enabled pressing `p'
-   ;; several times cycle between the kill ring content. (default nil)
+   ;; If non-nil, the paste transient-state is enabled. While enabled, pressing
+   ;; `p' several times cycles through the elements in the `kill-ring'.
+   ;; (default nil)
    dotspacemacs-enable-paste-transient-state nil
    ;; Which-key delay in seconds. The which-key buffer is the popup listing
    ;; the commands bound to the current keystroke sequence. (default 0.4)
@@ -441,10 +444,22 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  ;; Use variable width font faces in current buffer
-  ;; Use monospaced font faces in current buffer
 
 ;;;; Edit
+  ;; (use-package tiny
+  ;;   :ensure t
+  ;;   :config (tiny-setup-default)
+  ;;   )
+  (defun camelize (s)
+    "Convert under_score string S to CamelCase string."
+    (store-substring
+     (mapconcat 'identity
+                (mapcar (lambda (word)
+                          (capitalize (downcase word)))
+                        (split-string s "[-_ ]+")) "")
+     0 (if (> (length s) 0)
+           (downcase (substring s 0 1)))))
+
   (defun align-repeat (start end regexp)
     "Repeat alignment with respect to
      the given regular expression."
@@ -452,7 +467,7 @@ you should place your code here."
     (align-regexp start end
                   (concat "\\(\\s-*\\)" regexp) 1 1 t))
 
-
+  (yas-global-mode)
 ;;;; UI
 ;;;;; Term line-spacing
 
@@ -874,6 +889,7 @@ you should place your code here."
 ;;;; Org-mode
   (with-eval-after-load 'org
 
+    (push 'company-ispell company-backends-org-mode)
 ;;;;; Org-refile-get-targets
     (defun org-refile-get-targets (&optional default-buffer)
       "Produce a table with refile targets."
@@ -1185,9 +1201,11 @@ Returns the new TODO keyword, or nil if no state change should occur."
      org-todo-keywords '(
                          (sequence "TODO(t!)"  "|" "DONE(d!/@)")
                          (sequence "WAIT(w@/@)" "|" "OUTD(o@/@)" "KILL(k@/@)")
+                         (sequence "HABT(h!)" "|" "DONE(d!/@)" "KILL(k@/@)")
                          )
      org-todo-keyword-faces '(
                               ("TODO" :inherit default :foreground "#d34a65" :weight bold :box (:line-width 1 :color "#d34a65" :style nil))
+                              ("HABT" :inherit default :foreground "#EADC77" :weight bold :box (:line-width 1 :color "#EADC77" :style nil))
                               ("DONE" :inherit default :foreground "#15c188" :weight bold :box (:line-width 1 :color "#15c188" :style nil))
                               ("WAIT" :inherit default :foreground "#ff9d00" :weight bold :box (:line-width 1 :color "#ff9d00" :style nil))
                               ("KILL" :inherit default :foreground "#6f2faf" :weight bold :box (:line-width 1 :color "#6f2faf" :style nil))
@@ -1235,6 +1253,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 :END:
 %i
 %?" :empty-lines 2 :clock-in t :created t)
+
 
                   ("M" "Meeting" entry
                    (file+datetree "~/Dropbox/org/meeting.org")
@@ -1289,7 +1308,37 @@ Brief description:
 %i
 %?" :prepend f :empty-lines 2 :created t)
 
-                  ("w" "Web site" entry
+                  ("d" "Daily Review" entry
+                   (file+datetree "~/Dropbox/org/review.org")
+                   "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:daily:%\\1:
+:PROPERTIES:
+:Created: %U
+:Linked: [[file:life.org::*Daily%20review][Daily review]]
+:END:
+%i
+%?" :empty-lines 1 :clock-in t :created t)
+
+                  ("w" "Week Review" entry
+                   (file+datetree "~/Dropbox/org/review.org")
+                   "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:week:%\\1:
+:PROPERTIES:
+:Created: %U
+:Linked: [[file:life.org::*Week%20review][Week review]]
+:END:
+%i
+%?" :empty-lines 1 :clock-in t :created t)
+
+                  ("r" "Month Review" entry
+                   (file+datetree "~/Dropbox/org/review.org")
+                   "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:month:%\\1:
+:PROPERTIES:
+:Created: %U
+:Linked: [[file:life.org::*Month%20review][Month review]]
+:END:
+%i
+%?" :empty-lines 1 :clock-in t :created t)
+
+                  ("W" "Web site" entry
                    (file "~/Dropbox/org/inbox.org")
                    "* %A :website:
 :PROPERTIES:
@@ -1299,7 +1348,33 @@ Brief description:
 %i
 %?" :prepend f :empty-lines 2 :created t)
                   ))))
-
+  (with-eval-after-load 'org-mac-link
+    (setq org-mac-Skim-highlight-selection-p t)
+    (defun as-get-skim-page-link ()
+      (do-applescript
+       (concat
+        "tell application \"Skim\"\n"
+        "set theDoc to front document\n"
+        "set theTitle to (name of theDoc)\n"
+        "set thePath to (path of theDoc)\n"
+        "set thePage to (get index for current page of theDoc)\n"
+        "set theSelection to selection of theDoc\n"
+        "set theContent to contents of (get text for theSelection)\n"
+        "if theContent is missing value then\n"
+        "    set theContent to theTitle & \", p. \" & thePage\n"
+        (when org-mac-Skim-highlight-selection-p
+          (concat
+           "else\n"
+           "    tell theDoc\n"
+           "        set theNote to make note with data theSelection with properties {type:highlight note}\n"
+           "         set text of theNote to (get text for theSelection)\n"
+           "    end tell\n"))
+        "end if\n"
+        "set theLink to \"skim://\" & thePath & \"::\" & thePage & "
+        "\"::split::\" & theContent\n"
+        "end tell\n"
+        "return theLink as string\n")))
+    )
 ;;;;; Org-agenda
   (with-eval-after-load 'org-agenda
     (advice-add 'org-agenda-goto :after
@@ -1310,11 +1385,11 @@ Brief description:
       (interactive)
       (start-process-shell-command "export diary" nil "/Users/xfu/.emacs.d/private/local/calendardiary 30 > /Users/xfu/Dropbox/org/cal.diary")
       )
-    (add-hook 'org-agenda-mode-hook 'export-diary-from-cal)
+    (add-hook 'after-init-hook 'export-diary-from-cal)
     (add-hook 'org-finalize-agenda-hook 'place-agenda-tags)
     (defun place-agenda-tags ()
       "Put the agenda tags by the right border of the agenda window."
-      (setq org-agenda-tags-column (- 4 (window-width)))
+      (setq org-agenda-tags-column (- 0 (window-width)))
       (org-agenda-align-tags))
     (spacemacs/set-leader-keys-for-major-mode 'org-agenda-mode
       "a" 'org-agenda
@@ -1331,6 +1406,12 @@ Brief description:
       "sc" 'org-copy
       )
 
+    (setq org-agenda-sorting-strategy
+          '((agenda time-up priority-down category-keep)
+            (todo   priority-down category-keep)
+            (tags   priority-down category-keep)
+            (search category-keep)))
+
     )
 ;;;; Ivy
   (with-eval-after-load 'ivy
@@ -1340,7 +1421,7 @@ Brief description:
     (setq
      counsel-org-goto-face-style 'org
      counsel-org-goto-separator " ➜ "
-     counsel-org-goto-display-style 'path
+     counsel-org-goto-display-style 'headline
 
      ivy-use-virtual-buffers t
      ivy-re-builders-alist '((t . ivy--regex-plus)))
@@ -1393,6 +1474,7 @@ This function is called at the very end of Spacemacs initialization."
  '(company-minimum-prefix-length 2)
  '(company-quickhelp-mode t)
  '(company-require-match nil)
+ '(company-statistics-mode t)
  '(company-tooltip-align-annotations t)
  '(company-transformers
    (quote
@@ -1403,6 +1485,7 @@ This function is called at the very end of Spacemacs initialization."
  '(cua-normal-cursor-color "#657b83")
  '(cua-overwrite-cursor-color "#b58900")
  '(cua-read-only-cursor-color "#859900")
+ '(custom-buffer-done-kill t)
  '(custom-safe-themes
    (quote
     ("e3aa063583d12b9026aa0e12ef75db105355ab3ff2f345d3d077b17f3af2209a" default)))
@@ -1411,7 +1494,7 @@ This function is called at the very end of Spacemacs initialization."
  '(display-line-numbers-current-absolute nil)
  '(display-time-day-and-date nil)
  '(display-time-default-load-average nil)
- '(display-time-mode t)
+ '(display-time-mode nil)
  '(elfeed-search-title-max-width 120)
  '(elfeed-search-trailing-width 15)
  '(eshell-modules-list
@@ -1447,6 +1530,7 @@ This function is called at the very end of Spacemacs initialization."
  '(git-gutter+-modified-sign " ")
  '(global-auto-revert-mode t)
  '(global-auto-revert-non-file-buffers t)
+ '(global-company-mode t)
  '(global-git-gutter+-mode t)
  '(global-hl-line-mode t)
  '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
@@ -1480,10 +1564,12 @@ This function is called at the very end of Spacemacs initialization."
  '(jdee-db-requested-breakpoint-face-colors ("#1B2229" . "#98be65"))
  '(jdee-db-spec-breakpoint-face-colors ("#1B2229" . "#3B3F46"))
  '(line-spacing 0.2)
+ '(mac-mouse-wheel-smooth-scroll t)
  '(magit-diff-section-arguments
    (quote
     ("--ignore-space-change" "--ignore-all-space" "--no-ext-diff")))
  '(magit-diff-use-overlays nil)
+ '(message-fill-column nil)
  '(modern-theme-comment-bg t)
  '(notmuch-archive-tags (quote ("-inbox" "-unread" "+archived")))
  '(notmuch-fcc-dirs nil)
@@ -1526,7 +1612,8 @@ This function is called at the very end of Spacemacs initialization."
    (quote
     (("n" "Agenda and all TODOs"
       ((agenda ""
-               ((org-agenda-overriding-header " Week Agenda
+               ((org-agenda-span 3)
+                (org-agenda-overriding-header " Week Agenda
 ")))
        (alltodo ""
                 ((org-agenda-skip-function
@@ -1696,7 +1783,7 @@ This function is called at the very end of Spacemacs initialization."
     </style>")
  '(org-agenda-files (quote ("/Users/xfu/Dropbox/org/")))
  '(org-agenda-log-mode-items (quote (closed clock)))
- '(org-agenda-restore-windows-after-quit t t)
+ '(org-agenda-restore-windows-after-quit t)
  '(org-agenda-skip-deadline-if-done t)
  '(org-agenda-skip-deadline-prewarning-if-scheduled t)
  '(org-agenda-skip-scheduled-if-deadline-is-shown t)
@@ -1708,13 +1795,15 @@ This function is called at the very end of Spacemacs initialization."
     (:maxlevel 3 :lang "en" :scope file :block nil :wstart 1 :mstart 1 :tstart nil :tend nil :step nil :stepskip0 t :fileskip0 t :tags "-COMMENT" :emphasize nil :link nil :narrow 40! :indent t :formula nil :timestamp nil :level nil :tcolumns nil :formatter nil)))
  '(org-download-image-dir "./image/")
  '(org-download-image-html-width 500)
+ '(org-download-image-latex-width 500)
  '(org-download-screenshot-method "screencapture -i %s")
  '(org-enforce-todo-dependencies t)
  '(org-fontify-done-headline t)
  '(org-fontify-quote-and-verse-blocks t)
  '(org-fontify-whole-heading-line t)
+ '(org-habit-graph-column 60)
  '(org-hide-block-startup t)
- '(org-image-actual-width 800)
+ '(org-image-actual-width 500)
  '(org-latex-packages-alist
    (quote
     (("" "color" t)
@@ -1725,7 +1814,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-mac-Skim-highlight-selection-p nil)
  '(org-modules
    (quote
-    (org-bibtex org-docview org-info org-protocol org-mac-iCal org-mac-link org-notmuch)))
+    (org-bibtex org-docview org-habit org-info org-protocol org-mac-iCal org-mac-link org-notmuch)))
  '(org-pandoc-options (quote ((standalone . t) (self-contained . t))))
  '(org-pomodoro-finished-sound
    "/Users/xfu/.emacs.d/elpa/org-pomodoro-20161119.226/resources/bell.wav")
@@ -1768,17 +1857,13 @@ This function is called at the very end of Spacemacs initialization."
      (#("idea" 0 1
         (idx 5))
       . 105))))
- '(org-todo-keywords
-   (quote
-    ((sequence "TODO(t!)" "|" "DONE(d!/@)")
-     (sequence "WAIT(w@/@)" "|" "OUTD(o@/@)" "KILL(k@/@)"))))
  '(org-treat-insert-todo-heading-as-state-change t)
  '(package-selected-packages
    (quote
-    (org-gcal request-deferred deferred calfw-org calfw modern-dawn-theme solarized-theme origami elfeed-goodies ace-jump-mode noflet powerline ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
+    (tiny grab-mac-link org-alert spaceline-all-the-icons spaceline org-gcal request-deferred deferred calfw-org calfw modern-dawn-theme solarized-theme origami elfeed-goodies ace-jump-mode noflet powerline ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
  '(paradox-github-token t)
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
- '(persp-add-buffer-on-find-file nil)
+ '(persp-add-buffer-on-find-file t)
  '(pos-tip-background-color "#292B2C")
  '(pos-tip-foreground-color "#ECEBE7")
  '(powerline-default-separator (quote arrow-fade))
@@ -1786,8 +1871,8 @@ This function is called at the very end of Spacemacs initialization."
  '(projectile-git-ignored-command "git ls-files -zcoi --exclude-standard | sed 's/ /\\\\ /g'")
  '(projectile-globally-ignored-file-suffixes (quote ("svg" "pdf" "png")))
  '(projectile-indexing-method (quote alien))
- '(python-shell-interpreter "python" t)
- '(python-shell-interpreter-args "--simple-prompt -i" t)
+ '(python-shell-interpreter "python")
+ '(python-shell-interpreter-args "--simple-prompt -i")
  '(safe-local-variable-values (quote ((eval progn (pp-buffer) (indent-buffer)))))
  '(send-mail-function (quote mailclient-send-it))
  '(shr-tag-pre-highlight-lang-modes
@@ -1820,6 +1905,7 @@ This function is called at the very end of Spacemacs initialization."
  '(tramp-remote-path
    (quote
     ("/uac/gds/xfu/bin" "/research/kevinyip10/xfu/miniconda3/bin" "/research/kevinyip10/xfu/miniconda2/bin" tramp-default-remote-path "/bin" "/usr/bin" "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin" "/local/bin" "/local/freeware/bin" "/local/gnu/bin" "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin" "/opt/bin" "/opt/sbin" "/opt/local/bin")))
+ '(tramp-verbose 1)
  '(truncate-lines t)
  '(user-mail-address "fuxialexander@gmail.com")
  '(vc-annotate-background "#181e26")

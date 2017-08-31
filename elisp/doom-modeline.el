@@ -234,6 +234,11 @@ DEFAULT is non-nil, set the default mode-line for all buffers."
   "Face used for the filename part of the mode-line buffer path."
   :group '+doom-modeline)
 
+(defface doom-modeline-workspace-number
+  '((t (:inherit default :weight normal)))
+  "Face used for persp name."
+  :group '+doom-modeline)
+
 
 
 (defface doom-modeline-perspname
@@ -556,6 +561,61 @@ directory, the file name, and its state (modified, read-only or non-existent)."
                 (format " (%+d)" text-scale-mode-amount)))
    'face (if (active) 'doom-modeline-buffer-major-mode)))
 
+(defun get-unicode-number (str)
+  "Return a nice unicode representation of a single-digit number STR."
+  (cond
+   ((string= "1" str) "➊")
+   ((string= "2" str) "➋")
+   ((string= "3" str) "➌")
+   ((string= "4" str) "➍")
+   ((string= "5" str) "➎")
+   ((string= "6" str) "➏")
+   ((string= "7" str) "➐")
+   ((string= "8" str) "➑")
+   ((string= "9" str) "➒")
+   ((string= "10" str) "➓")
+   (t str)))
+
+;;
+(def-modeline-segment! workspace-number
+                          "The current workspace name or number. Requires `eyebrowse-mode' to be
+enabled."
+                          (when (and (bound-and-true-p eyebrowse-mode)
+                                     (< 1 (length (eyebrowse--get 'window-configs))))
+                            (let* ((num (eyebrowse--get 'current-slot))
+                                   (tag (when num (nth 2 (assoc num (eyebrowse--get 'window-configs)))))
+                                   (str (if (and tag (< 0 (length tag)))
+                                            tag
+                                          (when num (int-to-string num)))))
+                              ;; (or (when spaceline-workspace-numbers-unicode
+                              (propertize (get-unicode-number str) 'face (if (active) 'doom-modeline-workspace-number))
+                                  )))
+
+
+(defvar spaceline-org-clock-format-function
+  'org-clock-get-clock-string
+  "The function called by the `org-clock' segment to determine what to show.")
+
+;;
+(def-modeline-segment! org-clock
+                          "Show information about the current org clock task.  Configure
+`spaceline-org-clock-format-function' to configure. Requires a currently running
+org clock.
+This segment overrides the modeline functionality of `org-mode-line-string'."
+                          (when (and (fboundp 'org-clocking-p)
+                                     (org-clocking-p))
+                            (substring-no-properties (funcall spaceline-org-clock-format-function)))
+                          :global-override org-mode-line-string)
+
+;;
+(def-modeline-segment! org-pomodoro
+                          "Shows the current pomodoro.  Requires `org-pomodoro' to be active.
+This segment overrides the modeline functionality of `org-pomodoro' itself."
+                          (when (and (fboundp 'org-pomodoro-active-p)
+                                     (org-pomodoro-active-p))
+                            (nth 1 org-pomodoro-mode-line))
+                          :global-override org-pomodoro-mode-line)
+
 ;;
 (def-modeline-segment! vcs
   "Displays the current branch, colored based on its state."
@@ -787,8 +847,18 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 
 (def-modeline! main
   ;; (bar matches " " buffer-info "  ")
-  (bar matches " " buffer-info "  " buffer-purpose " ")
-  (major-mode vcs flycheck " " perspname " "))
+  (bar matches "  " buffer-info " " buffer-purpose "  ")
+  (major-mode vcs flycheck " " perspname " " workspace-number " "))
+
+(def-modeline! clock
+  ;; (bar matches " " buffer-info "  ")
+  (bar matches "  " buffer-info " " buffer-purpose "  ")
+  (org-clock " " major-mode vcs flycheck " " perspname " " workspace-number " "))
+
+(def-modeline! pomodoro
+  ;; (bar matches " " buffer-info "  ")
+  (bar matches "  " buffer-info " " buffer-purpose "  ")
+  (org-clock org-pomodoro " " major-mode vcs flycheck " " perspname " " workspace-number " "))
 
 (def-modeline! minimal
   (bar matches " " buffer-info)
@@ -823,6 +893,12 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 (defun +doom-modeline|set-special-modeline ()
   (doom-set-modeline 'special))
 
+(defun +doom-modeline|set-clock-modeline ()
+  (doom-set-modeline 'clock))
+
+(defun +doom-modeline|set-pomodoro-modeline ()
+  (doom-set-modeline 'pomodoro))
+
 (defun +doom-modeline|set-media-modeline ()
   (doom-set-modeline 'media))
 
@@ -831,11 +907,15 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 ;; Bootstrap
 ;;
 
-(add-hook 'doom-init-ui-hook #'+doom-modeline|init)
+(add-hook 'doom-init-ui-hook          #'+doom-modeline|init)
 
-(add-hook 'org-src-mode-hook #'+doom-modeline|set-special-modeline)
-(add-hook 'image-mode-hook   #'+doom-modeline|set-media-modeline)
-(add-hook 'circe-mode-hook   #'+doom-modeline|set-special-modeline)
+(add-hook 'org-src-mode-hook          #'+doom-modeline|set-special-modeline)
+(add-hook 'org-clock-in-hook          #'+doom-modeline|set-clock-modeline)
+;; (add-hook 'org-clock-out-hook         #'+doom-modeline|set-main-modeline)
+(add-hook 'org-pomodoro-started-hook  #'+doom-modeline|set-pomodoro-modeline)
+;; (add-hook 'org-pomodoro-finished-hook #'+doom-modeline|set-main-modeline)
+(add-hook 'image-mode-hook            #'+doom-modeline|set-media-modeline)
+(add-hook 'circe-mode-hook            #'+doom-modeline|set-special-modeline)
 
 ;; torgeir added this
 (add-hook! 'js2-mode-hook (setq +doom-modeline-env-command "node -v 2>&1"))

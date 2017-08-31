@@ -5,15 +5,30 @@
 (setq notmuch-packages
       '(notmuch
         counsel
+        company
+        yasnippet
+        org-mime
         org
         avy
         wid-edit
         persp-mode
         notmuch-labeler
         ))
+(defun notmuch/init-org-mime ()
+  (use-package org-mime
+    :after notmuch
+    :init (setq org-mime-library 'mml)
+    )
+  )
+(defun notmuch/post-init-company-mode ()
+  (spacemacs|add-company-backends
+    :backends (company-capf notmuch-company company-yasnippet)
+    :modes notmuch-message-mode
+    )
+  )
 
-;; List of packages to exclude.
-(setq notmuch-excluded-packages '())
+(defun notmuch/post-init-yasnippet-mode ())
+
 
 (defun notmuch/post-init-persp-mode ()
   ;; do not save erc buffers
@@ -119,11 +134,13 @@
               (interactive)
               (setq buffer-face-mode-face '(:family "Inziu Iosevka SC"))
               (buffer-face-mode))
-
             (add-hook 'notmuch-hello-mode-hook 'my-buffer-face-mode-notmuch)
             (add-hook 'notmuch-tree-mode-hook 'my-buffer-face-mode-notmuch)
             (add-hook 'notmuch-search-mode-hook 'my-buffer-face-mode-notmuch)
             (add-hook 'notmuch-message-mode-hook 'my-buffer-face-mode-notmuch)
+            (add-hook 'notmuch-message-mode-hook
+                      (lambda ()
+                        (set (make-local-variable 'company-backends) '(notmuch-company (company-ispell :with company-yasnippet)))))
             (add-hook 'notmuch-tree-mode-hook (lambda () (setq line-spacing nil)))
 
 
