@@ -52,7 +52,7 @@ This function should only modify configuration layer settings."
      git
      version-control
      colors
-     (org :variables org-enable-bootstrap-support t)
+     (myorg :variables org-enable-bootstrap-support t)
      pandoc
      (shell :variables
             shell-default-shell 'eshell
@@ -207,6 +207,7 @@ dotspacemacs-startup-buffer-responsive t
                          (modern-dawn :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-dark :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-light :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
+                         solarized-dark
                          doom-one-light
                          doom-one
                          )
@@ -469,6 +470,7 @@ you should place your code here."
 
   (yas-global-mode)
 ;;;; UI
+
 ;;;;; Term line-spacing
 
   (add-hook 'eshell-mode-hook
@@ -491,6 +493,8 @@ you should place your code here."
 ;;;;; Doom
   (use-package shrink-path
     :commands (shrink-path-prompt shrink-path-file-mixed))
+
+
 
   (use-package company-files
     :defer t
@@ -1468,12 +1472,12 @@ This function is called at the very end of Spacemacs initialization."
  '(auto-revert-verbose nil)
  '(blink-cursor-mode nil)
  '(column-number-mode t)
- '(company-dabbrev-downcase nil)
- '(company-dabbrev-ignore-case nil)
- '(company-idle-delay 0.2)
- '(company-minimum-prefix-length 2)
+ '(company-dabbrev-downcase nil t)
+ '(company-dabbrev-ignore-case nil t)
+ '(company-idle-delay 0.2 t)
+ '(company-minimum-prefix-length 2 t)
  '(company-quickhelp-mode t)
- '(company-require-match nil)
+ '(company-require-match nil t)
  '(company-statistics-mode t)
  '(company-tooltip-align-annotations t)
  '(company-transformers
@@ -1517,7 +1521,7 @@ This function is called at the very end of Spacemacs initialization."
  '(ess-eval-visibly (quote nowait))
  '(evil-org-key-theme
    (quote
-    (navigation textobjects insert rsi additional todo leader)))
+    (navigation textobjects insert rsi additional todo leader)) t)
  '(evil-want-Y-yank-to-eol nil)
  '(eww-search-prefix "https://www.google.com/search?q=")
  '(exec-path-from-shell-check-startup-files nil)
@@ -1526,8 +1530,8 @@ This function is called at the very end of Spacemacs initialization."
  '(flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id))
  '(frame-resize-pixelwise t)
  '(fringe-mode 4 nil (fringe))
- '(git-gutter+-hide-gutter nil)
- '(git-gutter+-modified-sign " ")
+ '(git-gutter+-hide-gutter nil t)
+ '(git-gutter+-modified-sign " " t)
  '(global-auto-revert-mode t)
  '(global-auto-revert-non-file-buffers t)
  '(global-company-mode t)
@@ -1557,7 +1561,7 @@ This function is called at the very end of Spacemacs initialization."
    (quote
     ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
  '(hl-paren-background-colors (quote ("#2492db" "#95a5a6" nil)))
- '(hl-paren-colors (quote ("#ecf0f1" "#ecf0f1" "#c0392b")))
+ '(hl-paren-colors (quote ("#ecf0f1" "#ecf0f1" "#c0392b")) t)
  '(ispell-highlight-face (quote flyspell-incorrect))
  '(ispell-program-name "aspell")
  '(jdee-db-active-breakpoint-face-colors ("#1B2229" . "#51afef"))
@@ -1783,7 +1787,7 @@ This function is called at the very end of Spacemacs initialization."
     </style>")
  '(org-agenda-files (quote ("/Users/xfu/Dropbox/org/")))
  '(org-agenda-log-mode-items (quote (closed clock)))
- '(org-agenda-restore-windows-after-quit t)
+ '(org-agenda-restore-windows-after-quit t t)
  '(org-agenda-skip-deadline-if-done t)
  '(org-agenda-skip-deadline-prewarning-if-scheduled t)
  '(org-agenda-skip-scheduled-if-deadline-is-shown t)
@@ -1860,7 +1864,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-treat-insert-todo-heading-as-state-change t)
  '(package-selected-packages
    (quote
-    (tiny grab-mac-link org-alert spaceline-all-the-icons spaceline org-gcal request-deferred deferred calfw-org calfw modern-dawn-theme solarized-theme origami elfeed-goodies ace-jump-mode noflet powerline ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
+    (org-mime dash-functional tiny grab-mac-link org-alert spaceline-all-the-icons spaceline org-gcal request-deferred deferred calfw-org calfw modern-dawn-theme solarized-theme origami elfeed-goodies ace-jump-mode noflet powerline ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
  '(paradox-github-token t)
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(persp-add-buffer-on-find-file t)

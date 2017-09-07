@@ -14,12 +14,14 @@
         persp-mode
         notmuch-labeler
         ))
+
 (defun notmuch/init-org-mime ()
   (use-package org-mime
-    :after notmuch
+    :after notmuch org
     :init (setq org-mime-library 'mml)
     )
   )
+
 (defun notmuch/post-init-company-mode ()
   (spacemacs|add-company-backends
     :backends (company-capf notmuch-company company-yasnippet)
