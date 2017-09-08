@@ -45,6 +45,7 @@ This function should only modify configuration layer settings."
                       auto-completion-complete-with-key-sequence-delay 0.1
                       auto-completion-private-snippets-directory nil)
      better-defaults
+     ipython-notebook
      emacs-lisp
      evil-snipe
      imenu-list
@@ -103,6 +104,7 @@ This function should only modify configuration layer settings."
    ;; A list of packages that will not be installed and loaded.
 ;;;; Excluded Packages
    dotspacemacs-excluded-packages '(
+                                    ess-R-object-popup
                                     vi-tilde-fringe
                                     spaceline
                                     exec-path-from-shell
@@ -197,16 +199,16 @@ It should only modify the values of Spacemacs settings."
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
    dotspacemacs-startup-lists nil
    ;; True if the home buffer should respond to resize events. (default t)
-dotspacemacs-startup-buffer-responsive t
+   dotspacemacs-startup-buffer-responsive t
    ;; Default major mode of the scratch buffer (default `text-mode')
    dotspacemacs-scratch-mode 'text-mode
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(
+                         (modern-light :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-dawn :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-dark :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
-                         (modern-light :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          solarized-dark
                          doom-one-light
                          doom-one
@@ -424,17 +426,19 @@ before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
   ;; (setq gc-cons-threshold 1000000)
   (add-to-list 'load-path "~/.emacs.d/private/elisp/")
-
   (defun t/project-root ()
     "Get project root without throwing"
     (let (projectile-require-project-root strict-p)
       (projectile-project-root)))
 
   (defun t/init-modeline () (+doom-modeline|init))
+  (defun export-diary-from-cal ()
+    (interactive)
+    (start-process-shell-command "export diary" nil "/Users/xfu/.emacs.d/private/local/calendardiary 30 > /Users/xfu/Dropbox/org/cal.diary")
+    )
   (require 'doom-modeline)
   (add-hook 'after-init-hook #'t/init-modeline)
-
-
+  (add-hook 'after-init-hook 'export-diary-from-cal)
   )
 
 ;;; User-config
@@ -494,8 +498,6 @@ you should place your code here."
   (use-package shrink-path
     :commands (shrink-path-prompt shrink-path-file-mixed))
 
-
-
   (use-package company-files
     :defer t
     :init
@@ -504,6 +506,13 @@ you should place your code here."
       :modes shell-script-mode))
 
   (setq-default
+   company-statistics-mode t
+   company-tooltip-align-annotations t
+   company-require-match nil
+   company-quickhelp-mode t
+   company-minimum-prefix-length 2
+   custom-buffer-done-kill t
+   auto-revert-remote-files nil
    mac-mouse-wheel-smooth-scroll nil
    bidi-display-reordering nil ; disable bidirectional text for tiny performance boost
    blink-matching-paren nil    ; don't blink--too distracting
@@ -538,9 +547,26 @@ you should place your code here."
    ;; no beeping or blinking please
    ring-bell-function #'ignore
    visible-bell nil
+   truncate-lines t
+   split-height-threshold 100
+   split-width-threshold 100
+
+   ;; window-divider-mode t
+   ;; global-hl-line-mode t
+   ;; global-company-mode t
+   ;; global-auto-revert-mode t
+   ;; global-auto-revert-non-file-buffers t
+   frame-resize-pixelwise t
+   window-resize-pixelwise t
    window-divider-default-places t
    window-divider-default-bottom-width 0
    window-divider-default-right-width 1)
+
+  (window-divider-mode                 )
+  (global-hl-line-mode                 )
+  (global-company-mode                 )
+  (global-auto-revert-mode             )
+
   ;; standardize default fringe width
   (defvar doom-fringe-size '4
     "Default fringe width.")
@@ -682,24 +708,6 @@ you should place your code here."
       ))
 
 
-
-  ;; ;;;; Solaire-mode
-  ;;   ;; brighten buffers (that represent real files)
-  ;;   (add-hook 'after-change-major-mode-hook #'turn-on-solaire-mode)
-  ;;   ;; To enable solaire-mode unconditionally for certain modes:
-  ;;   (add-hook 'ediff-prepare-buffer-hook #'solaire-mode)
-
-  ;;   ;; ...if you use auto-revert-mode:
-  ;;   (add-hook 'after-revert-hook #'turn-on-solaire-mode)
-
-  ;;   ;; highlight the minibuffer when it is activated:
-  ;;   (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer)
-
-  ;;   ;; if the bright and dark background colors are the wrong way around, use this
-  ;;   ;; to switch the backgrounds of the `default` and `solaire-default-face` faces.
-  ;;   ;; This should be used *after* you load the active theme!
-  ;;   ;;
-  ;;   ;; NOTE: This is necessary for themes in the doom-themes package!
 
 
 ;;;; Prodigy
@@ -890,538 +898,8 @@ you should place your code here."
     (add-to-list 'tramp-remote-path "/uac/gds/xfu/bin")
     )
 
-;;;; Org-mode
-  (with-eval-after-load 'org
-
-    (push 'company-ispell company-backends-org-mode)
-;;;;; Org-refile-get-targets
-    (defun org-refile-get-targets (&optional default-buffer)
-      "Produce a table with refile targets."
-      (let ((case-fold-search nil)
-            ;; otherwise org confuses "TODO" as a kw and "Todo" as a word
-            (entries (or org-refile-targets '((nil . (:level . 1)))))
-            targets tgs files desc descre)
-        (message "Getting targets...")
-        (with-current-buffer (or default-buffer (current-buffer))
-          (dolist (entry entries)
-            (setq files (car entry) desc (cdr entry))
-            (cond
-             ((null files) (setq files (list (current-buffer))))
-             ((eq files 'org-agenda-files)
-              (setq files (org-agenda-files 'unrestricted)))
-             ((and (symbolp files) (fboundp files))
-              (setq files (funcall files)))
-             ((and (symbolp files) (boundp files))
-              (setq files (symbol-value files))))
-            (when (stringp files) (setq files (list files)))
-            (cond
-             ((eq (car desc) :tag)
-              (setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
-             ((eq (car desc) :todo)
-              (setq descre (concat "^\\*+[ \t]+" (regexp-quote (cdr desc)) "[ \t]")))
-             ((eq (car desc) :regexp)
-              (setq descre (cdr desc)))
-             ((eq (car desc) :level)
-              (setq descre (concat "^\\*\\{" (number-to-string
-                                              (if org-odd-levels-only
-                                                  (1- (* 2 (cdr desc)))
-                                                (cdr desc)))
-                                   "\\}[ \t]")))
-             ((eq (car desc) :maxlevel)
-              (setq descre (concat "^\\*\\{1," (number-to-string
-                                                (if org-odd-levels-only
-                                                    (1- (* 2 (cdr desc)))
-                                                  (cdr desc)))
-                                   "\\}[ \t]")))
-             (t (error "Bad refiling target description %s" desc)))
-            (dolist (f files)
-              (with-current-buffer (if (bufferp f) f (org-get-agenda-file-buffer f))
-                (or
-                 (setq tgs (org-refile-cache-get (buffer-file-name) descre))
-                 (progn
-                   (when (bufferp f)
-                     (setq f (buffer-file-name (buffer-base-buffer f))))
-                   (setq f (and f (expand-file-name f)))
-                   (when (eq org-refile-use-outline-path 'file)
-                     (push (list (file-name-nondirectory f) f nil nil) tgs))
-                   (org-with-wide-buffer
-                    (goto-char (point-min))
-                    (setq org-outline-path-cache nil)
-                    (while (re-search-forward descre nil t)
-                      (beginning-of-line)
-                      (let ((case-fold-search nil))
-                        (looking-at org-complex-heading-regexp))
-                      (let ((begin (point))
-                            (heading (match-string-no-properties 4)))
-                        (unless (or (and
-                                     org-refile-target-verify-function
-                                     (not
-                                      (funcall org-refile-target-verify-function)))
-                                    (not heading))
-                          (let ((re (format org-complex-heading-regexp-format
-                                            (regexp-quote heading)))
-                                (target
-                                 (if (not org-refile-use-outline-path) heading
-                                   (concat
-                                    (file-name-nondirectory (buffer-file-name (buffer-base-buffer)))
-                                    " ✦ "
-                                    (org-format-outline-path (org-get-outline-path t t) 1000 nil " ➜ ")
-                                    ))))
-
-                            (push (list target f re (org-refile-marker (point)))
-                                  tgs)))
-                        (when (= (point) begin)
-                          ;; Verification function has not moved point.
-                          (end-of-line)))))))
-                (when org-refile-use-cache
-                  (org-refile-cache-put tgs (buffer-file-name) descre))
-                (setq targets (append tgs targets))))))
-        (message "Getting targets...done")
-        (delete-dups (nreverse targets))))
-
-;;;;; Org-edit-src-code
-
-    (defun org-edit-src-code (&optional code edit-buffer-name)
-      "Edit the source or example block at point.
-\\<org-src-mode-map>
-The code is copied to a separate buffer and the appropriate mode
-is turned on.  When done, exit with `\\[org-edit-src-exit]'.  This \
-will remove the
-original code in the Org buffer, and replace it with the edited
-version.  See `org-src-window-setup' to configure the display of
-windows containing the Org buffer and the code buffer.
-
-When optional argument CODE is a string, edit it in a dedicated
-buffer instead.
-
-When optional argument EDIT-BUFFER-NAME is non-nil, use it as the
-name of the sub-editing buffer."
-      (interactive)
-      (let* ((element (org-element-at-point))
-             (type (org-element-type element)))
-        (unless (and (memq type '(example-block src-block))
-                     (org-src--on-datum-p element))
-          (user-error "Not in a source or example block"))
-        (let* ((lang
-                (if (eq type 'src-block) (org-element-property :language element)
-                  "example"))
-               (lang-f (and (eq type 'src-block) (org-src--get-lang-mode lang)))
-               (babel-info (and (eq type 'src-block)
-                                (org-babel-get-src-block-info 'light)))
-               deactivate-mark)
-          (when (and (eq type 'src-block) (not (functionp lang-f)))
-            (error "No such language mode: %s" lang-f))
-          (org-src--edit-element
-           element
-           (or edit-buffer-name
-               (org-src--construct-edit-buffer-name (buffer-name) lang))
-           lang-f
-           (and (null code)
-                (lambda () (org-escape-code-in-region (point-min) (point-max))))
-           (and code (org-unescape-code-in-string code)))
-          ;; Finalize buffer.
-          (setq-local org-coderef-label-format
-                      (or (org-element-property :label-fmt element)
-                          org-coderef-label-format))
-          (when (eq type 'src-block)
-            (setq-local org-src--babel-info babel-info)
-            (setq-local params (nth 2 babel-info))
-            (setq-local dir (cdr (assq :dir params)))
-            (cd (file-name-as-directory (expand-file-name dir)))
-            (let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
-              (when (fboundp edit-prep-func)
-                (funcall edit-prep-func babel-info))))
-          t)))
-
-    (spacemacs/set-leader-keys-for-major-mode 'org-mode
-      "sc" 'org-copy
-      "n" 'org-modify-and-clock-current-heading
-      )
-
-;;;;; Org-mode clock
-    (defun org-modify-and-clock-current-heading ()
-      (interactive)
-      (org-narrow-to-subtree)
-      (org-clock-in)
-      )
-
-    (define-key org-mode-map "\C-cn" #'org-modify-and-clock-current-heading)
-
-;;;;; Org-mode fast-todo-selection
-    (defun org-fast-todo-selection ()
-      "Fast TODO keyword selection with single keys.
-Returns the new TODO keyword, or nil if no state change should occur."
-      (let* ((fulltable org-todo-key-alist)
-             (done-keywords org-done-keywords) ;; needed for the faces.
-             (maxlen (apply 'max (mapcar
-                                  (lambda (x)
-                                    (if (stringp (car x)) (string-width (car x)) 0))
-                                  fulltable)))
-             (expert t)
-             (fwidth (+ maxlen 3 1 3))
-             (ncol (/ (- (window-width) 4) fwidth))
-             tg cnt e c tbl
-             groups ingroup)
-        (save-excursion
-          (save-window-excursion
-            (if expert
-                (set-buffer (get-buffer-create " *Org todo*"))
-              (org-switch-to-buffer-other-window (get-buffer-create " *Org todo*")))
-            (erase-buffer)
-            (setq-local org-done-keywords done-keywords)
-            (setq tbl fulltable cnt 0)
-            (while (setq e (pop tbl))
-              (cond
-               ((equal e '(:startgroup))
-                (push '() groups) (setq ingroup t)
-                (unless (= cnt 0)
-                  (setq cnt 0)
-                  (insert "\n"))
-                (insert "{ "))
-               ((equal e '(:endgroup))
-                (setq ingroup nil cnt 0)
-                (insert "}\n"))
-               ((equal e '(:newline))
-                (unless (= cnt 0)
-                  (setq cnt 0)
-                  (insert "\n")
-                  (setq e (car tbl))
-                  (while (equal (car tbl) '(:newline))
-                    (insert "\n")
-                    (setq tbl (cdr tbl)))))
-               (t
-                (setq tg (car e) c (cdr e))
-                (when ingroup (push tg (car groups)))
-                (setq tg (org-add-props tg nil 'face
-                                        (org-get-todo-face tg)))
-                (when (and (= cnt 0) (not ingroup)) (insert "  "))
-                (insert "[" c "] " tg (make-string
-                                       (- fwidth 4 (length tg)) ?\ ))
-                (when (= (setq cnt (1+ cnt)) ncol)
-                  (insert "\n")
-                  (when ingroup (insert "  "))
-                  (setq cnt 0)))))
-            (insert "\n")
-            (goto-char (point-min))
-            (unless expert (org-fit-window-to-buffer))
-            (message "[T]ODO | [D]ONE | [W]AIT | [K]ILL | [O]UTD | [SPC]:Clear")
-            (setq c (let ((inhibit-quit t)) (read-char-exclusive)))
-            (cond
-             ((or (= c ?\C-g)
-                  (and (= c ?q) (not (rassoc c fulltable))))
-              (setq quit-flag t))
-             ((= c ?\ ) nil)
-             ((setq e (rassoc c fulltable) tg (car e))
-              tg)
-             (t (setq quit-flag t)))))))
-
-;;;;; Org-pandoc
-    (setq org-pandoc-options '(
-                               (standalone . t)
-                               (self-contained . t)
-                               ))
-
-
-;;;;; Org-tag-with-ivy
-    (defun spacemacs//org-ctrl-c-ctrl-c-counsel-org-tag ()
-      "Hook for `org-ctrl-c-ctrl-c-hook' to use `counsel-org-tag'."
-      (if (save-excursion (beginning-of-line) (looking-at "[ \t]*$"))
-          (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
-              (user-error "C-c C-c can do nothing useful at this location"))
-        (let* ((context (org-element-context))
-               (type (org-element-type context)))
-          (case type
-            ;; When at a link, act according to the parent instead.
-            (link (setq context (org-element-property :parent context))
-                  (setq type (org-element-type context)))
-            ;; Unsupported object types: refer to the first supported
-            ;; element or object containing it.
-            ((bold code entity export-snippet inline-babel-call inline-src-block
-                   italic latex-fragment line-break macro strike-through subscript
-                   superscript underline verbatim)
-             (setq context
-                   (org-element-lineage
-                    context '(radio-target paragraph verse-block table-cell)))))
-          ;; For convenience: at the first line of a paragraph on the
-          ;; same line as an item, apply function on that item instead.
-          (when (eq type 'paragraph)
-            (let ((parent (org-element-property :parent context)))
-              (when (and (eq (org-element-type parent) 'item)
-                         (= (line-beginning-position)
-                            (org-element-property :begin parent)))
-                (setq context parent type 'item))))
-          (case type
-            ((headline inlinetask)
-             (save-excursion (goto-char (org-element-property :begin context))
-                             (call-interactively 'counsel-org-tag)) t)))))
-    (add-hook 'org-ctrl-c-ctrl-c-hook 'spacemacs//org-ctrl-c-ctrl-c-counsel-org-tag)
-    (add-hook 'org-capture-before-finalize-hook 'counsel-org-tag)
-
-;;;;; Org-babel
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((emacs-lisp . t)
-       (python . t)
-       (R . t)
-       (shell . t)
-       (org . t)
-       (latex . t)))
-
-;;;;; Org-latex
-    (setq
-     ;; org-latex-pdf-process '("latexmk -pdflatex='%latex -shell-escape -bibtex -interaction nonstopmode' -pdf -output-directory=%o -f %f")
-     org-latex-logfiles-extensions (quote ("lof" "lot" "tex~" "aux" "idx" "log" "out" "toc" "nav" "snm" "vrb" "dvi" "fdb_latexmk" "blg" "brf" "fls" "entoc" "ps" "spl" "bbl"))
-     org-latex-create-formula-image-program 'dvisvgm
-     org-latex-packages-alist
-     (quote (("" "color" t)
-             ("" "minted" t)
-             ("" "parskip" t)
-             ("" "tikz" t)))
-     )
-
-;;;;; Org-TODO
-    (setq
-     org-directory "/Users/xfu/Dropbox/org/"
-     diary-file "/Users/xfu/Dropbox/org/cal.diary"
-     org-default-notes-file "/Users/xfu/Dropbox/org/inbox.org"
-     org-log-done 'time
-     org-log-note-clock-out t
-     org-log-redeadline 'note
-     org-log-reschedule 'note
-     org-indirect-buffer-display 'current-window
-     org-tags-column 0
-     org-agenda-restore-windows-after-quit t
-     org-agenda-files '("/Users/xfu/Dropbox/org/")
-     org-refile-targets '((nil :maxlevel . 9)
-                          (org-agenda-files :maxlevel . 9))
-     org-refile-use-outline-path 'file
-     org-outline-path-complete-in-steps nil
-     org-columns-default-format "%50ITEM(Task) %10CLOCKSUM %16TIMESTAMP_IA"
-     org-global-properties (quote (("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")))
-     org-use-fast-todo-selection t
-     org-use-fast-tag-selection nil
-     org-log-into-drawer t
-     org-log-state-notes-into-drawer t
-     org-todo-keywords '(
-                         (sequence "TODO(t!)"  "|" "DONE(d!/@)")
-                         (sequence "WAIT(w@/@)" "|" "OUTD(o@/@)" "KILL(k@/@)")
-                         (sequence "HABT(h!)" "|" "DONE(d!/@)" "KILL(k@/@)")
-                         )
-     org-todo-keyword-faces '(
-                              ("TODO" :inherit default :foreground "#d34a65" :weight bold :box (:line-width 1 :color "#d34a65" :style nil))
-                              ("HABT" :inherit default :foreground "#EADC77" :weight bold :box (:line-width 1 :color "#EADC77" :style nil))
-                              ("DONE" :inherit default :foreground "#15c188" :weight bold :box (:line-width 1 :color "#15c188" :style nil))
-                              ("WAIT" :inherit default :foreground "#ff9d00" :weight bold :box (:line-width 1 :color "#ff9d00" :style nil))
-                              ("KILL" :inherit default :foreground "#6f2faf" :weight bold :box (:line-width 1 :color "#6f2faf" :style nil))
-                              ("OUTD" :inherit default :foreground "#6fa1f2" :weight bold :box (:line-width 1 :color "#6fa1f2" :style nil))
-                              )
-     )
-;;;;; Org-tools
-    (setq
-     org-download-screenshot-method "screencapture -i %s"
-     )
-;;;;; Org-brain
-    (setq
-     org-brain-path "/Users/xfu/Dropbox/org/brain"
-     org-id-track-globally t
-     org-id-locations-file "~/.emacs.d/.org-id-locations"
-     org-brain-visualize-default-choices 'all
-     )
-
-    ;;;;; Org-appearance
-    (setq
-     org-startup-with-inline-images nil
-     org-image-actual-width 800
-     org-fontify-whole-heading-line t
-     org-fontify-done-headline t
-     org-fontify-quote-and-verse-blocks t
-     org-ellipsis " + "
-     org-columns-ellipses " + "
-     org-bullets-bullet-list '("" "" "" "" "" "" "" "")
-     )
-    )
-
-;;;;; Org-capture
-  (with-eval-after-load 'org-capture
-    (defun my-org-move-point-to-capture ()
-      (cond ((org-at-heading-p) (org-beginning-of-line))
-            (t (org-previous-visible-heading 1))))
-    (setq org-capture-templates
-          (quote (
-                  ("j" "Journal" entry
-                   (function my-org-move-point-to-capture)
-                   "* %^{Logging for...} :logs:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-%?" :empty-lines 2 :clock-in t :created t)
-
-
-                  ("M" "Meeting" entry
-                   (file+datetree "~/Dropbox/org/meeting.org")
-                   "* %^{Logging for...} :logs:communication:
-%^{Effort}p
-%^T
-
-- Things to discuss:
-
-%i
-%?" :empty-lines 2 :clock-in t :created t)
-
-                  ("m" "Meeting Minutes" entry
-                   (function my-org-move-point-to-capture)
-                   "* %^{Logging for...} :logs:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-%?" :empty-lines 2 :clock-in t :created t)
-
-
-                  ("u" "Write-up" entry
-                   (function my-org-move-point-to-capture)
-                   "* %^{Logging for...} :writeup:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-%?" :empty-lines 2 :clock-in t :created t)
-
-                  ("a" "Article" entry
-                   (file "~/Dropbox/org/ref.org")
-                   "* %^{Title}  :article:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-Brief description:
-%?" :prepend f :empty-lines 2 :created t)
-
-                  ("i" "Idea" entry
-                   (file "~/Dropbox/org/idea.org")
-                   "* %A :idea:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-%?" :prepend f :empty-lines 2 :created t)
-
-                  ("d" "Daily Review" entry
-                   (file+datetree "~/Dropbox/org/review.org")
-                   "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:daily:%\\1:
-:PROPERTIES:
-:Created: %U
-:Linked: [[file:life.org::*Daily%20review][Daily review]]
-:END:
-%i
-%?" :empty-lines 1 :clock-in t :created t)
-
-                  ("w" "Week Review" entry
-                   (file+datetree "~/Dropbox/org/review.org")
-                   "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:week:%\\1:
-:PROPERTIES:
-:Created: %U
-:Linked: [[file:life.org::*Week%20review][Week review]]
-:END:
-%i
-%?" :empty-lines 1 :clock-in t :created t)
-
-                  ("r" "Month Review" entry
-                   (file+datetree "~/Dropbox/org/review.org")
-                   "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:month:%\\1:
-:PROPERTIES:
-:Created: %U
-:Linked: [[file:life.org::*Month%20review][Month review]]
-:END:
-%i
-%?" :empty-lines 1 :clock-in t :created t)
-
-                  ("W" "Web site" entry
-                   (file "~/Dropbox/org/inbox.org")
-                   "* %A :website:
-:PROPERTIES:
-:Created: %U
-:Linked: %a
-:END:
-%i
-%?" :prepend f :empty-lines 2 :created t)
-                  ))))
-  (with-eval-after-load 'org-mac-link
-    (setq org-mac-Skim-highlight-selection-p t)
-    (defun as-get-skim-page-link ()
-      (do-applescript
-       (concat
-        "tell application \"Skim\"\n"
-        "set theDoc to front document\n"
-        "set theTitle to (name of theDoc)\n"
-        "set thePath to (path of theDoc)\n"
-        "set thePage to (get index for current page of theDoc)\n"
-        "set theSelection to selection of theDoc\n"
-        "set theContent to contents of (get text for theSelection)\n"
-        "if theContent is missing value then\n"
-        "    set theContent to theTitle & \", p. \" & thePage\n"
-        (when org-mac-Skim-highlight-selection-p
-          (concat
-           "else\n"
-           "    tell theDoc\n"
-           "        set theNote to make note with data theSelection with properties {type:highlight note}\n"
-           "         set text of theNote to (get text for theSelection)\n"
-           "    end tell\n"))
-        "end if\n"
-        "set theLink to \"skim://\" & thePath & \"::\" & thePage & "
-        "\"::split::\" & theContent\n"
-        "end tell\n"
-        "return theLink as string\n")))
-    )
-;;;;; Org-agenda
-  (with-eval-after-load 'org-agenda
-    (advice-add 'org-agenda-goto :after
-                (lambda (&rest args)
-                  (org-narrow-to-subtree)))
-
-    (defun export-diary-from-cal ()
-      (interactive)
-      (start-process-shell-command "export diary" nil "/Users/xfu/.emacs.d/private/local/calendardiary 30 > /Users/xfu/Dropbox/org/cal.diary")
-      )
-    (add-hook 'after-init-hook 'export-diary-from-cal)
-    (add-hook 'org-finalize-agenda-hook 'place-agenda-tags)
-    (defun place-agenda-tags ()
-      "Put the agenda tags by the right border of the agenda window."
-      (setq org-agenda-tags-column (- 0 (window-width)))
-      (org-agenda-align-tags))
-    (spacemacs/set-leader-keys-for-major-mode 'org-agenda-mode
-      "a" 'org-agenda
-      "," 'counsel-org-tag-agenda
-      "Cc" 'org-agenda-clock-cancel
-      "Ci" 'org-agenda-clock-in
-      "Co" 'org-agenda-clock-out
-      "dd" 'org-agenda-deadline
-      "ds" 'org-agenda-schedule
-      "ie" 'org-agenda-set-effort
-      "ip" 'org-agenda-set-property
-      "it" 'org-agenda-set-tags
-      "sr" 'org-agenda-refile
-      "sc" 'org-copy
-      )
-
-    (setq org-agenda-sorting-strategy
-          '((agenda time-up priority-down category-keep)
-            (todo   priority-down category-keep)
-            (tags   priority-down category-keep)
-            (search category-keep)))
-
-    )
 ;;;; Ivy
   (with-eval-after-load 'ivy
-
-
-
     (setq
      counsel-org-goto-face-style 'org
      counsel-org-goto-separator " ➜ "
@@ -1458,500 +936,18 @@ Brief description:
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
- '(ansi-color-names-vector
-   ["#d2ceda" "#f2241f" "#67b11d" "#b1951d" "#3a81c3" "#a31db1" "#21b8c7" "#655370"])
- '(auto-revert-remote-files nil)
- '(auto-revert-use-notify nil)
- '(auto-revert-verbose nil)
- '(blink-cursor-mode nil)
- '(column-number-mode t)
- '(company-dabbrev-downcase nil t)
- '(company-dabbrev-ignore-case nil t)
- '(company-idle-delay 0.2 t)
- '(company-minimum-prefix-length 2 t)
- '(company-quickhelp-mode t)
- '(company-require-match nil t)
- '(company-statistics-mode t)
- '(company-tooltip-align-annotations t)
- '(company-transformers
-   (quote
-    (spacemacs//company-transformer-cancel company-sort-by-occurrence)))
- '(compilation-message-face (quote default))
- '(counsel-async-filter-update-time 500000)
- '(cua-global-mark-cursor-color "#2aa198")
- '(cua-normal-cursor-color "#657b83")
- '(cua-overwrite-cursor-color "#b58900")
- '(cua-read-only-cursor-color "#859900")
- '(custom-buffer-done-kill t)
- '(custom-safe-themes
-   (quote
-    ("e3aa063583d12b9026aa0e12ef75db105355ab3ff2f345d3d077b17f3af2209a" default)))
- '(display-line-number-width nil)
- '(display-line-numbers nil)
- '(display-line-numbers-current-absolute nil)
- '(display-time-day-and-date nil)
- '(display-time-default-load-average nil)
- '(display-time-mode nil)
- '(elfeed-search-title-max-width 120)
- '(elfeed-search-trailing-width 15)
- '(eshell-modules-list
-   (quote
-    (eshell-alias eshell-banner eshell-basic eshell-cmpl eshell-dirs eshell-glob eshell-hist eshell-ls eshell-pred eshell-prompt eshell-script eshell-term eshell-tramp eshell-unix)))
- '(ess-R-font-lock-keywords
-   (quote
-    ((ess-R-fl-keyword:modifiers . t)
-     (ess-R-fl-keyword:fun-defs . t)
-     (ess-R-fl-keyword:keywords . t)
-     (ess-R-fl-keyword:assign-ops . t)
-     (ess-R-fl-keyword:constants . t)
-     (ess-fl-keyword:fun-calls . t)
-     (ess-fl-keyword:numbers . t)
-     (ess-fl-keyword:operators . t)
-     (ess-fl-keyword:delimiters . t)
-     (ess-fl-keyword:= . t)
-     (ess-R-fl-keyword:F&T . t)
-     (ess-R-fl-keyword:%op% . t))))
- '(ess-eval-visibly (quote nowait))
- '(evil-org-key-theme
-   (quote
-    (navigation textobjects insert rsi additional todo leader)) t)
- '(evil-want-Y-yank-to-eol nil)
- '(eww-search-prefix "https://www.google.com/search?q=")
- '(exec-path-from-shell-check-startup-files nil)
- '(fci-rule-character-color "#d9d9d9")
- '(fci-rule-color "#d6d6d6" t)
- '(flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id))
- '(frame-resize-pixelwise t)
- '(fringe-mode 4 nil (fringe))
- '(git-gutter+-hide-gutter nil t)
- '(git-gutter+-modified-sign " " t)
- '(global-auto-revert-mode t)
- '(global-auto-revert-non-file-buffers t)
- '(global-company-mode t)
- '(global-git-gutter+-mode t)
- '(global-hl-line-mode t)
- '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
- '(highlight-symbol-colors
-   (--map
-    (solarized-color-blend it "#fdf6e3" 0.25)
-    (quote
-     ("#b58900" "#2aa198" "#dc322f" "#6c71c4" "#859900" "#cb4b16" "#268bd2"))))
- '(highlight-symbol-foreground-color "#586e75")
- '(highlight-tail-colors
-   (quote
-    (("#eee8d5" . 0)
-     ("#B4C342" . 20)
-     ("#69CABF" . 30)
-     ("#69B7F0" . 50)
-     ("#DEB542" . 60)
-     ("#F2804F" . 70)
-     ("#F771AC" . 85)
-     ("#eee8d5" . 100))))
- '(hl-bg-colors
-   (quote
-    ("#DEB542" "#F2804F" "#FF6E64" "#F771AC" "#9EA0E5" "#69B7F0" "#69CABF" "#B4C342")))
- '(hl-fg-colors
-   (quote
-    ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
- '(hl-paren-background-colors (quote ("#2492db" "#95a5a6" nil)))
- '(hl-paren-colors (quote ("#ecf0f1" "#ecf0f1" "#c0392b")) t)
- '(ispell-highlight-face (quote flyspell-incorrect))
- '(ispell-program-name "aspell")
- '(jdee-db-active-breakpoint-face-colors ("#1B2229" . "#51afef"))
- '(jdee-db-requested-breakpoint-face-colors ("#1B2229" . "#98be65"))
- '(jdee-db-spec-breakpoint-face-colors ("#1B2229" . "#3B3F46"))
- '(line-spacing 0.2)
- '(mac-mouse-wheel-smooth-scroll t)
- '(magit-diff-section-arguments
-   (quote
-    ("--ignore-space-change" "--ignore-all-space" "--no-ext-diff")))
- '(magit-diff-use-overlays nil)
- '(message-fill-column nil)
- '(modern-theme-comment-bg t)
- '(notmuch-archive-tags (quote ("-inbox" "-unread" "+archived")))
- '(notmuch-fcc-dirs nil)
- '(notmuch-hello-sections
-   (quote
-    (notmuch-hello-insert-saved-searches notmuch-hello-insert-alltags)))
- '(notmuch-message-headers-visible nil)
- '(notmuch-saved-searches
-   (quote
-    ((:name "fantom" :query "(to:kevin or from:kevin or to:qin or from:qin) and ((fantom near project) or (gentle near project) or (deep learning)) " :key "f")
-     (:name "n2o" :query "(from:shanglong or from:williamkkwu) or ((from:kevin or to:kevin or to:shanglong or to:williamkkwu) and (medip or MeDIP or n2o or rat))" :key "n")
-     (:name "hscr" :query "(from:hku or from:ellyngan or from:clara) or ((from:kevin or to:kevin or to:hku) and (hscr or hirschsprung or hku or variants))" :key "h")
-     (:name "inbox" :query "tag:inbox" :key "i")
-     (:name "unread" :query "tag:unread and tag:new" :key "u")
-     (:name "sent" :query "from:fuxialexander@gmail.com" :key "t")
-     (:name "drafts" :query "folder:drafts" :key "d"))))
- '(notmuch-show-imenu-indent t)
- '(notmuch-show-logo nil)
- '(notmuch-tag-formats
-   (quote
-    (("unread"
-      (propertize tag
-                  (quote face)
-                  (quote notmuch-tag-unread)))
-     ("flagged"
-      (propertize tag
-                  (quote face)
-                  (quote notmuch-tag-flagged))))))
- '(nrepl-message-colors
-   (quote
-    ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
- '(ns-alternate-modifier (quote meta))
- '(ns-command-modifier (quote hyper))
- '(ns-function-modifier (quote none))
- '(org-agenda-block-separator "")
- '(org-agenda-clockreport-parameter-plist
-   (quote
-    (:link t :maxlevel 3 :fileskip0 t :stepskip0 t :tags "-COMMENT")))
- '(org-agenda-custom-commands
-   (quote
-    (("n" "Agenda and all TODOs"
-      ((agenda ""
-               ((org-agenda-span 3)
-                (org-agenda-overriding-header " Week Agenda
-")))
-       (alltodo ""
-                ((org-agenda-skip-function
-                  (quote
-                   (org-agenda-skip-entry-if
-                    (quote scheduled))))
-                 (org-agenda-overriding-header " TODOs
-")
-                 (org-agenda-sorting-strategy
-                  (quote
-                   (todo-state-up deadline-up))))))
-      ((org-agenda-tag-filter-preset
-        (quote
-         ("-COMMENT"))))))))
- '(org-agenda-dim-blocked-tasks (quote invisible))
- '(org-agenda-export-html-style
-   "    <style type=\"text/css\">
-    <!--
-      pre {
-        font-family: \"Operator Mono\";
-        line-height: 1.5
-      }
-      body {
-        color: #bbc2cf;
-        font-family: \"Operator Mono\";
-        background-color: #21242b;
-        line-height: 1.5
-      }
-      .custom {
-        /* (:inherit default :foreground \"#ff9d00\" :weight normal (:line-width 1 :color \"#ff9d00\" :style nil)) */
-        color: #6fa1f2;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .custom-1 {
-        /* (:inherit default :foreground \"#d34a65\" :weight normal (:line-width 1 :color \"#d34a65\" :style nil)) */
-        color: #6f2faf;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .custom-2 {
-        /* (:inherit default :foreground \"#d34a65\" :weight normal (:line-width 1 :color \"#d34a65\" :style nil)) */
-        color: #ff9d00;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .custom-3 {
-        /* (:inherit default :foreground \"#d34a65\" :weight normal (:line-width 1 :color \"#d34a65\" :style nil)) */
-        color: #15c188;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .custom-4 {
-        /* (:inherit default :foreground \"#d34a65\" :weight normal (:line-width 1 :color \"#d34a65\" :style nil)) */
-        color: #d34a65;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .org-agenda-calendar-event {
-        /* org-agenda-calendar-event */
-        color: #bbc2cf;
-        font-family: \"Operator Mono\";
-        background-color: #21242b;
-        line-height: 1.5
-      }
-      .org-agenda-current-time {
-        /* org-agenda-current-time */
-        color: #ffffff;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .org-agenda-date {
-        /* org-agenda-date */
-        color: #87cefa;
-        font-family: \"Input Mono Compressed\";
-        font-weight: normal;
-        font-style: italic;
-        line-height: 1.5
-      }
-      .org-agenda-date-today {
-        /* org-agenda-date-today */
-        color: #87cefa;
-        font-family: \"Input Mono Compressed\";
-        font-weight: normal;
-        font-style: italic;
-        line-height: 1.5
-      }
-      .org-agenda-date-weekend {
-        /* org-agenda-date-weekend */
-        color: #87cefa;
-        font-family: \"Input Mono Compressed\";
-        font-weight: normal;
-        font-style: italic;
-        line-height: 1.5
-      }
-      .org-agenda-structure {
-        /* org-agenda-structure */
-        color: #87cefa;
-        font-family: \"Input Mono Compressed\";
-        font-weight: normal;
-        font-style: italic;
-        line-height: 1.5
-      }
-      .org-agenda-done {
-        /* org-agenda-done */
-        color: #5B6268;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .org-scheduled-previously {
-        /* org-scheduled-previously */
-        color: #00b2ee;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .org-tag {
-        /* org-tag */
-        color: #98be65;
-        font-weight: normal;
-        font-family: \"Operator Mono\";
-        font-style: italic;
-        line-height: 1.5
-      }
-      .org-time-grid {
-        /* org-time-grid */
-        color: #5B6268;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .org-upcoming-deadline {
-        /* org-upcoming-deadline */
-        color: #ff6eb4;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        line-height: 1.5
-      }
-      .org-warning {
-        /* org-warning */
-        color: #ff3e96;
-        font-family: \"Operator Mono\";
-        font-weight: normal;
-        font-style: italic;
-        line-height: 1.5
-      }
-
-      a {
-        color: inherit;
-        background-color: inherit;
-        font: inherit;
-        text-decoration: inherit;
-        line-height: 1.5
-      }
-      a:hover {
-        text-decoration: underline;
-        line-height: 1.5
-      }
-    -->
-    </style>")
- '(org-agenda-files (quote ("/Users/xfu/Dropbox/org/")))
- '(org-agenda-log-mode-items (quote (closed clock)))
- '(org-agenda-restore-windows-after-quit t t)
- '(org-agenda-skip-deadline-if-done t)
- '(org-agenda-skip-deadline-prewarning-if-scheduled t)
- '(org-agenda-skip-scheduled-if-deadline-is-shown t)
- '(org-agenda-skip-scheduled-if-done t)
- '(org-agenda-start-with-log-mode nil)
- '(org-clock-clocktable-default-properties (quote (:maxlevel 3 :scope agenda :tags "-COMMENT")))
- '(org-clocktable-defaults
-   (quote
-    (:maxlevel 3 :lang "en" :scope file :block nil :wstart 1 :mstart 1 :tstart nil :tend nil :step nil :stepskip0 t :fileskip0 t :tags "-COMMENT" :emphasize nil :link nil :narrow 40! :indent t :formula nil :timestamp nil :level nil :tcolumns nil :formatter nil)))
- '(org-download-image-dir "./image/")
- '(org-download-image-html-width 500)
- '(org-download-image-latex-width 500)
- '(org-download-screenshot-method "screencapture -i %s")
- '(org-enforce-todo-dependencies t)
- '(org-fontify-done-headline t)
- '(org-fontify-quote-and-verse-blocks t)
- '(org-fontify-whole-heading-line t)
- '(org-habit-graph-column 60)
- '(org-hide-block-startup t)
- '(org-image-actual-width 500)
- '(org-latex-packages-alist
-   (quote
-    (("" "color" t)
-     ("" "minted" t)
-     ("" "parskip" t)
-     ("" "tikz" t)
-     ("" "tabularx" t))))
- '(org-mac-Skim-highlight-selection-p nil)
- '(org-modules
-   (quote
-    (org-bibtex org-docview org-habit org-info org-protocol org-mac-iCal org-mac-link org-notmuch)))
- '(org-pandoc-options (quote ((standalone . t) (self-contained . t))))
- '(org-pomodoro-finished-sound
-   "/Users/xfu/.emacs.d/elpa/org-pomodoro-20161119.226/resources/bell.wav")
- '(org-pomodoro-finished-sound-p nil)
- '(org-pomodoro-long-break-sound-p nil)
- '(org-pomodoro-short-break-sound-p nil)
- '(org-preview-latex-default-process (quote dvisvgm))
- '(org-ref-bibliography-notes "/Users/xfu/Dropbox/org/ref.org")
- '(org-ref-note-title-format
-   "** %y - %t
- :PROPERTIES:
-  :Custom_ID: %k
-  :AUTHOR: %9a
-  :JOURNAL: %j
-  :YEAR: %y
-  :VOLUME: %v
-  :PAGES: %p
-  :DOI: %D
-  :URL: %U
- :END:
-
-")
- '(org-tag-persistent-alist
-   (quote
-    ((#("communication" 0 1
-        (idx 0))
-      . 99)
-     (#("logs" 0 1
-        (idx 1))
-      . 108)
-     (#("organize" 0 1
-        (idx 2))
-      . 111)
-     (#("analysis" 0 1
-        (idx 3))
-      . 97)
-     (#("read" 0 1
-        (idx 4))
-      . 114)
-     (#("idea" 0 1
-        (idx 5))
-      . 105))))
- '(org-treat-insert-todo-heading-as-state-change t)
- '(package-selected-packages
-   (quote
-    (org-mime dash-functional tiny grab-mac-link org-alert spaceline-all-the-icons spaceline org-gcal request-deferred deferred calfw-org calfw modern-dawn-theme solarized-theme origami elfeed-goodies ace-jump-mode noflet powerline ob-browser doom-themes helm-org-rifle helm-notmuch org-ref pdf-tools key-chord tablist helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-bibtex helm-ag flyspell-correct-helm helm helm-core flx-ido popwin window-purpose shackle spinner outorg ht alert log4e gntp notmuch language-detection parsebib imenu-list hydra git-gutter+ git-gutter fringe-helper flyspell-correct flycheck magit magit-popup git-commit with-editor smartparens iedit anzu highlight ctable ess julia-mode org-plus-contrib elfeed dired-hacks-utils diminish pkg-info epl counsel swiper pos-tip company bind-map bind-key biblio biblio-core yasnippet packed auctex async anaconda-mode pythonic f dash s memoize font-lock+ avy auto-complete popup org-brain highlight-numbers evil-nerd-commenter counsel-projectile color-identifiers-mode evil ivy markdown-mode yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill undo-tree toc-org sx string-inflection smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort projectile prodigy prettify-utils pip-requirements persp-mode pcre2el pbcopy password-generator parent-mode paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-edit-latex org-download org-bullets open-junk-file ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses hide-comnt help-fns+ goto-chg google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fish-mode fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diff-hl cython-mode company-statistics company-shell company-quickhelp company-auctex company-anaconda column-enforce-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
- '(paradox-github-token t)
- '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
- '(persp-add-buffer-on-find-file t)
- '(pos-tip-background-color "#292B2C")
- '(pos-tip-foreground-color "#ECEBE7")
- '(powerline-default-separator (quote arrow-fade))
- '(powerline-height 22 t)
- '(projectile-git-ignored-command "git ls-files -zcoi --exclude-standard | sed 's/ /\\\\ /g'")
- '(projectile-globally-ignored-file-suffixes (quote ("svg" "pdf" "png")))
- '(projectile-indexing-method (quote alien))
- '(python-shell-interpreter "python")
- '(python-shell-interpreter-args "--simple-prompt -i")
- '(safe-local-variable-values (quote ((eval progn (pp-buffer) (indent-buffer)))))
- '(send-mail-function (quote mailclient-send-it))
- '(shr-tag-pre-highlight-lang-modes
-   (quote
-    (("ocaml" . tuareg)
-     ("elisp" . emacs-lisp)
-     ("ditaa" . artist)
-     ("asymptote" . asy)
-     ("dot" . fundamental)
-     ("sqlite" . sql)
-     ("calc" . fundamental)
-     ("C" . c)
-     ("cpp" . c++)
-     ("C++" . c++)
-     ("screen" . shell-script)
-     ("shell" . sh)
-     ("bash" . sh)
-     ("emacslisp" . emacs-lisp)
-     ("R" . r-mode))))
- '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
- '(sml/active-background-color "#34495e")
- '(sml/active-foreground-color "#ecf0f1")
- '(sml/inactive-background-color "#dfe4ea")
- '(sml/inactive-foreground-color "#34495e")
- '(split-height-threshold 100)
- '(split-width-threshold 100)
- '(term-default-bg-color "#fdf6e3")
- '(term-default-fg-color "#657b83")
- '(tool-bar-mode nil)
- '(tramp-remote-path
-   (quote
-    ("/uac/gds/xfu/bin" "/research/kevinyip10/xfu/miniconda3/bin" "/research/kevinyip10/xfu/miniconda2/bin" tramp-default-remote-path "/bin" "/usr/bin" "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin" "/local/bin" "/local/freeware/bin" "/local/gnu/bin" "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin" "/opt/bin" "/opt/sbin" "/opt/local/bin")))
- '(tramp-verbose 1)
- '(truncate-lines t)
- '(user-mail-address "fuxialexander@gmail.com")
- '(vc-annotate-background "#181e26")
- '(vc-annotate-background-mode nil)
- '(vc-annotate-color-map
-   (quote
-    ((20 . "#98be65")
-     (40 . "#b4be6c")
-     (60 . "#d0be73")
-     (80 . "#ECBE7B")
-     (100 . "#e6ab6a")
-     (120 . "#e09859")
-     (140 . "#da8548")
-     (160 . "#d38079")
-     (180 . "#cc7cab")
-     (200 . "#c678dd")
-     (220 . "#d974b7")
-     (240 . "#ec7091")
-     (260 . "#ff6c6b")
-     (280 . "#d6696a")
-     (300 . "#ad6769")
-     (320 . "#836468")
-     (340 . "#5B6268")
-     (360 . "#5B6268"))))
- '(vc-annotate-very-old-color nil)
- '(weechat-color-list
-   (quote
-    (unspecified "#fdf6e3" "#eee8d5" "#990A1B" "#dc322f" "#546E00" "#859900" "#7B6000" "#b58900" "#00629D" "#268bd2" "#93115C" "#d33682" "#00736F" "#2aa198" "#657b83" "#839496")))
- '(window-divider-default-bottom-width 0)
- '(window-divider-default-places t)
- '(window-divider-default-right-width 1)
- '(window-divider-mode t)
- '(window-resize-pixelwise t)
- '(xterm-color-names
-   ["#eee8d5" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#073642"])
- '(xterm-color-names-bright
-   ["#fdf6e3" "#cb4b16" "#93a1a1" "#839496" "#657b83" "#6c71c4" "#586e75" "#002b36"])
- '(xterm-mouse-mode t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-warning ((t (:inherit org-scheduled-previously :foreground "#E46261")))))
-)
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(package-selected-packages
+     (quote
+      (vi-tilde-fringe symon spaceline powerline neotree lorem-ipsum linum-relative highlight-indentation helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag flx-ido fancy-battery exec-path-from-shell define-word clean-aindent-mode ace-jump-helm-line helm helm-core yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill toc-org tiny sx string-inflection solarized-theme smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain open-junk-file ob-browser ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dawn-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org ein editorconfig dumb-jump doom-themes dired-narrow diff-hl cython-mode counsel-projectile company-statistics company-quickhelp company-auctex company-anaconda column-enforce-mode color-identifiers-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   )
+  )

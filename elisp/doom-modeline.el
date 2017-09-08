@@ -2,7 +2,7 @@
 
 
 ;; TODO torgeir added this
-(setq +doom-modeline-height 24)
+(setq +doom-modeline-height 15)
 (defun doom-project-root () (t/project-root))
 
 (defun doom--resolve-hooks (hooks)

@@ -107,6 +107,18 @@
       (setq org-ref-completion-library 'org-ref-ivy-cite
             org-ref-default-bibliography '("/Users/xfu/Dropbox/org/ref.bib")
             org-ref-bibliography-notes "/Users/xfu/Dropbox/org/ref.org"
+            org-ref-note-title-format "** %y - %t
+ :PROPERTIES:
+  :Custom_ID: %k
+  :AUTHOR: %9a
+  :JOURNAL: %j
+  :YEAR: %y
+  :VOLUME: %v
+  :PAGES: %p
+  :DOI: %D
+  :URL: %U
+ :END:
+"
             )
 
       )

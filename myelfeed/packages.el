@@ -18,7 +18,12 @@
 (defun myelfeed/init-elfeed ()
   (use-package elfeed
     :defer t
-    :init (spacemacs/set-leader-keys "af" 'elfeed)
+    :init
+    (spacemacs/set-leader-keys "af" 'elfeed)
+    (setq elfeed-search-title-max-width 120
+          elfeed-search-trailing-width 15
+
+          )
     :config
     (progn
       (evilified-state-evilify-map elfeed-search-mode-map
