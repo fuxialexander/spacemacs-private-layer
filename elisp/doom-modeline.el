@@ -2,7 +2,7 @@
 
 
 ;; TODO torgeir added this
-(setq +doom-modeline-height 15)
+(setq +doom-modeline-height 18)
 (defun doom-project-root () (t/project-root))
 
 (defun doom--resolve-hooks (hooks)
@@ -486,7 +486,7 @@ buffer where knowing the current project directory is important."
 (def-modeline-segment! buffer-info
   "Combined information about the current buffer, including the current working
 directory, the file name, and its state (modified, read-only or non-existent)."
-  (let* ((all-the-icons-scale-factor 1.2)
+  (let* ((all-the-icons-scale-factor 0.8)
          (modified-p (buffer-modified-p))
          ;; (active (active))
          ;; (faces (if modified-p 'doom-modeline-buffer-modified))
@@ -624,16 +624,17 @@ This segment overrides the modeline functionality of `org-pomodoro' itself."
            (state   (vc-state buffer-file-name backend)))
       (let ((face    'mode-line-inactive)
             (active  (active))
-            (all-the-icons-scale-factor 1.0)
-            (all-the-icons-default-adjust -0.1))
+            (all-the-icons-scale-factor 0.8)
+            (all-the-icons-default-adjust -0.0))
         (concat "  "
                 (cond ((memq state '(edited added))
                        (if active (setq face 'doom-modeline-info))
                        (all-the-icons-octicon
                         "git-compare"
                         :face face
-                        :height 1.2
-                        :v-adjust -0.05))
+                        ;; :height 1.0
+                        ;; :v-adjust -0.05
+                        ))
                       ((eq state 'needs-merge)
                        (if active (setq face 'doom-modeline-info))
                        (all-the-icons-octicon "git-merge" :face face))
@@ -648,8 +649,9 @@ This segment overrides the modeline functionality of `org-pomodoro' itself."
                        (all-the-icons-octicon
                         "git-compare"
                         :face face
-                        :height 1.2
-                        :v-adjust -0.05)))
+                        ;; :height 1.2
+                        ;; :v-adjust -0.05
+                        )))
                 " "
                 (propertize (substring vc-mode (+ (if (eq backend 'Hg) 2 3) 2))
                             'face (if active face))
