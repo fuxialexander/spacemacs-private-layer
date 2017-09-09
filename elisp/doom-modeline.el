@@ -809,7 +809,7 @@ lines are selected, or the NxM dimensions of a block selection."
 enabled."
                           (when (bound-and-true-p purpose-mode)
                             (propertize (substring (purpose--modeline-string) 2 -1)
-                                        'face 'bold
+                                        'face 'mode-line-inactive
                                         'help-echo "Window purpose")))
 
 (def-modeline-segment! matches
