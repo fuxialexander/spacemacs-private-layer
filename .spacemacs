@@ -84,6 +84,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-additional-packages '(
                                       ivy-dired-history
                                       tiny
+                                      shx
                                       shrink-path
                                       ob-browser
                                       fringe-helper
@@ -455,6 +456,8 @@ you should place your code here."
   ;;   :ensure t
   ;;   :config (tiny-setup-default)
   ;;   )
+
+  
   (defun camelize (s)
     "Convert under_score string S to CamelCase string."
     (store-substring
@@ -477,6 +480,9 @@ you should place your code here."
 
 ;;;;; Term line-spacing
 
+  (use-package shx
+    :commands shx
+    )
   (add-hook 'eshell-mode-hook
             (lambda ()
               (setq line-spacing nil)))
@@ -640,6 +646,11 @@ you should place your code here."
   (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "C-.") nil))
   (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "C-;") nil))
   (eval-after-load "flyspell" '(define-key flyspell-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
+  (eval-after-load "magit" '(define-key magit-mode-map (kbd "M-1") nil))
+  (eval-after-load "magit" '(define-key magit-mode-map (kbd "M-2") nil))
+  (eval-after-load "magit" '(define-key magit-mode-map (kbd "M-3") nil))
+  (eval-after-load "magit" '(define-key magit-mode-map (kbd "M-4") nil))
+  (eval-after-load "magit" '(define-key magit-mode-map (kbd "M-w") nil))
   (eval-after-load "shr" '(define-key shr-map (kbd "o") nil))
   (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") nil))
   (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
@@ -816,10 +827,30 @@ you should place your code here."
      (concat
       "tell application \"iTerm\"\n"
       "    activate\n"
+      "    create window with default profile\n"
       "    tell current session of current window\n"
       "        write text \"" text "\"\n"
-      "        end tell\n"
+      "    end tell\n"
       "end tell")))
+
+  (defun mac-iTerm-shell-command-current (text)
+    "Write TEXT into iTerm like user types it with keyboard."
+    (interactive
+     (list
+      (read-shell-command "Run Shell command in iTerm: "
+                          (when (use-region-p)
+                            (buffer-substring-no-properties
+                             (region-beginning)
+                             (region-end))))))
+    (do-applescript
+     (concat
+      "tell application \"iTerm\"\n"
+      "    activate\n"
+      "    tell current session of current window\n"
+      "        write text \"" text "\"\n"
+      "    end tell\n"
+      "end tell")))
+
 
   (defun mac-iTerm-cd (dir)
     "Switch to iTerm and change directory there to DIR."
@@ -829,8 +860,20 @@ you should place your code here."
                    (if current-prefix-arg
                        (read-directory-name "cd to: ")
                      default-directory))))
-    (let ((cmd (format "cd %s" dir)))
-      (mac-iTerm-shell-command cmd)))
+    (if (file-remote-p dir)
+        (let* (
+               (host (tramp-file-name-host (tramp-dissect-file-name dir)))
+               (dir (tramp-file-name-localname (tramp-dissect-file-name dir)))
+               (sshcmd (format "ssh %s" host))
+               (cdcmd (format "cd %s" dir))
+               )
+          (mac-iTerm-shell-command sshcmd)
+          (mac-iTerm-shell-command-current cdcmd)
+          )
+      (let ((cmd (format "cd %s" dir)))
+        (mac-iTerm-shell-command cmd))
+        )
+    )
 
 ;;;;; Tyme2
   ;;   ;; (defun start-tyme ()
@@ -947,7 +990,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (iedit magit vi-tilde-fringe symon spaceline powerline neotree lorem-ipsum linum-relative highlight-indentation helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag flx-ido fancy-battery exec-path-from-shell define-word clean-aindent-mode ace-jump-helm-line helm helm-core yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill toc-org tiny sx string-inflection solarized-theme smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain open-junk-file ob-browser ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dawn-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org ein editorconfig dumb-jump doom-themes dired-narrow diff-hl cython-mode counsel-projectile company-statistics company-quickhelp company-auctex company-anaconda column-enforce-mode color-identifiers-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))))
+    (shx iedit magit vi-tilde-fringe symon spaceline powerline neotree lorem-ipsum linum-relative highlight-indentation helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag flx-ido fancy-battery exec-path-from-shell define-word clean-aindent-mode ace-jump-helm-line helm helm-core yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill toc-org tiny sx string-inflection solarized-theme smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain open-junk-file ob-browser ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dawn-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org ein editorconfig dumb-jump doom-themes dired-narrow diff-hl cython-mode counsel-projectile company-statistics company-quickhelp company-auctex company-anaconda column-enforce-mode color-identifiers-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
