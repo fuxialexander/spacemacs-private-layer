@@ -47,7 +47,6 @@
                                  textobjects
                                  navigation
                                  insert
-                                 rsi
                                  additional
                                  todo
                                  leader
@@ -831,56 +830,56 @@ Returns the new TODO keyword, or nil if no state change should occur."
               ))
        )
 
-      (defun remove-headline-tags (headline)
-    (if (string-match "\\(.+\\)[ \t]+\\(:.+:\\)"  headline)
-        (string-trim (match-string 1 headline))
-      headline))
-      (defun org-agenda-highlight-todo (x)
-    (let ((org-done-keywords org-done-keywords-for-agenda)
-          (case-fold-search nil) (level nil) (position nil) re)
-      (if (eq x 'line)
-          (save-excursion
-            (beginning-of-line 1)
-            (setq re (org-get-at-bol 'org-todo-regexp))
-            (setq position (or (text-property-any (point-at-bol) (point-at-eol) 'org-heading t) (point)))
-            (goto-char position)
-            (setq level (get-text-property position 'level))
-            (when (looking-at (concat "[ \t]*\\.*\\(" re "\\) +"))
-              (add-text-properties (match-beginning 0) (match-end 1)
-                                   (list 'face (org-get-todo-face 1)))
-              (let* ((s (buffer-substring (match-beginning 1) (match-end 1)))
-                     (data (buffer-substring (match-end 1) (line-end-position)))
-                     (formated_s (format org-agenda-todo-keyword-format s)))
-                (delete-region (match-beginning 1) (point-at-eol))
-                (goto-char (match-beginning 1))
-                (insert (concat "⎥ " formated_s " ⎥ "
-                                (if (string-match "\\(.+\\)\\(\\[#[A-Z]?\\]\\) \\(.+\\)" data)
-                                    (concat (string-trim (match-string 2 data))
-                                            " ⎥" level (remove-headline-tags (match-string 3 data)))
-                                  (concat "     ⎥" level (remove-headline-tags (string-trim data)))))))))
-        (let ((pl (text-property-any 0 (length x) 'org-heading t x)))
-          (setq re (get-text-property 0 'org-todo-regexp x))
-          (when (and re pl (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)") x pl)
-                                  pl))
-            (add-text-properties
-             (or (match-end 1) (match-end 0)) (match-end 0)
-             (list 'face (org-get-todo-face (match-string 2 x)))
-             x)
-            (when (match-end 1)
-              (setq x (concat (substring x 0 (match-end 1)) "⎥ "
-                              (format org-agenda-todo-keyword-format (match-string 2 x)) " ⎥ "
-                              (let ((data  (substring x (match-end 3))))
-                                (if (string-match "\\(.*\\)\\(\\[#[A-Z]?\\]\\) \\(.*\\)" data)
-                                    (concat (match-string 2 data) " ⎥"
-                                            (or level (get-text-property 0 'level x))
-                                            (match-string 1 data)
-                                            (remove-headline-tags (match-string 3 data)))
-                                  (concat "     ⎥"
-                                          (or level (get-text-property 0 'level x))
-                                          (remove-headline-tags data))))
-                              (org-add-props " " (text-properties-at 0 x))
-                              )))))
-        x)))
+      ;; (defun remove-headline-tags (headline)
+      ;;   (if (string-match "\\(.+\\)[ \t]+\\(:.+:\\)"  headline)
+      ;;       (string-trim (match-string 1 headline))
+      ;;     headline))
+      ;; (defun org-agenda-highlight-todo (x)
+    ;; (let ((org-done-keywords org-done-keywords-for-agenda)
+    ;;       (case-fold-search nil) (level nil) (position nil) re)
+    ;;   (if (eq x 'line)
+    ;;       (save-excursion
+    ;;         (beginning-of-line 1)
+    ;;         (setq re (org-get-at-bol 'org-todo-regexp))
+    ;;         (setq position (or (text-property-any (point-at-bol) (point-at-eol) 'org-heading t) (point)))
+    ;;         (goto-char position)
+    ;;         (setq level (get-text-property position 'level))
+    ;;         (when (looking-at (concat "[ \t]*\\.*\\(" re "\\) +"))
+    ;;           (add-text-properties (match-beginning 0) (match-end 1)
+    ;;                                (list 'face (org-get-todo-face 1)))
+    ;;           (let* ((s (buffer-substring (match-beginning 1) (match-end 1)))
+    ;;                  (data (buffer-substring (match-end 1) (line-end-position)))
+    ;;                  (formated_s (format org-agenda-todo-keyword-format s)))
+    ;;             (delete-region (match-beginning 1) (point-at-eol))
+    ;;             (goto-char (match-beginning 1))
+    ;;             (insert (concat "⎥ " formated_s " ⎥ "
+    ;;                             (if (string-match "\\(.+\\)\\(\\[#[A-Z]?\\]\\) \\(.+\\)" data)
+    ;;                                 (concat (string-trim (match-string 2 data))
+    ;;                                         " ⎥" level (remove-headline-tags (match-string 3 data)))
+    ;;                               (concat "     ⎥" level (remove-headline-tags (string-trim data)))))))))
+    ;;     (let ((pl (text-property-any 0 (length x) 'org-heading t x)))
+    ;;       (setq re (get-text-property 0 'org-todo-regexp x))
+    ;;       (when (and re pl (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)") x pl)
+    ;;                               pl))
+    ;;         (add-text-properties
+    ;;          (or (match-end 1) (match-end 0)) (match-end 0)
+    ;;          (list 'face (org-get-todo-face (match-string 2 x)))
+    ;;          x)
+    ;;         (when (match-end 1)
+    ;;           (setq x (concat (substring x 0 (match-end 1)) "⎥ "
+    ;;                           (format org-agenda-todo-keyword-format (match-string 2 x)) " ⎥ "
+    ;;                           (let ((data  (substring x (match-end 3))))
+    ;;                             (if (string-match "\\(.*\\)\\(\\[#[A-Z]?\\]\\) \\(.*\\)" data)
+    ;;                                 (concat (match-string 2 data) " ⎥"
+    ;;                                         (or level (get-text-property 0 'level x))
+    ;;                                         (match-string 1 data)
+    ;;                                         (remove-headline-tags (match-string 3 data)))
+    ;;                               (concat "     ⎥"
+    ;;                                       (or level (get-text-property 0 'level x))
+    ;;                                       (remove-headline-tags data))))
+    ;;                           (org-add-props " " (text-properties-at 0 x))
+    ;;                           )))))
+    ;;     x)))
       (setq org-agenda-sorting-strategy
             '((agenda time-up priority-down category-keep)
               (todo   priority-down category-keep)
