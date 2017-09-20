@@ -96,6 +96,7 @@
             org-bullets-bullet-list '("" "" "" "" "" "" "" "")
             org-src-fontify-natively t
             org-preview-latex-default-process 'dvisvgm
+            org-highlight-latex-and-related '(latex)
             org-modules
             (quote
              (org-bibtex org-docview org-habit org-info org-protocol org-mac-iCal org-mac-link org-notmuch))

@@ -130,7 +130,6 @@
     :commands (notmuch-tree)
     :defer t
     :init (progn
-
             (defun my-buffer-face-mode-notmuch ()
               "Sets a fixed width (monospace) font in current buffer"
               (interactive)
@@ -154,7 +153,26 @@
               ))
 
     :config (progn
-
+              (setq notmuch-tag-formats '(("unread"
+                                           (propertize tag 'face 'notmuch-tag-unread))
+                                          )
+                    notmuch-hello-sections '(
+                                             notmuch-hello-insert-saved-searches
+                                             notmuch-hello-insert-alltags
+                                             )
+                    notmuch-saved-searches '(
+                                             (:name "hscr"     :query "variants and significant and (from:fuxialexander@gmail.com or from:kevin)  or from:clara  or from:merce or from:ellyngan or from:malzac")
+                                             (:name "n2o"      :query "from:shanglong or to:shanglong")
+                                             (:name "kevin"    :query "from:kevin or to:kevin")
+                                             (:name "fantom"   :query "from:kevin and fantom")
+                                             (:name "diabetes" :query "(diabetes or t2d) and (from:fuxialexander@gmail.com or from:kevin) or from:ronald or from:yichen or from:edward")
+                                             (:name "inbox"    :query "tag:inbox")
+                                             (:name "flagged"  :query "tag:flagged")
+                                             (:name "sent"     :query "tag:sent")
+                                             (:name "drafts"   :query "tag:draft")
+                                             )
+                    notmuch-archive-tags '("-inbox" "+archive" "-unread")
+                    )
 
               (defun notmuch-start-notmuch-sentinel (proc event)
                 "Process sentinel function used by `notmuch-start-notmuch'."
@@ -390,6 +408,7 @@ matched."
                 (kbd "t") 'notmuch-tree-from-search-thread
                 (kbd "T") 'notmuch-tree-from-search-current-query
                 (kbd "d") 'notmuch-search-delete
+                (kbd "q") 'notmuch
                 (kbd "x") 'notmuch-search-killed
                 )
               (evilified-state-evilify-map notmuch-tree-mode-map
@@ -399,6 +418,7 @@ matched."
                 (kbd "k") 'notmuch-tree-prev-message
                 (kbd "S") 'notmuch-search-from-tree-current-query
                 (kbd "t") 'notmuch-tree
+                (kbd "q") 'notmuch
                 (kbd "r") 'notmuch-search-reply-to-thread-sender
                 (kbd "i") 'open-message-with-mail-app-notmuch-tree
                 (kbd "d") 'notmuch-tree-delete
@@ -418,6 +438,7 @@ matched."
                 :bindings
                 (kbd "i") 'open-message-with-mail-app-notmuch-show
                 (kbd "I") 'notmuch-show-view-all-mime-parts
+                (kbd "q") 'notmuch
                 )
 
 

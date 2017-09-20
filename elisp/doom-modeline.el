@@ -804,13 +804,13 @@ lines are selected, or the NxM dimensions of a block selection."
          name)
        'face (if (active) 'doom-modeline-perspname)))))
 
-(def-modeline-segment! buffer-purpose
-                          "The current window purpose. Requires `purpose-mode' to be
-enabled."
-                          (when (bound-and-true-p purpose-mode)
-                            (propertize (substring (purpose--modeline-string) 2 -1)
-                                        'face 'mode-line-inactive
-                                        'help-echo "Window purpose")))
+;; (def-modeline-segment! buffer-purpose
+;;                           "The current window purpose. Requires `purpose-mode' to be
+;; enabled."
+;;                           (when (bound-and-true-p purpose-mode)
+;;                             (propertize (substring (purpose--modeline-string) 2 -1)
+;;                                         'face 'mode-line-inactive
+;;                                         'help-echo "Window purpose")))
 
 (def-modeline-segment! matches
   "Displays: 1. the currently recording macro, 2. A current/total for the
@@ -848,18 +848,18 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 ;;
 
 (def-modeline! main
-  ;; (bar matches " " buffer-info "  ")
-  (bar matches "  " buffer-info " " buffer-purpose "  ")
+  (bar matches " " buffer-info "  ")
+  ;; (bar matches "  " buffer-info " " buffer-purpose "  ")
   (major-mode vcs flycheck " " perspname " " workspace-number " "))
 
 (def-modeline! clock
-  ;; (bar matches " " buffer-info "  ")
-  (bar matches "  " buffer-info " " buffer-purpose "  ")
+  (bar matches " " buffer-info "  ")
+  ;; (bar matches "  " buffer-info " " buffer-purpose "  ")
   (org-clock " " major-mode vcs flycheck " " perspname " " workspace-number " "))
 
 (def-modeline! pomodoro
-  ;; (bar matches " " buffer-info "  ")
-  (bar matches "  " buffer-info " " buffer-purpose "  ")
+  (bar matches " " buffer-info "  ")
+  ;; (bar matches "  " buffer-info " " buffer-purpose "  ")
   (org-clock org-pomodoro " " major-mode vcs flycheck " " perspname " " workspace-number " "))
 
 (def-modeline! minimal
