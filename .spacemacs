@@ -38,40 +38,39 @@ This function should only modify configuration layer settings."
      ;; ----------------------------------------------------------------
      (auto-completion :variables
                       auto-completion-return-key-behavior 'complete
-                      auto-completion-enable-help-tooltip t
                       auto-completion-enable-snippets-in-popup t
+                      auto-completion-enable-sort-by-usage t
                       auto-completion-tab-key-behavior 'cycle
                       auto-completion-complete-with-key-sequence nil
                       auto-completion-complete-with-key-sequence-delay 0.1
                       auto-completion-private-snippets-directory nil)
      better-defaults
-     ipython-notebook
      emacs-lisp
      evil-snipe
      imenu-list
-     notmuch
      git
      version-control
      colors
-     (myorg :variables org-enable-bootstrap-support t)
      pandoc
      (shell :variables
             shell-default-shell 'eshell
             shell-default-height 40
             )
      ivy
-     mybibtex
      (latex :variables latex-build-command "LatexMk")
      (ess :variables ess-enable-smart-equals t)
-     (ranger :variables ranger-show-preview nil)
-     python
+     ;; python
      osx
-     myshellscripts
      (spell-checking :variables spell-checking-enable-by-default nil)
-     (myelfeed :variables rmh-elfeed-org-files (list "~/.emacs.d/private/feed.org"))
      syntax-checking
+
      display
      personal
+     notmuch
+     myshellscripts
+     mybibtex
+     (myorg :variables org-enable-bootstrap-support t)
+     (myelfeed :variables rmh-elfeed-org-files (list "~/.emacs.d/private/feed.org"))
      (languagetool :variables langtool-language-tool-jar "/usr/local/Cellar/languagetool/3.8/libexec/languagetool-commandline.jar")
      )
    ;; List of additional packages that will be installed without being
@@ -82,18 +81,22 @@ This function should only modify configuration layer settings."
 ;;;; Additional Packages
 
    dotspacemacs-additional-packages '(
-                                      circadian
-                                      ;; bpr
+                                      ;; circadian
+                                      org-super-agenda
                                       ivy-dired-history
+                                      cdlatex
                                       tiny
+                                      ob-ipython
+                                      olivetti
                                       shx
+                                      lsp-mode
+                                      lsp-python
                                       shrink-path
                                       ob-browser
                                       fringe-helper
                                       kurecolor
                                       dired-narrow
                                       prodigy
-                                      ranger
                                       ox-twbs
                                       sx
                                       ob-async
@@ -108,6 +111,7 @@ This function should only modify configuration layer settings."
 ;;;; Excluded Packages
    dotspacemacs-excluded-packages '(
                                     window-purpose
+                                    ivy-purpose
                                     spacemacs-purpose-popwin
                                     ess-R-object-popup
                                     vi-tilde-fringe
@@ -171,6 +175,13 @@ It should only modify the values of Spacemacs settings."
    ;; Maximum allowed time in seconds to contact an ELPA repository.
    ;; (default 5)
    dotspacemacs-elpa-timeout 5
+   ;; If non-nil then Spacelpa repository is the primary source to install
+   ;; a locked version of packages. If nil then Spacemacs will install the lastest
+   ;; version of packages from MELPA. (default nil)
+   dotspacemacs-use-spacelpa nil
+   ;; If non-nil then verify the signature for downloaded Spacelpa archives.
+   ;; (default nil)
+   dotspacemacs-verify-spacelpa-archives nil
    ;; If non-nil then spacemacs will check for updates at startup
    ;; when the current branch is not `develop'. Note that checking for
    ;; new versions works via git commands, thus it calls GitHub services
@@ -178,8 +189,8 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-check-for-update nil
    ;; If non-nil, a form that evaluates to a package directory. For example, to
    ;; use different package directories for different Emacs versions, set this
-   ;; to `emacs-version'. (default nil)
-   dotspacemacs-elpa-subdirectory nil
+   ;; to `emacs-version'. (default 'emacs-version)
+   dotspacemacs-elpa-subdirectory 'emacs-version
    ;; One of `vim', `emacs' or `hybrid'.
    ;; `hybrid' is like `vim' except that `insert state' is replaced by the
    ;; `hybrid state' with `emacs' key bindings. The value can also be a list
@@ -211,24 +222,24 @@ It should only modify the values of Spacemacs settings."
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(
-                         (modern-light :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-dawn :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
+                         (modern-light :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          (modern-dark :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          solarized-dark
                          doom-one-light
                          doom-one
                          )
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
+   ;; (default t)
    dotspacemacs-colorize-cursor-according-to-state nil
-   ;;Default font, or prioritized list of fonts. `powerline-scale' allows to
+   ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Operator Mono"
-                               :size 13
+   dotspacemacs-default-font '("operator mono"
+                               :size 12
                                :weight normal
                                :width normal
-                               :powerline-scale 1.2
-                               )
-   ;; The leader key
+                               :powerline-scale 1.1)
+   ;; The leader key (default "SPC")
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands `M-x' (after pressing on the leader key).
    ;; (default "SPC")
@@ -303,7 +314,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-enable-paste-transient-state nil
    ;; Which-key delay in seconds. The which-key buffer is the popup listing
    ;; the commands bound to the current keystroke sequence. (default 0.4)
-   dotspacemacs-which-key-delay 0.4
+   dotspacemacs-which-key-delay 0
    ;; Which-key frame position. Possible values are `right', `bottom' and
    ;; `right-then-bottom'. right-then-bottom tries to display the frame to the
    ;; right; if there is insufficient space it displays it at the bottom.
@@ -346,7 +357,7 @@ It should only modify the values of Spacemacs settings."
    ;; If non-nil smooth scrolling (native-scrolling) is enabled. Smooth
    ;; scrolling overrides the default behavior of Emacs which recenters point
    ;; when it reaches the top or bottom of the screen. (default t)
-   dotspacemacs-smooth-scrolling nil
+   dotspacemacs-smooth-scrolling t
    ;; Control line numbers activation.
    ;; If set to `t' or `relative' line numbers are turned on in all `prog-mode' and
    ;; `text-mode' derivatives. If set to `relative', line numbers are relative.
@@ -366,11 +377,11 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-folding-method 'evil
    ;; If non-nil `smartparens-strict-mode' will be enabled in programming modes.
    ;; (default nil)
-   dotspacemacs-smartparens-strict-mode nil
+   dotspacemacs-smartparens-strict-mode t
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
    ;; over any automatically added closing parenthesis, bracket, quote, etc…
    ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
-   dotspacemacs-smart-closing-parenthesis nil
+   dotspacemacs-smart-closing-parenthesis t
    ;; Select a scope to highlight delimiters. Possible values are `any',
    ;; `current', `all' or `nil'. Default is `all' (highlight any scope and
    ;; emphasis the current one). (default 'all)
@@ -411,7 +422,7 @@ It should only modify the values of Spacemacs settings."
    ;; `trailing' to delete only the whitespace at end of lines, `changed' to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup 'nil
+   dotspacemacs-whitespace-cleanup nil
    ;; Either nil or a number of seconds. If non-nil zone out after the specified
    ;; number of seconds. (default nil)
    dotspacemacs-zone-out-when-idle nil
@@ -443,7 +454,9 @@ before packages are loaded. If you are unsure, you should try in setting them in
     )
   (require 'doom-modeline)
   (add-hook 'after-init-hook #'t/init-modeline)
+
   (add-hook 'after-init-hook 'export-diary-from-cal)
+  (setq evil-respect-visual-line-mode t)
   )
 
 ;;; User-config
@@ -460,8 +473,114 @@ you should place your code here."
   ;;   :ensure t
   ;;   :config (tiny-setup-default)
   ;;   )
+  ;; (use-package org-super-agenda :config
+  ;;   (let ((org-super-agenda-groups
+  ;;      '(;; Each group has an implicit boolean OR operator between its selectors.
+  ;;        (:name "Today"  ; Optionally specify section name
+  ;;               :time-grid t  ; Items that appear on the time grid
+  ;;               :todo "TODAY")  ; Items that have this TODO keyword
+  ;;        (:name "Important"
+  ;;               :priority "A")
+  ;;        (:todo "WAIT" :order 8)  ; Set order of this section
+  ;;        (:priority<= "B"
+  ;;                     ;; Show this section after "Today" and "Important", because
+  ;;                     ;; their order is unspecified, defaulting to 0. Sections
+  ;;                     ;; are displayed lowest-number-first.
+  ;;                     :order 1)
+  ;;        ;; After the last group, the agenda will display items that didn't
+  ;;        ;; match any of these groups, with the default order position of 99
+  ;;        )))
+  ;; (org-agenda nil "a"))
+  ;;   )
 
-  
+  (defvar kk/org-latex-fragment-last nil
+    "Holds last fragment/environment you were on.")
+
+  (defun kk/org-in-latex-fragment-p ()
+    "Return the point where the latex fragment begins, if inside
+  a latex fragment. Else return false"
+    (let* ((el (org-element-context))
+           (el-type (car el)))
+      (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
+          (org-element-property :begin el))))
+
+  (defun kk/org-latex-fragment-toggle ()
+    "Toggle a latex fragment image "
+    (and (eq 'org-mode major-mode)
+	 (let ((begin (kk/org-in-latex-fragment-p)))
+           (cond
+            ;; were on a fragment and now on a new fragment
+            ((and
+              ;; fragment we were on
+              kk/org-latex-fragment-last
+              ;; and are on a fragment now
+              begin
+
+              ;; but not on the last one this is a little tricky. as you edit the
+              ;; fragment, it is not equal to the last one. We use the begin
+              ;; property which is less likely to change for the comparison.
+              (not (and kk/org-latex-fragment-last
+			(= begin
+			   kk/org-latex-fragment-last))))
+             ;; go back to last one and put image back, provided there is still a fragment there
+             (save-excursion
+               (goto-char kk/org-latex-fragment-last)
+               (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment))
+
+               ;; now remove current image
+               (goto-char begin)
+               (let ((ov (loop for ov in (org--list-latex-overlays)
+                               if
+                               (and
+				(<= (overlay-start ov) (point))
+				(>= (overlay-end ov) (point)))
+                               return ov)))
+		 (when ov
+                   (delete-overlay ov)))
+               ;; and save new fragment
+               (setq kk/org-latex-fragment-last begin)))
+
+            ;; were on a fragment and now are not on a fragment
+            ((and
+              ;; not on a fragment now
+              (not begin)
+              ;; but we were on one
+              kk/org-latex-fragment-last)
+             ;; put image back on, provided that there is still a fragment here.
+             (save-excursion
+               (goto-char kk/org-latex-fragment-last)
+               (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment)))
+
+             ;; unset last fragment
+             (setq kk/org-latex-fragment-last nil))
+
+            ;; were not on a fragment, and now are
+            ((and
+              ;; we were not one one
+              (not kk/org-latex-fragment-last)
+              ;; but now we are
+              begin)
+             ;; remove image
+             (save-excursion
+               (goto-char begin)
+               (let ((ov (loop for ov in (org--list-latex-overlays)
+                               if
+                               (and
+				(<= (overlay-start ov) (point))
+				(>= (overlay-end ov) (point)))
+                               return ov)))
+		 (when ov
+                   (delete-overlay ov))))
+             (setq kk/org-latex-fragment-last begin))))))
+
+  (with-eval-after-load 'org
+    (add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
+    )
+
+  ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  ;; (add-to-list 'default-frame-alist '(ns-appearance . 'nil)) ; or 'dark, to switch to white title text
+
+
   (defun camelize (s)
     "Convert under_score string S to CamelCase string."
     (store-substring
@@ -479,19 +598,20 @@ you should place your code here."
     (align-regexp start end
                   (concat "\\(\\s-*\\)" regexp) 1 1 t))
 
+
   (yas-global-mode)
 ;;;; UI
 
 
-;;;;; Circadian
-  (use-package circadian
-    :load-path "~/.emacs.d/config/circadian/"
-    :ensure t
-    :config
-    (setq circadian-themes '(("8:00" . modern-light)
-                             ("19:30" . modern-dawn)
-                             ("00:00" . modern-dark)))
-    (circadian-setup))
+;; ;;;;; Circadian
+;;   (use-package circadian
+;;     :load-path "~/.emacs.d/config/circadian/"
+;;     :ensure t
+;;     :config
+;;     (setq circadian-themes '(("8:00" . modern-light)
+;;                              ("19:30" . modern-dawn)
+;;                              ("00:00" . modern-dark)))
+;;     (circadian-setup))
 
 
 ;;;;; Term line-spacing
@@ -528,16 +648,19 @@ you should place your code here."
       :modes shell-script-mode))
 
   (setq-default
+   ispell-program-name "/usr/local/bin/aspell"
    line-spacing 0.15
+   exec-path-from-shell-check-startup-files nil
+   display-line-numbers nil
+   bidi-paragraph-direction 'left-to-right
+   company-frontends '(company-preview-frontend)
    company-statistics-mode t
-   company-tooltip-align-annotations t
    company-require-match nil
-   company-quickhelp-mode t
    company-minimum-prefix-length 2
    custom-buffer-done-kill t
    auto-revert-remote-files nil
-   mac-mouse-wheel-smooth-scroll nil
-   bidi-display-reordering nil ; disable bidirectional text for tiny performance boost
+   ;; mac-mouse-wheel-smooth-scroll t
+
    blink-matching-paren nil    ; don't blink--too distracting
    cursor-in-non-selected-windows nil  ; hide cursors in other windows
    frame-inhibit-implied-resize t
@@ -579,7 +702,7 @@ you should place your code here."
    ;; global-company-mode t
    ;; global-auto-revert-mode t
    ;; global-auto-revert-non-file-buffers t
-   eyebrowse-new-workspace t
+   eyebrowse-new-workspace 'ivy-switch-buffer
    frame-resize-pixelwise t
    window-resize-pixelwise t
    window-divider-default-places t
@@ -641,6 +764,8 @@ you should place your code here."
   (global-set-key (kbd "C-H-M-#") 'spacemacs/custom-perspective-@Elfeed )
   (global-set-key (kbd "C-H-M-$") 'spacemacs/custom-perspective-@Lisp )
 
+  (global-set-key (kbd "H-f") 'counsel-company )
+
   (global-set-key (kbd "H-1") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-1-and-exit)
   (global-set-key (kbd "H-2") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-2-and-exit)
   (global-set-key (kbd "H-3") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-3-and-exit)
@@ -657,6 +782,7 @@ you should place your code here."
   (global-set-key (kbd "H-l") 'org-store-link )
   (global-set-key (kbd "H-d") 'split-window-right-and-focus )
   (global-set-key (kbd "H-D") 'split-window-below-and-focus )
+  (define-key global-map (kbd "<C-tab>") nil)
   (global-set-key (kbd-mac-command "h") 'ns-do-hide-emacs)
   (global-set-key (kbd "<f11>") nil)
   ;; (global-set-key (kbd "C-H-f") 'spacemacs/toggle-fullscreen)
@@ -670,6 +796,7 @@ you should place your code here."
   (eval-after-load "magit" '(define-key magit-mode-map (kbd "M-w") nil))
   (eval-after-load "shr" '(define-key shr-map (kbd "o") nil))
   (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") nil))
+  (eval-after-load "org" '(define-key org-mode-map (kbd "H-p") 'org-toggle-latex-fragment))
   (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
   (eval-after-load "org" '(define-key org-mode-map (kbd "H-i") 'org-ref-ivy-insert-cite-link))
   (eval-after-load "org" '(define-key org-mode-map (kbd "C-j") 'counsel-org-goto))
@@ -723,7 +850,7 @@ you should place your code here."
       (add-hook 'inferior-ess-mode-hook #'spacemacs-layouts/add-research-buffer-to-persp)
       ;; (add-hook 'ess-mode-hook #'spacemacs-layouts/add-research-buffer-to-persp)
       (add-hook 'dired-mode-hook #'spacemacs-layouts/add-research-buffer-to-persp)
-      (org-agenda nil "n")
+      (org-agenda nil "a")
       ))
 
   (spacemacs|define-custom-layout "@Elfeed"
@@ -830,67 +957,75 @@ you should place your code here."
     (start-process-shell-command "modify bib" nil "sleep 4;~/.emacs.d/private/local/cleanbib.sh")
     )
 
+  (setq org-latex-pdf-process
+        '("pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f"
+          "bibtex %b"
+          "pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f"
+          "pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f"))
+
+
+
 ;;;;; iTerm
-  (defun mac-iTerm-shell-command (text)
-    "Write TEXT into iTerm like user types it with keyboard."
-    (interactive
-     (list
-      (read-shell-command "Run Shell command in iTerm: "
-                          (when (use-region-p)
-                            (buffer-substring-no-properties
-                             (region-beginning)
-                             (region-end))))))
-    (do-applescript
-     (concat
-      "tell application \"iTerm\"\n"
-      "    activate\n"
-      "    create window with default profile\n"
-      "    tell current session of current window\n"
-      "        write text \"" text "\"\n"
-      "    end tell\n"
-      "end tell")))
+(defun mac-iTerm-shell-command (text)
+  "Write TEXT into iTerm like user types it with keyboard."
+  (interactive
+   (list
+    (read-shell-command "Run Shell command in iTerm: "
+                        (when (use-region-p)
+                          (buffer-substring-no-properties
+                           (region-beginning)
+                           (region-end))))))
+  (do-applescript
+   (concat
+    "tell application \"iTerm\"\n"
+    "    activate\n"
+    "    create window with default profile\n"
+    "    tell current session of current window\n"
+    "        write text \"" text "\"\n"
+    "    end tell\n"
+    "end tell")))
 
-  (defun mac-iTerm-shell-command-current (text)
-    "Write TEXT into iTerm like user types it with keyboard."
-    (interactive
-     (list
-      (read-shell-command "Run Shell command in iTerm: "
-                          (when (use-region-p)
-                            (buffer-substring-no-properties
-                             (region-beginning)
-                             (region-end))))))
-    (do-applescript
-     (concat
-      "tell application \"iTerm\"\n"
-      "    activate\n"
-      "    tell current session of current window\n"
-      "        write text \"" text "\"\n"
-      "    end tell\n"
-      "end tell")))
+(defun mac-iTerm-shell-command-current (text)
+  "Write TEXT into iTerm like user types it with keyboard."
+  (interactive
+   (list
+    (read-shell-command "Run Shell command in iTerm: "
+                        (when (use-region-p)
+                          (buffer-substring-no-properties
+                           (region-beginning)
+                           (region-end))))))
+  (do-applescript
+   (concat
+    "tell application \"iTerm\"\n"
+    "    activate\n"
+    "    tell current session of current window\n"
+    "        write text \"" text "\"\n"
+    "    end tell\n"
+    "end tell")))
 
 
-  (defun mac-iTerm-cd (dir)
-    "Switch to iTerm and change directory there to DIR."
-    (interactive (list
-                  ;; Because shell doesn't expand 'dir'
-                  (expand-file-name
-                   (if current-prefix-arg
-                       (read-directory-name "cd to: ")
-                     default-directory))))
-    (if (file-remote-p dir)
-        (let* (
-               (host (tramp-file-name-host (tramp-dissect-file-name dir)))
-               (dir (tramp-file-name-localname (tramp-dissect-file-name dir)))
-               (sshcmd (format "ssh %s" host))
-               (cdcmd (format "cd %s" dir))
-               )
-          (mac-iTerm-shell-command sshcmd)
-          (mac-iTerm-shell-command-current cdcmd)
-          )
-      (let ((cmd (format "cd %s" dir)))
-        (mac-iTerm-shell-command cmd))
+(defun mac-iTerm-cd (dir)
+  "Switch to iTerm and change directory there to DIR."
+  (interactive (list
+                ;; Because shell doesn't expand 'dir'
+                (expand-file-name
+                 (if current-prefix-arg
+                     (read-directory-name "cd to: ")
+                   default-directory))))
+  (if (file-remote-p dir)
+      (let* (
+             (host (tramp-file-name-host (tramp-dissect-file-name dir)))
+             (dir (tramp-file-name-localname (tramp-dissect-file-name dir)))
+             (sshcmd (format "ssh %s" host))
+             (cdcmd (format "cd %s" dir))
+             )
+        (mac-iTerm-shell-command sshcmd)
+        (mac-iTerm-shell-command-current cdcmd)
         )
-    )
+    (let ((cmd (format "cd %s" dir)))
+      (mac-iTerm-shell-command cmd))
+      )
+  )
 
 ;;;;; Tyme2
   ;;   ;; (defun start-tyme ()
@@ -960,8 +1095,6 @@ you should place your code here."
     (add-to-list 'tramp-remote-path "/uac/gds/xfu/bin")
     )
 
-;;;; EIN
-  (setq ein:cell-max-num-outputs 10)
 ;;;; Ivy
   (with-eval-after-load 'ivy
     (setq
@@ -973,6 +1106,50 @@ you should place your code here."
      ivy-re-builders-alist '((t . ivy--regex-plus)))
 
     (define-key ivy-minibuffer-map (kbd "<C-return>") 'ivy-call)
+
+    (defun counsel-org-goto--get-headlines ()
+  "Get all headlines from the current org buffer."
+  (save-excursion
+    (let (entries
+          start-pos
+          stack
+          (stack-level 0))
+      (goto-char (point-min))
+      (setq start-pos (or (and (org-at-heading-p)
+                               (point))
+                          (outline-next-heading)))
+      (while start-pos
+        (let ((name (org-get-heading
+                     (not counsel-org-goto-display-tags)
+                     (not counsel-org-goto-display-todo)))
+              level)
+          (search-forward " ")
+          (setq level
+                (- (length (buffer-substring-no-properties start-pos (point)))
+                   1))
+          (cond ((eq counsel-org-goto-display-style 'path)
+                 ;; Update stack. The empty entry guards against incorrect
+                 ;; headline hierarchies e.g. a level 3 headline immediately
+                 ;; following a level 1 entry.
+                 (while (<= level stack-level)
+                   (pop stack)
+                   (cl-decf stack-level))
+                 (while (> level stack-level)
+                   (push "" stack)
+                   (cl-incf stack-level))
+                 (setf (car stack) (counsel-org-goto--add-face name level))
+                 (setq name (mapconcat
+                             #'identity
+                             (reverse stack)
+                             counsel-org-goto-separator)))
+                (t
+                 (when (eq counsel-org-goto-display-style 'headline)
+                   (setq name (concat (make-string (* 2 level) ? ) (nth (- level 1) org-bullets-bullet-list) "  " name)))
+                 (setq name (counsel-org-goto--add-face name level))))
+          (push (cons name (point-marker)) entries))
+        (setq start-pos (outline-next-heading)))
+      (nreverse entries))))
+
     )
 ;;;; Dired
   (with-eval-after-load 'dired
@@ -1007,7 +1184,8 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (circadian goto-chg markdown-mode projectile julia-mode async all-the-icons magit-popup git-commit smartparens ess flycheck counsel swiper ivy notmuch elfeed org-plus-contrib shx iedit magit vi-tilde-fringe symon spaceline powerline neotree lorem-ipsum linum-relative highlight-indentation helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-ag flx-ido fancy-battery exec-path-from-shell define-word clean-aindent-mode ace-jump-helm-line helm helm-core yapfify xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill toc-org tiny sx string-inflection solarized-theme smex smeargle shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs ranger rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain open-junk-file ob-browser ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dawn-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org ein editorconfig dumb-jump doom-themes dired-narrow diff-hl cython-mode counsel-projectile company-statistics company-quickhelp company-auctex company-anaconda column-enforce-mode color-identifiers-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ac-ispell))))
+    (org-download org-brain dumb-jump julia-mode counsel lsp-mode magit org-plus-contrib markdown-mode xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill toc-org tiny sx string-inflection solarized-theme smex smeargle shx shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters prodigy prettify-utils popwin persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-bullets open-junk-file olivetti ob-ipython ob-browser ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dawn-theme modern-dark-theme magit-popup macrostep lsp-python link-hint launchctl langtool kurecolor ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide imenu-list hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig doom-themes dired-narrow diff-hl counsel-projectile company-statistics company-auctex column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
+ '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -607,16 +607,16 @@ This segment overrides the modeline functionality of `org-mode-line-string'."
                             (substring-no-properties (funcall spaceline-org-clock-format-function)))
                           :global-override org-mode-line-string)
 
-;;
-(def-modeline-segment! org-pomodoro
-                          "Shows the current pomodoro.  Requires `org-pomodoro' to be active.
-This segment overrides the modeline functionality of `org-pomodoro' itself."
-                          (when (and (fboundp 'org-pomodoro-active-p)
-                                     (org-pomodoro-active-p))
-                            (nth 1 org-pomodoro-mode-line))
-                          :global-override org-pomodoro-mode-line)
+;; ;;
+;; (def-modeline-segment! org-pomodoro
+;;                           "Shows the current pomodoro.  Requires `org-pomodoro' to be active.
+;; This segment overrides the modeline functionality of `org-pomodoro' itself."
+;;                           (when (and (fboundp 'org-pomodoro-active-p)
+;;                                      (org-pomodoro-active-p))
+;;                             (nth 1 org-pomodoro-mode-line))
+;;                           :global-override org-pomodoro-mode-line)
 
-;;
+;; ;;
 (def-modeline-segment! vcs
   "Displays the current branch, colored based on its state."
   (when (and vc-mode buffer-file-name)
@@ -857,10 +857,10 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
   ;; (bar matches "  " buffer-info " " buffer-purpose "  ")
   (org-clock " " major-mode vcs flycheck " " perspname " " workspace-number " "))
 
-(def-modeline! pomodoro
-  (bar matches " " buffer-info "  ")
-  ;; (bar matches "  " buffer-info " " buffer-purpose "  ")
-  (org-clock org-pomodoro " " major-mode vcs flycheck " " perspname " " workspace-number " "))
+;; (def-modeline! pomodoro
+;;   (bar matches " " buffer-info "  ")
+;;   ;; (bar matches "  " buffer-info " " buffer-purpose "  ")
+;;   (org-clock org-pomodoro " " major-mode vcs flycheck " " perspname " " workspace-number " "))
 
 (def-modeline! minimal
   (bar matches " " buffer-info)
@@ -898,8 +898,8 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 (defun +doom-modeline|set-clock-modeline ()
   (doom-set-modeline 'clock))
 
-(defun +doom-modeline|set-pomodoro-modeline ()
-  (doom-set-modeline 'pomodoro))
+;; (defun +doom-modeline|set-pomodoro-modeline ()
+;;   (doom-set-modeline 'pomodoro))
 
 (defun +doom-modeline|set-media-modeline ()
   (doom-set-modeline 'media))
@@ -914,7 +914,7 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 (add-hook 'org-src-mode-hook          #'+doom-modeline|set-special-modeline)
 (add-hook 'org-clock-in-hook          #'+doom-modeline|set-clock-modeline)
 ;; (add-hook 'org-clock-out-hook         #'+doom-modeline|set-main-modeline)
-(add-hook 'org-pomodoro-started-hook  #'+doom-modeline|set-pomodoro-modeline)
+;; (add-hook 'org-pomodoro-started-hook  #'+doom-modeline|set-pomodoro-modeline)
 ;; (add-hook 'org-pomodoro-finished-hook #'+doom-modeline|set-main-modeline)
 (add-hook 'image-mode-hook            #'+doom-modeline|set-media-modeline)
 (add-hook 'circe-mode-hook            #'+doom-modeline|set-special-modeline)

@@ -27,10 +27,11 @@
         org-mime
         org-pomodoro
         org-present
+        org-super-agenda
         (org-projectile :requires projectile)
         (ox-twbs :toggle org-enable-bootstrap-support)
         (ox-reveal :toggle org-enable-reveal-js-support)
-        ))
+        (ox-hugo :toggle org-enable-hugo-support)))
 
 (defun myorg/post-init-company ()
   (spacemacs|add-company-backends :backends company-capf :modes org-mode)
@@ -74,6 +75,7 @@
         (org-babel-do-load-languages 'org-babel-load-languages
                                      org-babel-load-languages))
       (add-hook 'org-mode-hook 'spacemacs//org-babel-do-load-languages)
+      
       ;; Fix redisplay of inline images after a code block evaluation.
       (add-hook 'org-babel-after-execute-hook 'spacemacs/ob-fix-inline-images))))
 
@@ -83,6 +85,15 @@
     :commands (orgtbl-mode)
     :init
     (progn
+
+      (defface org-todo-keyword-todo '((t ())) "org-todo" :group 'org)
+      (defface org-todo-keyword-kill '((t ())) "org-kill" :group 'org)
+      (defface org-todo-keyword-outd '((t ())) "org-outd" :group 'org)
+      (defface org-todo-keyword-wait '((t ())) "org-wait" :group 'org)
+      (defface org-todo-keyword-done '((t ())) "org-done" :group 'org)
+      (defface org-todo-keyword-habt '((t ())) "org-habt" :group 'org)
+
+
       (setq org-clock-persist-file (concat spacemacs-cache-directory "org-clock-save.el")
             org-id-locations-file (concat spacemacs-cache-directory ".org-id-locations")
             org-publish-timestamp-directory (concat spacemacs-cache-directory ".org-timestamps/")
@@ -246,15 +257,21 @@ Brief description:
                                 (sequence "HABT(h!)" "|" "DONE(d!/@)" "KILL(k@/@)")
                                 )
             org-todo-keyword-faces '(
-                                     ("TODO" :inherit default :foreground "#d34a65" :weight bold :box (:line-width 1 :color "#d34a65" :style nil))
-                                     ("HABT" :inherit default :foreground "#EADC77" :weight bold :box (:line-width 1 :color "#EADC77" :style nil))
-                                     ("DONE" :inherit default :foreground "#15c188" :weight bold :box (:line-width 1 :color "#15c188" :style nil))
-                                     ("WAIT" :inherit default :foreground "#ff9d00" :weight bold :box (:line-width 1 :color "#ff9d00" :style nil))
-                                     ("KILL" :inherit default :foreground "#6f2faf" :weight bold :box (:line-width 1 :color "#6f2faf" :style nil))
-                                     ("OUTD" :inherit default :foreground "#6fa1f2" :weight bold :box (:line-width 1 :color "#6fa1f2" :style nil))
+                                     ("TODO" . org-todo-keyword-todo)
+                                     ("HABT" . org-todo-keyword-habt)
+                                     ("DONE" . org-todo-keyword-done)
+                                     ("WAIT" . org-todo-keyword-wait)
+                                     ("KILL" . org-todo-keyword-kill)
+                                     ("OUTD" . org-todo-keyword-outd)
                                      )
             )
 ;;;;; Org-latex
+      (defun my-buffer-face-mode-orgwrite ()
+        "Sets a fixed width (monospace) font in current buffer"
+        (interactive)
+        (setq buffer-face-mode-face '(:family "CMU Serif"))
+        (buffer-face-mode))
+
       (setq
        org-latex-logfiles-extensions (quote ("lof" "lot" "tex~" "aux" "idx" "log" "out" "toc" "nav" "snm" "vrb" "dvi" "fdb_latexmk" "blg" "brf" "fls" "entoc" "ps" "spl" "bbl"))
        org-latex-create-formula-image-program 'dvisvgm
@@ -371,11 +388,10 @@ Will work on both org-mode and any mode that accepts plain html."
         "a"     'org-agenda
         "n" 'org-modify-and-clock-current-heading
 
-        "Tt"    'org-show-todo-tree
-        "Ti"    'org-toggle-inline-images
-        "TT"    'org-todo
-        "TV"    'space-doc-mode
-        "Tx"    'org-toggle-latex-fragment
+        "tt"    'org-show-todo-tree
+        "ti"    'org-toggle-inline-images
+        "td"    'space-doc-mode
+        "te"    'org-toggle-latex-fragment
 
         ;; More cycling options (timestamps, headlines, items, properties)
         "L"     'org-shiftright
@@ -404,32 +420,32 @@ Will work on both org-mode and any mode that accepts plain html."
         "sS"    'org-sort
 
         ;; tables
-        "ta"    'org-table-align
-        "tb"    'org-table-blank-field
-        "tc"    'org-table-convert
-        "tdc"   'org-table-delete-column
-        "tdr"   'org-table-kill-row
-        "te"    'org-table-eval-formula
-        "tE"    'org-table-export
-        "th"    'org-table-previous-field
-        "tH"    'org-table-move-column-left
-        "tic"   'org-table-insert-column
-        "tih"   'org-table-insert-hline
-        "tiH"   'org-table-hline-and-move
-        "tir"   'org-table-insert-row
-        "tI"    'org-table-import
-        "tj"    'org-table-next-row
-        "tJ"    'org-table-move-row-down
-        "tK"    'org-table-move-row-up
-        "tl"    'org-table-next-field
-        "tL"    'org-table-move-column-right
-        "tn"    'org-table-create
-        "tN"    'org-table-create-with-table.el
-        "tr"    'org-table-recalculate
-        "ts"    'org-table-sort-lines
-        "ttf"   'org-table-toggle-formula-debugger
-        "tto"   'org-table-toggle-coordinate-overlays
-        "tw"    'org-table-wrap-region
+        "Ta"    'org-table-align
+        "Tb"    'org-table-blank-field
+        "Tc"    'org-table-convert
+        "Tdc"   'org-table-delete-column
+        "Tdr"   'org-table-kill-row
+        "Te"    'org-table-eval-formula
+        "TE"    'org-table-export
+        "Th"    'org-table-previous-field
+        "TH"    'org-table-move-column-left
+        "Tic"   'org-table-insert-column
+        "Tih"   'org-table-insert-hline
+        "TiH"   'org-table-hline-and-move
+        "Tir"   'org-table-insert-row
+        "TI"    'org-table-import
+        "Tj"    'org-table-next-row
+        "TJ"    'org-table-move-row-down
+        "TK"    'org-table-move-row-up
+        "Tl"    'org-table-next-field
+        "TL"    'org-table-move-column-right
+        "Tn"    'org-table-create
+        "TN"    'org-table-create-with-table.el
+        "Tr"    'org-table-recalculate
+        "Ts"    'org-table-sort-lines
+        "Ttf"   'org-table-toggle-formula-debugger
+        "Tto"   'org-table-toggle-coordinate-overlays
+        "Tw"    'org-table-wrap-region
 
         ;; Multi-purpose keys
         (or dotspacemacs-major-mode-leader-key ",") 'org-ctrl-c-ctrl-c
@@ -458,7 +474,7 @@ Will work on both org-mode and any mode that accepts plain html."
         "xr" (spacemacs|org-emphasize spacemacs/org-clear ? )
         "xs" (spacemacs|org-emphasize spacemacs/org-strike-through ?+)
         "xu" (spacemacs|org-emphasize spacemacs/org-underline ?_)
-        "xv" (spacemacs|org-emphasize spacemacs/org-verbose ?=))
+        "xv" (spacemacs|org-emphasize spacemacs/org-verbatim ?=))
 
       ;; Add global evil-leader mappings. Used to access org-agenda
       ;; functionalities – and a few others commands – from any other mode.
@@ -500,6 +516,7 @@ Will work on both org-mode and any mode that accepts plain html."
       (org-babel-do-load-languages
        'org-babel-load-languages
        '((emacs-lisp . t)
+         (ipython . t)
          (python . t)
          (R . t)
          (shell . t)
@@ -807,28 +824,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
             org-agenda-skip-scheduled-if-deadline-is-shown t
             org-agenda-skip-scheduled-if-done t
             org-agenda-start-with-log-mode nil
-            org-agenda-custom-commands
-            (quote
-             (
-              ("n" "Agenda and all TODOs"
-               ((agenda ""
-                        ((org-agenda-span 3)
-                         (org-agenda-overriding-header " Week Agenda
-")))
-                (alltodo ""
-                         ((org-agenda-skip-function
-                           (quote
-                            (org-agenda-skip-entry-if
-                             (quote scheduled))))
-                          (org-agenda-overriding-header " TODOs
-")
-                          (org-agenda-sorting-strategy
-                           (quote
-                            (todo-state-up deadline-up))))))
-               ((org-agenda-tag-filter-preset
-                 (quote
-                  ("-COMMENT")))))
-              ))
+            org-agenda-custom-commands '()
        )
 
       ;; (defun remove-headline-tags (headline)
@@ -909,22 +905,22 @@ Returns the new TODO keyword, or nil if no state change should occur."
         "sc" 'org-copy
         )
       (spacemacs|define-transient-state org-agenda
-        :title "Org-agenda transient state"
-        :on-enter (setq which-key-inhibit t)
-        :on-exit (setq which-key-inhibit nil)
-        :foreign-keys run
-        :doc
-        "
-Headline^^            Visit entry^^               Filter^^                    Date^^               Toggle mode^^        View^^             Clock^^        Other^^
---------^^---------   -----------^^------------   ------^^-----------------   ----^^-------------  -----------^^------  ----^^---------    -----^^------  -----^^-----------
-[_ht_] set status     [_SPC_] in other window     [_ft_] by tag               [_ds_] schedule      [_tf_] follow        [_vd_] day         [_cI_] in      [_gr_] reload
-[_hk_] kill           [_TAB_] & go to location    [_fr_] refine by tag        [_dd_] set deadline  [_tl_] log           [_vw_] week        [_cO_] out     [_._]  go to today
-[_hr_] refile         [_RET_] & del other windows [_fc_] by category          [_dt_] timestamp     [_ta_] archive       [_vt_] fortnight   [_cq_] cancel  [_gd_] go to date
-[_hA_] archive        [_o_]   link                [_fh_] by top headline      [_+_]  do later      [_tr_] clock report  [_vm_] month       [_cj_] jump    ^^
-[_h:_] set tags       ^^                          [_fx_] by regexp            [_-_]  do earlier    [_td_] diaries       [_vy_] year        ^^             ^^
-[_hp_] set priority   ^^                          [_fd_] delete all filters   ^^                   ^^                   [_vn_] next span   ^^             ^^
-^^                    ^^                          ^^                          ^^                   ^^                   [_vp_] prev span   ^^             ^^
-^^                    ^^                          ^^                          ^^                   ^^                   [_vr_] reset       ^^             ^^
+      :title "Org-agenda transient state"
+      :on-enter (setq which-key-inhibit t)
+      :on-exit (setq which-key-inhibit nil)
+      :foreign-keys run
+      :doc
+      "
+Headline^^            Visit entry^^               Filter^^                    Date^^                  Toggle mode^^        View^^             Clock^^        Other^^
+--------^^---------   -----------^^------------   ------^^-----------------   ----^^-------------     -----------^^------  ----^^---------    -----^^------  -----^^-----------
+[_ht_] set status     [_SPC_] in other window     [_ft_] by tag               [_ds_] schedule         [_tf_] follow        [_vd_] day         [_cI_] in      [_gr_] reload
+[_hk_] kill           [_TAB_] & go to location    [_fr_] refine by tag        [_dS_] un-schedule      [_tl_] log           [_vw_] week        [_cO_] out     [_._]  go to today
+[_hr_] refile         [_RET_] & del other windows [_fc_] by category          [_dd_] set deadline     [_ta_] archive       [_vt_] fortnight   [_cq_] cancel  [_gd_] go to date
+[_hA_] archive        [_o_]   link                [_fh_] by top headline      [_dD_] remove deadline  [_tr_] clock report  [_vm_] month       [_cj_] jump    ^^
+[_h:_] set tags       ^^                          [_fx_] by regexp            [_dt_] timestamp        [_td_] diaries       [_vy_] year        ^^             ^^
+[_hp_] set priority   ^^                          [_fd_] delete all filters   [_+_]  do later         ^^                   [_vn_] next span   ^^             ^^
+^^                    ^^                          ^^                          [_-_]  do earlier       ^^                   [_vp_] prev span   ^^             ^^
+^^                    ^^                          ^^                          ^^                      ^^                   [_vr_] reset       ^^             ^^
 [_q_] quit
 "
       :bindings
@@ -945,8 +941,14 @@ Headline^^            Visit entry^^               Filter^^                    Da
 
       ;; Date
       ("ds" org-agenda-schedule)
+      ("dS" (lambda () (interactive)
+             (let ((current-prefix-arg '(4)))
+                  (call-interactively 'org-agenda-schedule))))
       ("dd" org-agenda-deadline)
       ("dt" org-agenda-date-prompt)
+      ("dD" (lambda () (interactive)
+             (let ((current-prefix-arg '(4)))
+                  (call-interactively 'org-agenda-deadline))))
       ("+" org-agenda-do-date-later)
       ("-" org-agenda-do-date-earlier)
 
@@ -1154,3 +1156,6 @@ Headline^^            Visit entry^^               Filter^^                    Da
         "j" 'org-journal-new-entry
         "n" 'org-journal-open-next-entry
         "p" 'org-journal-open-previous-entry))))
+
+(defun org/init-ox-hugo ()
+  (use-package ox-hugo :after ox))

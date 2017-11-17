@@ -11,12 +11,12 @@
 *** entry-title: \(hirschsprung\)                                         :hscr:
 *** entry-title: \(hirschsprung\)                                         :hscr:
 *** [[http://connect.biorxiv.org/biorxiv_xml.php?subject=genomics+bioinformatics+developmental_biology][BioRxiv]]                                                           :preprint:
-*** [[http://feeds.nature.com/nature/rss/aop?format=usm][Nature AOP]]                                                          :nature:
+*** [[http://feeds.nature.com/nature/rss/aop?format=usm][Nature AOP] :nature:
 *** [[http://bioinformatics.oxfordjournals.org/rss/current.xml][Bioinformatics]]                                                     :bioinfo:
 *** [[http://www.cell.com/cell/inpress.rss][Cell]]                                                                  :cell:
 *** [[http://genome.cshlp.org/rss/ahead.xml][Genome Research AOP]]                                                 :genome:
 *** [[http://genomebiology.biomedcentral.com/articles/most-recent/rss.xml][Genome Biology]]                                                      :genome:
-*** [[http://feeds.nature.com/nbt/rss/aop][Nature Biotechnology]]                                                :nature:
-*** [[http://feeds.nature.com/ng/rss/aop][Nature Genetics]]                                                     :nature:
+*** [[http://feeds.nature.com/nbt/rss/aop?format=usm][Nature Biotechnology]] :nature:
+*** [[http://feeds.nature.com/ng/rss/aop?format=usm][Nature Genetics]] :nature:
 ** Bioinfo                                                             :bioinfo:
 *** [[http://jef.works/feed.xml][Jean Fan's blog]]

@@ -130,12 +130,13 @@
     :commands (notmuch-tree)
     :defer t
     :init (progn
+            (remove-hook 'message-mode-hook #'turn-on-auto-fill)
+            (remove-hook 'notmuch-message-mode-hook #'turn-on-auto-fill)
             (defun my-buffer-face-mode-notmuch ()
               "Sets a fixed width (monospace) font in current buffer"
               (interactive)
               (setq buffer-face-mode-face '(:family "Inziu Iosevka SC"))
               (buffer-face-mode))
-            (add-hook 'notmuch-hello-mode-hook 'my-buffer-face-mode-notmuch)
             (add-hook 'notmuch-tree-mode-hook 'my-buffer-face-mode-notmuch)
             (add-hook 'notmuch-search-mode-hook 'my-buffer-face-mode-notmuch)
             (add-hook 'notmuch-message-mode-hook 'my-buffer-face-mode-notmuch)
@@ -161,17 +162,14 @@
                                              notmuch-hello-insert-alltags
                                              )
                     notmuch-saved-searches '(
-                                             (:name "hscr"     :query "variants and significant and (from:fuxialexander@gmail.com or from:kevin)  or from:clara  or from:merce or from:ellyngan or from:malzac")
-                                             (:name "n2o"      :query "from:shanglong or to:shanglong")
-                                             (:name "kevin"    :query "from:kevin or to:kevin")
-                                             (:name "fantom"   :query "from:kevin and fantom")
-                                             (:name "diabetes" :query "(diabetes or t2d) and (from:fuxialexander@gmail.com or from:kevin) or from:ronald or from:yichen or from:edward")
-                                             (:name "inbox"    :query "tag:inbox")
+                                             (:name "kevin"    :query "(from:kevin or (from:fuxialexander and to:kevin)) ")
+                                             (:name "hscr"    :query "tag:hscr")
+                                             (:name "inbox"    :query "tag:inbox not tag:trash")
                                              (:name "flagged"  :query "tag:flagged")
                                              (:name "sent"     :query "tag:sent")
                                              (:name "drafts"   :query "tag:draft")
                                              )
-                    notmuch-archive-tags '("-inbox" "+archive" "-unread")
+                    notmuch-archive-tags '("-inbox" "-unread")
                     )
 
               (defun notmuch-start-notmuch-sentinel (proc event)
@@ -223,7 +221,7 @@
 
               (defun notmuch-update ()
                 (interactive)
-                (start-process-shell-command "manually update email" nil "afew -a -m && mbsync gmail && notmuch new && afew -a -t")
+                (start-process-shell-command "manually update email" nil "cd .mail/gmail && gmi sync && notmuch new && afew -a -t")
                 (notmuch-hello-update)
                 )
 
@@ -377,11 +375,11 @@ matched."
                        (temp (make-temp-file "notmuch-message-" nil ".eml")))
                   (shell-command-to-string (format "cp '%s' '%s'; open '%s' -a Mail; l/bin/rm '%s'" msg-path temp temp temp))))
 
-              (defun notmuch-search-delete () (interactive) (notmuch-search-add-tag (list "+deleted" "-inbox" "-unread")) (notmuch-search-next-thread))
-              (defun notmuch-tree-delete () (interactive) (notmuch-tree-add-tag (list "+deleted" "-inbox" "-unread")) (notmuch-tree-next-message))
+              (defun notmuch-search-delete () (interactive) (notmuch-search-add-tag (list "+trash" "-inbox" "-unread")) (notmuch-search-next-thread))
+              (defun notmuch-tree-delete () (interactive) (notmuch-tree-add-tag (list "+trash" "-inbox" "-unread")) (notmuch-tree-next-message))
 
-              (defun notmuch-search-killed () (interactive) (notmuch-search-add-tag (list "+killed" "-inbox" "-unread")) (notmuch-search-next-thread))
-              (defun notmuch-tree-killed () (interactive) (notmuch-tree-add-tag (list "+killed" "-inbox" "-unread")) (notmuch-tree-next-message))
+              (defun notmuch-search-spam () (interactive) (notmuch-search-add-tag (list "+spam" "-inbox" "-unread")) (notmuch-search-next-thread))
+              (defun notmuch-tree-spam () (interactive) (notmuch-tree-add-tag (list "+spam" "-inbox" "-unread")) (notmuch-tree-next-message))
 
 
 
@@ -409,7 +407,7 @@ matched."
                 (kbd "T") 'notmuch-tree-from-search-current-query
                 (kbd "d") 'notmuch-search-delete
                 (kbd "q") 'notmuch
-                (kbd "x") 'notmuch-search-killed
+                (kbd "x") 'notmuch-search-spam
                 )
               (evilified-state-evilify-map notmuch-tree-mode-map
                 :mode notmuch-tree-mode
@@ -422,7 +420,7 @@ matched."
                 (kbd "r") 'notmuch-search-reply-to-thread-sender
                 (kbd "i") 'open-message-with-mail-app-notmuch-tree
                 (kbd "d") 'notmuch-tree-delete
-                (kbd "x") 'notmuch-tree-killed
+                (kbd "x") 'notmuch-tree-spam
                 )
 
               (evilified-state-evilify-map notmuch-hello-mode-map
@@ -436,9 +434,17 @@ matched."
               (evilified-state-evilify-map notmuch-show-mode-map
                 :mode notmuch-show-mode
                 :bindings
-                (kbd "i") 'open-message-with-mail-app-notmuch-show
+                (kbd "H-i") 'open-message-with-mail-app-notmuch-show
                 (kbd "I") 'notmuch-show-view-all-mime-parts
                 (kbd "q") 'notmuch
+                (kbd "e") 'evil-forward-word-end
+                (kbd "w") 'evil-forward-word-begin
+                (kbd "b") 'evil-backward-word-begin
+                (kbd "f") 'evil-snipe-f
+                (kbd "F") 'evil-snipe-F
+                (kbd "b") 'evil-backward-word-begin
+                (kbd "t") 'notmuch-tree-from-show-current-query
+
                 )
 
 

@@ -95,7 +95,8 @@
 ;;     :config
 ;;     (progn
 ;;       ;; (pretty-outline-add-bullets)
-;;       ;;   (add-hook 'python-mode-hook 'pretty-outline-add-bullets)
+;;       (add-hook 'python-mode-hook 'pretty-outline-add-bullets)
+;;       (add-hook 'emacs-lisep-mode-hook 'pretty-outline-add-bullets)
 ;;       )))
 
 
