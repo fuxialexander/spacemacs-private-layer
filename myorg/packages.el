@@ -25,6 +25,7 @@
         org-download
         ;; org-mime is installed by `org-plus-contrib'
         org-mime
+        (ob-ipython :location local)
         org-pomodoro
         org-present
         org-super-agenda
@@ -37,6 +38,17 @@
   (spacemacs|add-company-backends :backends company-capf :modes org-mode)
   (spacemacs|add-company-backends :backends company-ispell :modes org-mode)
   )
+
+
+(defun myorg/init-org-super-agenda ()
+  (use-package org-super-agenda
+    :init
+    :config
+    (setq
+     org-super-agenda-groups '((:auto-category t))
+     )
+    (org-super-agenda-mode)
+    ))
 
 (defun myorg/init-evil-org ()
   (use-package evil-org
@@ -54,6 +66,18 @@
                                  )))
     :config
     (spacemacs|diminish evil-org-mode " ⓔ" " e")))
+(defun myorg/init-ob-ipython ()
+  (use-package ob-ipython
+    :defer t
+    :init
+    :config
+    (add-hook 'org-src-mode-hook 'ob-ipython-mode)
+    ;; (spacemacs|add-company-backends :backends company-ob-ipython :modes org-src-mode)
+
+    (define-key org-src-mode-map (kbd "H-p") 'company-ob-ipython)
+    (define-key ob-ipython-mode-map (kbd "<f1>") 'ob-ipython-inspect)
+    ;; (add-to-list 'company-backends 'company-ob-ipython)
+    ))
 
 (defun myorg/post-init-evil-surround ()
   (defun spacemacs/add-org-surrounds ()
@@ -75,7 +99,6 @@
         (org-babel-do-load-languages 'org-babel-load-languages
                                      org-babel-load-languages))
       (add-hook 'org-mode-hook 'spacemacs//org-babel-do-load-languages)
-      
       ;; Fix redisplay of inline images after a code block evaluation.
       (add-hook 'org-babel-after-execute-hook 'spacemacs/ob-fix-inline-images))))
 
@@ -232,9 +255,11 @@ Brief description:
             org-log-reschedule 'note
             org-enforce-todo-dependencies t
             org-habit-graph-column 60
+            org-habit-show-habits t
             org-hide-block-startup t
             org-tags-column 0
             org-agenda-restore-windows-after-quit t
+            org-agenda-span 'day
             org-agenda-files '("/Users/xfu/Dropbox/org/")
             org-refile-targets '((nil :maxlevel . 9)
                                  (org-agenda-files :maxlevel . 9))
@@ -342,6 +367,7 @@ Brief description:
         "Make function for setting the emphasis in org mode"
         `(defun ,fname () (interactive)
                 (org-emphasize ,char)))
+
 
       ;; Insert key for org-mode and markdown a la C-h k
       ;; from SE endless http://emacs.stackexchange.com/questions/2206/i-want-to-have-the-kbd-tags-for-my-blog-written-in-org-mode/2208#2208
@@ -517,6 +543,7 @@ Will work on both org-mode and any mode that accepts plain html."
        'org-babel-load-languages
        '((emacs-lisp . t)
          (ipython . t)
+         (ein . t)
          (python . t)
          (R . t)
          (shell . t)
@@ -656,7 +683,9 @@ name of the sub-editing buffer."
             (setq-local org-src--babel-info babel-info)
             (setq-local params (nth 2 babel-info))
             (setq-local dir (cdr (assq :dir params)))
-            (cd (file-name-as-directory (expand-file-name dir)))
+            (if (bound-and-true-p dir)
+              (cd (file-name-as-directory (expand-file-name dir)))
+              )
             (let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
               (when (fboundp edit-prep-func)
                 (funcall edit-prep-func babel-info))))
@@ -814,14 +843,13 @@ Returns the new TODO keyword, or nil if no state change should occur."
     :init
     (progn
       (setq org-agenda-restore-windows-after-quit t
+            org-agenda-sticky nil
             org-agenda-block-separator ""
             org-agenda-clockreport-parameter-plist (quote (:link t :maxlevel 3 :fileskip0 t :stepskip0 t :tags "-COMMENT"))
             org-agenda-dim-blocked-tasks (quote invisible)
             org-agenda-log-mode-items (quote (closed clock))
-            org-agenda-restore-windows-after-quit t
             org-agenda-skip-deadline-if-done t
             org-agenda-skip-deadline-prewarning-if-scheduled t
-            org-agenda-skip-scheduled-if-deadline-is-shown t
             org-agenda-skip-scheduled-if-done t
             org-agenda-start-with-log-mode nil
             org-agenda-custom-commands '()
@@ -1003,11 +1031,13 @@ Headline^^            Visit entry^^               Filter^^                    Da
       (kbd "M-RET") 'org-agenda-show-and-scroll-up
       (kbd "M-SPC") 'spacemacs/org-agenda-transient-state/body
       (kbd "s-M-SPC") 'spacemacs/org-agenda-transient-state/body)
+    (define-key org-agenda-mode-map (kbd "<escape>") 'org-agenda-quit)
     (defun place-agenda-tags ()
       "Put the agenda tags by the right border of the agenda window."
       (setq org-agenda-tags-column (- 0 (window-width)))
       (org-agenda-align-tags))
     (add-hook 'org-finalize-agenda-hook 'place-agenda-tags)
+    (add-hook 'org-agenda-mode-hook 'doom-hide-modeline-mode)
     ;; (advice-add 'org-agenda-goto :after
     ;;             (lambda (&rest args)
     ;;               (org-narrow-to-subtree)))

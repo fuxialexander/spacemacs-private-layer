@@ -353,6 +353,8 @@ returns the style with the override."
             ;; placeholder for other formats
             ((eq org-export-current-backend 'html)
              " @@html:<br>@@\n")
+            ((eq org-export-current-backend 'alex)
+             " @@html:<br>@@\n")
             (t
              ;; put in a \n for each spacing
              (mapconcat 'identity
@@ -377,6 +379,8 @@ returns the style with the override."
   (cond
    ((eq org-export-current-backend 'html)
     (format "@@html:<sup>%s</sup>@@" text))
+   ((eq org-export-current-backend 'alex)
+    (format "@@html:<sup>%s</sup>@@" text))
    ;; the catch-all case is org-syntax
    (t
     (format "^{%s}" text))))
@@ -387,6 +391,8 @@ returns the style with the override."
   (cond
    ((eq org-export-current-backend 'html)
     (format "@@html:<i>%s</i>@@" text))
+   ((eq org-export-current-backend 'alex)
+    (format "@@html:<i>%s</i>@@" text))
    ;; the catch-all case is org-syntax
    (t
     (format "/%s/" text))))
@@ -396,6 +402,8 @@ returns the style with the override."
   "Format TEXT in bold."
   (cond
    ((eq org-export-current-backend 'html)
+    (format "@@html:<b>%s</b>@@" text))
+   ((eq org-export-current-backend 'alex)
     (format "@@html:<b>%s</b>@@" text))
    ;; the catch-all case is org-syntax
    (t
@@ -570,6 +578,8 @@ Style information comes from `bibliography'"
   "Return formatted DOI for different backends."
   (cond
    ((eq org-export-current-backend 'html)
+    (format "http://dx.doi.org/%s" doi))
+   ((eq org-export-current-backend 'alex)
     (format "http://dx.doi.org/%s" doi))
    (t
     (format "doi:%s" doi))))

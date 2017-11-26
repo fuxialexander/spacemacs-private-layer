@@ -3,7 +3,7 @@
 ;; It must be stored in your home directory.
 
 ;;; Layers
-(defun dotspacemacs/layers ()
+(defun dotspacemacs/layers()
   "Layer configuration:
 This function should only modify configuration layer settings."
   (setq-default
@@ -52,18 +52,19 @@ This function should only modify configuration layer settings."
      version-control
      colors
      pandoc
-     (shell :variables
-            shell-default-shell 'eshell
-            shell-default-height 40
-            )
+     (treemacs :variables treemacs-use-follow-mode t)
+     ;; (shell :variables
+     ;;        shell-default-shell 'eshell
+     ;;        shell-default-height 40
+     ;;        )
      ivy
      (latex :variables latex-build-command "LatexMk")
      (ess :variables ess-enable-smart-equals t)
-     ;; python
+     python
      osx
      (spell-checking :variables spell-checking-enable-by-default nil)
      syntax-checking
-
+     ipython-notebook
      display
      personal
      notmuch
@@ -82,38 +83,28 @@ This function should only modify configuration layer settings."
 
    dotspacemacs-additional-packages '(
                                       ;; circadian
-                                      org-super-agenda
                                       ivy-dired-history
                                       cdlatex
                                       tiny
-                                      ob-ipython
                                       olivetti
                                       shx
-                                      lsp-mode
-                                      lsp-python
                                       shrink-path
-                                      ob-browser
                                       fringe-helper
                                       kurecolor
                                       dired-narrow
                                       prodigy
-                                      ox-twbs
-                                      sx
                                       ob-async
                                       org-edit-latex
                                       language-detection
                                       shr-tag-pre-highlight
-                                      eshell-git-prompt
                                       )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
 ;;;; Excluded Packages
    dotspacemacs-excluded-packages '(
-                                    window-purpose
-                                    ivy-purpose
-                                    spacemacs-purpose-popwin
                                     ess-R-object-popup
+                                    evil-escape
                                     vi-tilde-fringe
                                     spaceline
                                     exec-path-from-shell
@@ -314,7 +305,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-enable-paste-transient-state nil
    ;; Which-key delay in seconds. The which-key buffer is the popup listing
    ;; the commands bound to the current keystroke sequence. (default 0.4)
-   dotspacemacs-which-key-delay 0
+   dotspacemacs-which-key-delay 0.2
    ;; Which-key frame position. Possible values are `right', `bottom' and
    ;; `right-then-bottom'. right-then-bottom tries to display the frame to the
    ;; right; if there is insufficient space it displays it at the bottom.
@@ -377,7 +368,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-folding-method 'evil
    ;; If non-nil `smartparens-strict-mode' will be enabled in programming modes.
    ;; (default nil)
-   dotspacemacs-smartparens-strict-mode t
+   dotspacemacs-smartparens-strict-mode nil
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
    ;; over any automatically added closing parenthesis, bracket, quote, etc…
    ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
@@ -452,9 +443,12 @@ before packages are loaded. If you are unsure, you should try in setting them in
     (interactive)
     (start-process-shell-command "export diary" nil "/Users/xfu/.emacs.d/private/local/calendardiary 30 > /Users/xfu/Dropbox/org/cal.diary")
     )
+
   (require 'doom-modeline)
   (add-hook 'after-init-hook #'t/init-modeline)
 
+  (add-hook 'help-mode-hook #'doom-hide-modeline-mode)
+  (add-hook 'message-mode-hook #'doom-hide-modeline-mode)
   (add-hook 'after-init-hook 'export-diary-from-cal)
   (setq evil-respect-visual-line-mode t)
   )
@@ -468,6 +462,25 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+;; ;;;; XWidget
+;;   (defun xwidget-webkit-browse-url (url &optional new-session)
+;;     "Ask xwidget-webkit to browse URL.
+;; NEW-SESSION specifies whether to create a new xwidget-webkit session.
+;; Interactively, URL defaults to the string looking like a url around point."
+;;     (interactive (progn
+;;                    (require 'browse-url)
+;;                    (browse-url-interactive-arg "xwidget-webkit URL: "
+;;                                                ;;(xwidget-webkit-current-url)
+;;                                                )))
+;;     (or (featurep 'xwidget-internal)
+;;         (user-error "Your Emacs was not compiled with xwidgets support"))
+;;     (when (stringp url)
+;;       (if new-session
+;;           (xwidget-webkit-new-session url)
+;;         (xwidget-webkit-goto-url url))))
+
+
+;;;; Shackle
 ;;;; Edit
   ;; (use-package tiny
   ;;   :ensure t
@@ -493,6 +506,13 @@ you should place your code here."
   ;; (org-agenda nil "a"))
   ;;   )
 
+
+  ;; (use-package vimish-fold
+  ;;   )
+  ;; (use-package evil-vimish-fold
+  ;;   :config (evil-vimish-fold-mode 1)
+  ;;   )
+
   (defvar kk/org-latex-fragment-last nil
     "Holds last fragment/environment you were on.")
 
@@ -507,7 +527,7 @@ you should place your code here."
   (defun kk/org-latex-fragment-toggle ()
     "Toggle a latex fragment image "
     (and (eq 'org-mode major-mode)
-	 (let ((begin (kk/org-in-latex-fragment-p)))
+	       (let ((begin (kk/org-in-latex-fragment-p)))
            (cond
             ;; were on a fragment and now on a new fragment
             ((and
@@ -577,8 +597,8 @@ you should place your code here."
     (add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
     )
 
-  ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-  ;; (add-to-list 'default-frame-alist '(ns-appearance . 'nil)) ; or 'dark, to switch to white title text
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . 'dark)) ; or 'dark, to switch to white title text
 
 
   (defun camelize (s)
@@ -647,13 +667,17 @@ you should place your code here."
       :backends company-files
       :modes shell-script-mode))
 
+
   (setq-default
+   ;; browse-url-browser-function 'xwidget-webkit-browse-url
+   ;; browse-url-new-window-flag t
    ispell-program-name "/usr/local/bin/aspell"
+   python-shell-interpreter "/usr/local/bin/ipython3"
    line-spacing 0.15
    exec-path-from-shell-check-startup-files nil
    display-line-numbers nil
    bidi-paragraph-direction 'left-to-right
-   company-frontends '(company-preview-frontend)
+   company-frontends '(company-preview-frontend company-echo-metadata-frontend)
    company-statistics-mode t
    company-require-match nil
    company-minimum-prefix-length 2
@@ -673,11 +697,12 @@ you should place your code here."
    indicate-buffer-boundaries nil
    indicate-empty-lines nil
    max-mini-window-height 0.3
+   hybrid-mode-enable-hjkl-bindings t
    mode-line-default-help-echo nil ; disable mode-line mouseovers
    mouse-yank-at-point t           ; middle-click paste at point, not at click
    resize-mini-windows 'grow-only  ; Minibuffer resizing
    show-help-function nil          ; hide :help-echo text
-   split-width-threshold 160       ; favor horizontal splits
+   split-width-threshold 1000       ; favor horizontal splits
    uniquify-buffer-name-style 'forward
    use-dialog-box nil              ; always avoid GUI
    visible-cursor nil
@@ -688,14 +713,14 @@ you should place your code here."
    jit-lock-stealth-time 0.2
    jit-lock-stealth-verbose nil
    ;; `pos-tip' defaults
-   pos-tip-internal-border-width 6
-   pos-tip-border-width 1
+   pos-tip-background-color "#000000"
+   pos-tip-border-width 3
    ;; no beeping or blinking please
    ring-bell-function #'ignore
    visible-bell nil
    truncate-lines t
    split-height-threshold 100
-   split-width-threshold 100
+   split-width-threshold 1000
 
    ;; window-divider-mode t
    ;; global-hl-line-mode t
@@ -713,6 +738,7 @@ you should place your code here."
   (global-hl-line-mode                 )
   (global-company-mode                 )
   (global-auto-revert-mode             )
+
 
   ;; standardize default fringe width
   (defvar doom-fringe-size '4
@@ -763,8 +789,16 @@ you should place your code here."
   (global-set-key (kbd "C-H-M-@") 'spacemacs/custom-perspective-@Notmuch )
   (global-set-key (kbd "C-H-M-#") 'spacemacs/custom-perspective-@Elfeed )
   (global-set-key (kbd "C-H-M-$") 'spacemacs/custom-perspective-@Lisp )
+  (define-key key-translation-map (kbd "<escape>") nil)
+  (define-key key-translation-map (kbd "ESC") nil)
+  (define-key image-mode-map (kbd "<escape>") 'quit-window)
 
   (global-set-key (kbd "H-f") 'counsel-company )
+  (defun org-agenda-show-daily (&optional arg)
+    (interactive "P")
+    (org-agenda arg "a"))
+
+  (global-set-key (kbd "H-g") 'org-agenda-show-daily )
 
   (global-set-key (kbd "H-1") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-1-and-exit)
   (global-set-key (kbd "H-2") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-2-and-exit)
@@ -776,10 +810,9 @@ you should place your code here."
   (global-set-key (kbd "H-8") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-8-and-exit)
   (global-set-key (kbd "H-9") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-9-and-exit)
 
-
   (global-set-key (kbd "H-,") 'customize )
   (global-set-key (kbd "M-w") 'ace-window )
-  (global-set-key (kbd "H-l") 'org-store-link )
+  (global-set-key (kbd "H-o") 'org-store-link )
   (global-set-key (kbd "H-d") 'split-window-right-and-focus )
   (global-set-key (kbd "H-D") 'split-window-below-and-focus )
   (define-key global-map (kbd "<C-tab>") nil)
@@ -795,17 +828,36 @@ you should place your code here."
   (eval-after-load "magit" '(define-key magit-mode-map (kbd "M-4") nil))
   (eval-after-load "magit" '(define-key magit-mode-map (kbd "M-w") nil))
   (eval-after-load "shr" '(define-key shr-map (kbd "o") nil))
+
+  (defun highlight-grammar ()
+    (interactive)
+    (highlight-regexp "\\\w+s[\\\., ;]" 'hi-yellow)
+    )
+
+
+
   (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") nil))
   (eval-after-load "org" '(define-key org-mode-map (kbd "H-p") 'org-toggle-latex-fragment))
   (eval-after-load "org" '(define-key org-mode-map (kbd "M-;") 'flyspell-correct-previous-word-generic))
-  (eval-after-load "org" '(define-key org-mode-map (kbd "H-i") 'org-ref-ivy-insert-cite-link))
+  (eval-after-load "org" '(define-key org-mode-map (kbd "H-l") 'org-ref-ivy-insert-cite-link))
   (eval-after-load "org" '(define-key org-mode-map (kbd "C-j") 'counsel-org-goto))
   (eval-after-load "org" '(define-key org-mode-map (kbd "C-H-j") 'counsel-org-goto-all))
-  (eval-after-load "org" '(define-key org-mode-map (kbd "H-k") 'org-insert-link))
-  (eval-after-load "auctex" '(define-key latex-mode-map (kbd "H-i") 'org-ref-ivy-insert-cite-link))
+  (eval-after-load "org" '(define-key org-mode-map (kbd "H-i") 'org-insert-link))
+  (eval-after-load "auctex" '(define-key latex-mode-map (kbd "H-l") 'org-ref-ivy-insert-cite-link))
   (eval-after-load "eshell" '(eshell-git-prompt-use-theme 'powerline))
   (define-key evil-hybrid-state-map (kbd "C-;") 'hippie-expand)
 
+;;;; Treemacs
+  (with-eval-after-load 'treemacs
+    (define-key treemacs-mode-map (kbd "<escape>") 'treemtreemacs-toggle)
+    (add-hook 'treemacs-mode-hook 'doom-hide-modeline-mode)
+    )
+
+;;;; Magit
+  (with-eval-after-load 'magit
+    (add-hook 'magit-mode-hook 'doom-hide-modeline-mode)
+    (add-hook 'magit-popup-mode-hook 'doom-hide-modeline-mode)
+    )
 ;;;; Layout
   (with-eval-after-load 'persp-mode
     (push (lambda (b) (with-current-buffer b (eq major-mode 'dired-mode))) persp-filter-save-buffers-functions)
@@ -1168,6 +1220,14 @@ you should place your code here."
       (advice-add 'eww-display-html :around
                   'eww-display-html--override-shr-external-rendering-functions)))
 
+
+  (require 'ox-alex)
+  ;; (require 'lsp-mode)
+  ;; (require 'lsp-python)
+  ;; (add-hook 'python-mode-hook #'lsp-python-enable)
+  ;; (require 'company-lsp)
+  ;; (push 'company-lsp company-backends)
+
   )
 
 
@@ -1184,7 +1244,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (org-download org-brain dumb-jump julia-mode counsel lsp-mode magit org-plus-contrib markdown-mode xterm-color ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill toc-org tiny sx string-inflection solarized-theme smex smeargle shx shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters prodigy prettify-utils popwin persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-bullets open-junk-file olivetti ob-ipython ob-browser ob-async notmuch-labeler mwim multi-term move-text modern-light-theme modern-dawn-theme modern-dark-theme magit-popup macrostep lsp-python link-hint launchctl langtool kurecolor ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide imenu-list hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras eshell-git-prompt esh-help elisp-slime-nav elfeed-org editorconfig doom-themes dired-narrow diff-hl counsel-projectile company-statistics company-auctex column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
+    (evil-matchit counsel ivy treemacs ace-window yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection solarized-theme smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements pfuture persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain open-junk-file olivetti ob-async notmuch-labeler mwim move-text modern-light-theme modern-dawn-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org ein editorconfig dumb-jump doom-themes dired-narrow diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-link ac-ispell)))
  '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

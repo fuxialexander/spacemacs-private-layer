@@ -878,6 +878,7 @@ Bibliograhpy given by KEYWORD is formatted with description DESC in FORMAT"
    ((eq format 'ascii) (org-ref-get-ascii-bibliography))
    ((eq format 'odt) (org-ref-get-odt-bibliography))
    ((eq format 'html) (org-ref-get-html-bibliography))
+   ((eq format 'alex) (org-ref-get-html-bibliography))
    ((eq format 'latex)
     ;; write out the latex bibliography command
     (format "\\bibliography{%s}"
@@ -977,6 +978,7 @@ Bibliography given with KEYWORD is formatted with description DESC in FORMAT"
    ((eq format 'ascii) (org-ref-get-ascii-bibliography))
    ((eq format 'odt) (org-ref-get-ascii-bibliography))
    ((eq format 'html) (org-ref-get-html-bibliography))
+   ((eq format 'alex) (org-ref-get-html-bibliography))
    ((eq format 'latex)
     ;; write out the latex bibliography command
     (format "\\nobibliography{%s}"
@@ -1013,6 +1015,7 @@ Bibliography given with KEYWORD is formatted with description DESC in FORMAT"
             (cond
              ((eq format 'org) (org-ref-get-org-bibliography))
              ((eq format 'html) (org-ref-get-html-bibliography))
+             ((eq format 'alex) (org-ref-get-html-bibliography))
              ((eq format 'latex)
               ;; write out the biblatex bibliography command
               "\\printbibliography"))))
@@ -1082,6 +1085,7 @@ Bibliography given with KEYWORD is formatted with description DESC in FORMAT"
   :export (lambda (keyword desc format)
             (cond
              ((eq format 'html) (format "")) ; no output for html
+             ((eq format 'alex) (format "")) ; no output for html
              ((eq format 'latex)
               ;; write out the latex addbibresource command
               (format "\\addbibresource{%s}" keyword)))))
@@ -1303,6 +1307,7 @@ A number greater than one means multiple labels!"
   :export (lambda (keyword desc format)
             (cond
              ((eq format 'html) (format "<div id=\"%s\">" keyword))
+             ((eq format 'alex) (format "<div id=\"%s\">" keyword))
              ((eq format 'latex)
               (format "\\label{%s}" keyword))))
   :store #'org-label-store-link
@@ -1400,6 +1405,10 @@ The reference given by KEYWORD is formatted with description DESC in FORMAT"
   (cond
    ((eq format 'html)
     (format "<a href=\"#%s\">%s</a>" keyword (or desc keyword)))
+   ((eq format 'alex)
+    (format "<a href=\"#%s\">%s</a>" keyword (or desc keyword)))
+
+
    ((eq format 'latex)
     (format "\\ref{%s}" keyword))))
 
@@ -1558,6 +1567,7 @@ This is used to complete ref links."
   :export (lambda (path desc format)
             (cond
              ((eq format 'html) (format "(<pageref>%s</pageref>)" path))
+             ((eq format 'alex) (format "(<pageref>%s</pageref>)" path))
              ((eq format 'latex)
               (format "\\pageref{%s}" path))))
   :face 'org-ref-ref-face
@@ -1601,6 +1611,7 @@ This is used to complete ref links."
   "Export function for nameref PATH with the description DESC and in needed FORMAT."
   (cond
    ((eq format 'html) (format "(<nameref>%s</nameref>)" path))
+   ((eq format 'alex) (format "(<nameref>%s</nameref>)" path))
    ((eq format 'latex)
     (format "\\nameref{%s}" path))))
 
@@ -1641,7 +1652,9 @@ The equation with KEYWORD is formatted with the description DESC in FORMAT."
    ((eq format 'latex) (format "\\eqref{%s}" keyword))
    ;;considering the fact that latex's the standard of math formulas, just use mathjax to render the html
    ;;customize the variable 'org-html-mathjax-template' and 'org-html-mathjax-options' refering to  'autonumber'
-   ((eq format 'html) (format "\\eqref{%s}" keyword))))
+   ((eq format 'html) (format "\\eqref{%s}" keyword))
+   ((eq format 'alex) (format "\\eqref{%s}" keyword))
+   ))
 
 
 (org-ref-link-set-parameters "eqref"
@@ -1683,7 +1696,9 @@ The nameref in KEYWORD is formatted with the description DESC in FORMAT."
    ;;mathjax to render the html customize the variable
    ;;'org-html-mathjax-template' and 'org-html-mathjax-options' refering to
    ;;'autonumber'
-   ((eq format 'html) (format "\\autoref{%s}" keyword))))
+   ((eq format 'html) (format "\\autoref{%s}" keyword))
+   ((eq format 'alex) (format "\\autoref{%s}" keyword))
+   ))
 
 
 (org-ref-link-set-parameters "autoref"
@@ -1706,7 +1721,9 @@ See https://www.ctan.org/tex-archive/macros/latex/contrib/cleveref"
    ;;mathjax to render the html customize the variable
    ;;'org-html-mathjax-template' and 'org-html-mathjax-options' refering to
    ;;'autonumber'
-   ((eq format 'html) (format "\\cref{%s}" keyword))))
+   ((eq format 'html) (format "\\cref{%s}" keyword))
+   ((eq format 'alex) (format "\\cref{%s}" keyword))
+   ))
 
 
 (defun org-ref-Cref-export (keyword desc format)
@@ -1719,7 +1736,9 @@ https://www.ctan.org/tex-archive/macros/latex/contrib/cleveref"
    ;;mathjax to render the html customize the variable
    ;;'org-html-mathjax-template' and 'org-html-mathjax-options' refering to
    ;;'autonumber'
-   ((eq format 'html) (format "\\Cref{%s}" keyword))))
+   ((eq format 'html) (format "\\Cref{%s}" keyword))
+   ((eq format 'alex) (format "\\Cref{%s}" keyword))
+   ))
 
 
 (org-ref-link-set-parameters "cref"
@@ -1933,53 +1952,58 @@ Supported backends: 'html, 'latex, 'ascii, 'org, 'md, 'pandoc" type type)
      (cond
       ((eq format 'org)
        (mapconcat (lambda (key) (format "[[#%s][%s]]" key key))
-       (org-ref-split-and-strip-string keyword) ","))
+                  (org-ref-split-and-strip-string keyword) ","))
       ((eq format 'ascii)
        (concat "["
-         (mapconcat
-    (lambda (key)
-      (format "%s" key))
-    (org-ref-split-and-strip-string keyword) ",") "]"))
+               (mapconcat
+                (lambda (key)
+                  (format "%s" key))
+                (org-ref-split-and-strip-string keyword) ",") "]"))
       ((eq format 'html)
        (mapconcat
-  (lambda (key)
-    (format org-ref-ref-html key key))
-  (org-ref-split-and-strip-string keyword) ","))
+        (lambda (key)
+          (format org-ref-ref-html key key))
+        (org-ref-split-and-strip-string keyword) ","))
+      ((eq format 'alex)
+       (mapconcat
+        (lambda (key)
+          (format org-ref-ref-html key key))
+        (org-ref-split-and-strip-string keyword) ","))
       ((eq format 'latex)
        (if (string= (substring ,type -1) "s")
-     ;; biblatex format for multicite commands, which all end in s. These
-     ;; are formated as \cites{key1}{key2}...
-     (concat "\\" ,type
-       (mapconcat (lambda (key) (format "{%s}" key))
-            (org-ref-split-and-strip-string keyword) ""))
-   ;; bibtex format
-   (concat "\\" ,type
-     (when desc (org-ref-format-citation-description desc)) "{"
-     (mapconcat
-      (lambda (key) key)
-      (org-ref-split-and-strip-string keyword) ",")
-     "}")))
+           ;; biblatex format for multicite commands, which all end in s. These
+           ;; are formated as \cites{key1}{key2}...
+           (concat "\\" ,type
+                   (mapconcat (lambda (key) (format "{%s}" key))
+                              (org-ref-split-and-strip-string keyword) ""))
+         ;; bibtex format
+         (concat "\\" ,type
+                 (when desc (org-ref-format-citation-description desc)) "{"
+                 (mapconcat
+                  (lambda (key) key)
+                  (org-ref-split-and-strip-string keyword) ",")
+                 "}")))
       ;; simple format for odt.
       ((eq format 'odt)
        (format "[%s]" keyword))
       ;; for markdown and pandoc we generate pandoc citations
       ((or (eq format 'md) (eq format 'pandoc))
        (cond
-  (desc ;; pre and or post text
-   (let* ((text (split-string desc "::"))
-    (pre (car text))
-    (post (cadr text)))
-     (concat
-      (format "[@%s," keyword)
-      (when pre (format " %s" pre))
-      (when post (format ", %s" post))
-      "]")))
-  (t
-   (format "[%s]"
-     (mapconcat
-      (lambda (key) (concat "@" key))
-      (org-ref-split-and-strip-string keyword)
-      "; "))))))))
+        (desc ;; pre and or post text
+         (let* ((text (split-string desc "::"))
+                (pre (car text))
+                (post (cadr text)))
+           (concat
+            (format "[@%s," keyword)
+            (when pre (format " %s" pre))
+            (when post (format ", %s" post))
+            "]")))
+        (t
+         (format "[%s]"
+                 (mapconcat
+                  (lambda (key) (concat "@" key))
+                  (org-ref-split-and-strip-string keyword)
+                  "; "))))))))
 
 
 (defun org-ref-format-citation-description (desc)

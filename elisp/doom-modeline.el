@@ -2,7 +2,7 @@
 
 
 ;; TODO torgeir added this
-(setq +doom-modeline-height 18)
+(setq +doom-modeline-height 30)
 (defun doom-project-root () (t/project-root))
 
 (defun doom--resolve-hooks (hooks)
@@ -220,65 +220,65 @@ DEFAULT is non-nil, set the default mode-line for all buffers."
   :group 'doom)
 
 (defface doom-modeline-buffer-path
-  '((t (:inherit mode-line-emphasis :bold t)))
+  '((t (:bold t)))
   "Face used for the dirname part of the buffer path."
   :group '+doom-modeline)
 
 (defface doom-modeline-buffer-file
-  '((t (:inherit mode-line-buffer-id)))
+  '((t (:bold t)))
   "Face used for the filename part of the mode-line buffer path."
   :group '+doom-modeline)
 
 (defface doom-modeline-project-root-dir
-  '((t (:inherit mode-line-buffer-id)))
+  '((t (:bold t)))
   "Face used for the filename part of the mode-line buffer path."
   :group '+doom-modeline)
 
 (defface doom-modeline-workspace-number
-  '((t (:inherit default :weight normal)))
+  '((t (:bold t)))
   "Face used for persp name."
   :group '+doom-modeline)
 
 
 
 (defface doom-modeline-perspname
-  '((t (:inherit bold)))
+  '((t (:bold t)))
   "Face used for persp name."
   :group '+doom-modeline)
 
 (defface doom-modeline-buffer-modified
-  '((t (:inherit error :background nil :bold t)))
+  '((t (:bold t)))
   "Face used for the 'unsaved' symbol in the mode-line."
   :group '+doom-modeline)
 
 (defface doom-modeline-buffer-major-mode
-  '((t (:inherit mode-line-emphasis :bold t)))
+  '((t (:bold t)))
   "Face used for the major-mode segment in the mode-line."
   :group '+doom-modeline)
 
 (defface doom-modeline-highlight
-  '((t (:inherit mode-line-emphasis)))
+  '((t (:bold t)))
   "Face for bright segments of the mode-line."
   :group '+doom-modeline)
 
 (defface doom-modeline-panel
-  '((t (:inherit mode-line-highlight)))
+  '((t (:bold t)))
   "Face for 'X out of Y' segments, such as `+doom-modeline--anzu', `+doom-modeline--evil-substitute' and
 `iedit'"
   :group '+doom-modeline)
 
 (defface doom-modeline-info
-  `((t (:inherit success :bold t)))
+  `((t (:bold t)))
   "Face for info-level messages in the modeline. Used by `*vc'."
   :group '+doom-modeline)
 
 (defface doom-modeline-warning
-  `((t (:inherit warning :bold t)))
+  `((t (:bold t)))
   "Face for warnings in the modeline. Used by `*flycheck'"
   :group '+doom-modeline)
 
 (defface doom-modeline-urgent
-  `((t (:inherit error :bold t)))
+  `((t (:bold t)))
   "Face for errors in the modeline. Used by `*flycheck'"
   :group '+doom-modeline)
 
@@ -804,13 +804,13 @@ lines are selected, or the NxM dimensions of a block selection."
          name)
        'face (if (active) 'doom-modeline-perspname)))))
 
-;; (def-modeline-segment! buffer-purpose
-;;                           "The current window purpose. Requires `purpose-mode' to be
-;; enabled."
-;;                           (when (bound-and-true-p purpose-mode)
-;;                             (propertize (substring (purpose--modeline-string) 2 -1)
-;;                                         'face 'mode-line-inactive
-;;                                         'help-echo "Window purpose")))
+(def-modeline-segment! buffer-purpose
+                          "The current window purpose. Requires `purpose-mode' to be
+enabled."
+                          (when (bound-and-true-p purpose-mode)
+                            (propertize (substring (purpose--modeline-string) 2 -1)
+                                        'face 'mode-line-inactive
+                                        'help-echo "Window purpose")))
 
 (def-modeline-segment! matches
   "Displays: 1. the currently recording macro, 2. A current/total for the
@@ -821,7 +821,7 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
                       (+doom-modeline--evil-substitute)
                       (+doom-modeline--iedit))))
     (or (and (not (equal meta "")) meta)
-        (if buffer-file-name " %I "))))
+        )))
 
 ;; TODO Include other information
 (def-modeline-segment! media-info
@@ -848,13 +848,13 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 ;;
 
 (def-modeline! main
-  (bar matches " " buffer-info "  ")
-  ;; (bar matches "  " buffer-info " " buffer-purpose "  ")
+  ;; (bar matches " " buffer-info "  ")
+  (bar matches "  " buffer-info " " buffer-purpose "  ")
   (major-mode vcs flycheck " " perspname " " workspace-number " "))
 
 (def-modeline! clock
-  (bar matches " " buffer-info "  ")
-  ;; (bar matches "  " buffer-info " " buffer-purpose "  ")
+  ;; (bar matches " " buffer-info "  ")
+  (bar matches "  " buffer-info " " buffer-purpose "  ")
   (org-clock " " major-mode vcs flycheck " " perspname " " workspace-number " "))
 
 ;; (def-modeline! pomodoro
@@ -921,5 +921,41 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 
 ;; torgeir added this
 (add-hook! 'js2-mode-hook (setq +doom-modeline-env-command "node -v 2>&1"))
+;; A minor mode for toggling the mode-line
+(defvar-local doom--modeline-format nil
+  "The modeline format to use when `doom-hide-modeline-mode' is active. Don't
+set this directly. Let-bind it instead.")
+(defvar-local doom--old-modeline-format nil
+  "The old modeline format, so `doom-hide-modeline-mode' can revert when it's
+disabled.")
+(define-minor-mode doom-hide-modeline-mode
+  "Minor mode to hide the mode-line in the current buffer."
+  :init-value nil
+  :global nil
+  (if doom-hide-modeline-mode
+      (setq doom--old-modeline-format mode-line-format
+            mode-line-format doom--modeline-format)
+    (setq mode-line-format doom--old-modeline-format
+          doom--old-modeline-format nil))
+  (force-mode-line-update))
+;; Ensure major-mode or theme changes don't overwrite these variables
+(put 'doom--modeline-format 'permanent-local t)
+(put 'doom--old-modeline-format 'permanent-local t)
+(put 'doom-hide-modeline-mode 'permanent-local t)
+
+(defun doom|hide-modeline-mode-reset ()
+  "Sometimes, a major-mode is activated after `doom-hide-modeline-mode' is
+activated, thus disabling it (because changing major modes invokes
+`kill-all-local-variables' and specifically seems to kill `mode-line-format's
+local value, whether or not it's permanent-local. Therefore, we cycle
+`doom-hide-modeline-mode' to fix this."
+  (when doom-hide-modeline-mode
+    (doom-hide-modeline-mode -1)
+    (doom-hide-modeline-mode +1)))
+(add-hook 'after-change-major-mode-hook #'doom|hide-modeline-mode-reset)
+
+;; no modeline in completion popups
+(add-hook 'completion-list-mode-hook #'doom-hide-modeline-mode)
+
 
 (provide 'doom-modeline)
