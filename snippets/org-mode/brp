@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: hpc7 jupyter python
+# key: brp_
+# --
+#+NAME: $1
+#+BEGIN_SRC ipython :session $2 :kernel rik_ssh_hpc7_hpc7python :ipyfile image/$1.png :exports both :async t :results raw drawer
+%matplotlib inline
+$0
+#+END_SRC

@@ -1,0 +1,3 @@
+[submodule "myorg/local/ob-ipython"]
+	path = myorg/local/ob-ipython
+	url = https://github.com/fuxialexander/ob-ipython.git
