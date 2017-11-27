@@ -83,6 +83,7 @@ This function should only modify configuration layer settings."
 
    dotspacemacs-additional-packages '(
                                       ;; circadian
+                                      helpful
                                       ivy-dired-history
                                       cdlatex
                                       tiny
@@ -462,6 +463,12 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+;;;; Helpful
+  (use-package helpful
+    :ensure t
+    :bind ("H-/" . helpful-at-point)
+    :config
+    )
 ;; ;;;; XWidget
 ;;   (defun xwidget-webkit-browse-url (url &optional new-session)
 ;;     "Ask xwidget-webkit to browse URL.
@@ -673,6 +680,8 @@ you should place your code here."
    ;; browse-url-new-window-flag t
    ispell-program-name "/usr/local/bin/aspell"
    python-shell-interpreter "/usr/local/bin/ipython3"
+   counsel-describe-function-function 'helpful-function
+   counsel-describe-variable-function 'helpful-variable
    line-spacing 0.15
    exec-path-from-shell-check-startup-files nil
    display-line-numbers nil
@@ -1228,6 +1237,7 @@ you should place your code here."
   ;; (require 'company-lsp)
   ;; (push 'company-lsp company-backends)
 
+
   )
 
 
@@ -1244,7 +1254,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (evil-matchit counsel ivy treemacs ace-window yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection solarized-theme smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements pfuture persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain open-junk-file olivetti ob-async notmuch-labeler mwim move-text modern-light-theme modern-dawn-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org ein editorconfig dumb-jump doom-themes dired-narrow diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-link ac-ispell)))
+    (helpful yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection solarized-theme smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain open-junk-file olivetti ob-async notmuch-labeler mwim move-text modern-light-theme modern-dawn-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org ein editorconfig dumb-jump doom-themes dired-narrow diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-link ac-ispell)))
  '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

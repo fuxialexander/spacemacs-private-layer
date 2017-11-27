@@ -391,11 +391,8 @@ active."
      ('truncate-upto-root (+doom-modeline--buffer-file-name-truncate))
      ('truncate-all (+doom-modeline--buffer-file-name-truncate t))
      ('relative-to-project (+doom-modeline--buffer-file-name-relative))
-     ('file-name (propertize (file-name-nondirectory buffer-file-name)
-                             'face `(:inherit ,(or (and (buffer-modified-p)
-                                                        'doom-modeline-buffer-modified)
-                                                   (and (active)
-                                                        'doom-modeline-buffer-file))))))
+     ;; ('file-name (propertize (file-name-nondirectory buffer-file-name) 'face `(:inherit ,(or (and (buffer-modified-p) 'doom-modeline-buffer-modified) (and (active) 'doom-modeline-buffer-file)))))
+     )
    'help-echo (+doom-modeline--buffer-file-name nil)))
 
 (defun +doom-modeline--buffer-file-name-truncate (&optional truncate-tail)
@@ -450,9 +447,9 @@ Example:
         "%b"
       (pcase-let ((`(,root-path-parent ,project ,relative-path ,filename) file-name-split))
         (let ((sp-faces `(:inherit ,(or modified-faces (if active 'font-lock-comment-face))
-                          ,@(if active '(:weight bold))))
+                                   ,@(if active '(:weight bold))))
               (project-faces `(:inherit ,(or modified-faces (if active 'font-lock-string-face))
-                               ,@(if active '(:weight bold))))
+                                        ,@(if active '(:weight bold))))
               (relative-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-buffer-path))))
               (file-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-buffer-file)))))
           (concat (propertize (if truncate-project-root-parent
@@ -519,14 +516,14 @@ directory, the file name, and its state (modified, read-only or non-existent)."
             (if buffer-file-name
                 (+doom-modeline-buffer-file-name)
               "%b"))))
-            ;; (when-let (dir-path (+doom-modeline--buffer-path))
-            ;;   (if-let (faces (or faces (if active 'doom-modeline-buffer-path)))
-            ;;       (propertize dir-path 'face `(:inherit ,faces))
-            ;;     dir-path))
-            ;; (when-let (file-path (+doom-modeline--buffer-file))
-            ;;   (if-let (faces (or faces (if active 'doom-modeline-buffer-file)))
-            ;;       (propertize file-path 'face `(:inherit ,faces))
-            ;;     file-path)))))
+;; (when-let (dir-path (+doom-modeline--buffer-path))
+;;   (if-let (faces (or faces (if active 'doom-modeline-buffer-path)))
+;;       (propertize dir-path 'face `(:inherit ,faces))
+;;     dir-path))
+;; (when-let (file-path (+doom-modeline--buffer-file))
+;;   (if-let (faces (or faces (if active 'doom-modeline-buffer-file)))
+;;       (propertize file-path 'face `(:inherit ,faces))
+;;     file-path)))))
 
 
 ;;
@@ -578,18 +575,18 @@ directory, the file name, and its state (modified, read-only or non-existent)."
 
 ;;
 (def-modeline-segment! workspace-number
-                          "The current workspace name or number. Requires `eyebrowse-mode' to be
+  "The current workspace name or number. Requires `eyebrowse-mode' to be
 enabled."
-                          (when (and (bound-and-true-p eyebrowse-mode)
-                                     (< 1 (length (eyebrowse--get 'window-configs))))
-                            (let* ((num (eyebrowse--get 'current-slot))
-                                   (tag (when num (nth 2 (assoc num (eyebrowse--get 'window-configs)))))
-                                   (str (if (and tag (< 0 (length tag)))
-                                            tag
-                                          (when num (int-to-string num)))))
-                              ;; (or (when spaceline-workspace-numbers-unicode
-                              (propertize (get-unicode-number str) 'face (if (active) 'doom-modeline-workspace-number))
-                                  )))
+  (when (and (bound-and-true-p eyebrowse-mode)
+             (< 1 (length (eyebrowse--get 'window-configs))))
+    (let* ((num (eyebrowse--get 'current-slot))
+           (tag (when num (nth 2 (assoc num (eyebrowse--get 'window-configs)))))
+           (str (if (and tag (< 0 (length tag)))
+                    tag
+                  (when num (int-to-string num)))))
+      ;; (or (when spaceline-workspace-numbers-unicode
+      (propertize (get-unicode-number str) 'face (if (active) 'doom-modeline-workspace-number))
+      )))
 
 
 (defvar spaceline-org-clock-format-function
@@ -598,14 +595,14 @@ enabled."
 
 ;;
 (def-modeline-segment! org-clock
-                          "Show information about the current org clock task.  Configure
+  "Show information about the current org clock task.  Configure
 `spaceline-org-clock-format-function' to configure. Requires a currently running
 org clock.
 This segment overrides the modeline functionality of `org-mode-line-string'."
-                          (when (and (fboundp 'org-clocking-p)
-                                     (org-clocking-p))
-                            (substring-no-properties (funcall spaceline-org-clock-format-function)))
-                          :global-override org-mode-line-string)
+  (when (and (fboundp 'org-clocking-p)
+             (org-clocking-p))
+    (substring-no-properties (funcall spaceline-org-clock-format-function)))
+  :global-override org-mode-line-string)
 
 ;; ;;
 ;; (def-modeline-segment! org-pomodoro
@@ -805,12 +802,12 @@ lines are selected, or the NxM dimensions of a block selection."
        'face (if (active) 'doom-modeline-perspname)))))
 
 (def-modeline-segment! buffer-purpose
-                          "The current window purpose. Requires `purpose-mode' to be
+  "The current window purpose. Requires `purpose-mode' to be
 enabled."
-                          (when (bound-and-true-p purpose-mode)
-                            (propertize (substring (purpose--modeline-string) 2 -1)
-                                        'face 'mode-line-inactive
-                                        'help-echo "Window purpose")))
+  (when (bound-and-true-p purpose-mode)
+    (propertize (substring (purpose--modeline-string) 2 -1)
+                'face 'mode-line-inactive
+                'help-echo "Window purpose")))
 
 (def-modeline-segment! matches
   "Displays: 1. the currently recording macro, 2. A current/total for the

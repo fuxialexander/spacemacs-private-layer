@@ -45,7 +45,25 @@
     :init
     :config
     (setq
-     org-super-agenda-groups '((:auto-category t))
+     org-super-agenda-groups
+     '((:log t)  ; Automatically named "Log"
+       (:name "Schedule"
+              :time-grid t)
+       (:name "Today"
+              :scheduled today)
+       (:habit t)
+       (:name "Due today"
+              :deadline today)
+       (:name "Overdue"
+              :deadline past)
+       (:name "Due soon"
+              :deadline future)
+       ;; (:name "Unimportant" :todo ("SOMEDAY" "MAYBE" "CHECK" "TO-READ" "TO-WATCH") :order 100)
+       (:name "Waiting..."
+              :todo "WAIT"
+              :order 98)
+       (:name "Scheduled earlier"
+              :scheduled past))
      )
     (org-super-agenda-mode)
     ))
@@ -254,10 +272,13 @@ Brief description:
             org-log-redeadline 'note
             org-log-reschedule 'note
             org-enforce-todo-dependencies t
-            org-habit-graph-column 60
+            org-habit-graph-column 0
+            org-habit-following-days 0
+            org-habit-preceding-days 8
             org-habit-show-habits t
-            org-hide-block-startup t
+            Org-hide-block-startup t
             org-tags-column 0
+            org-agenda-tags-column 'auto
             org-agenda-restore-windows-after-quit t
             org-agenda-span 'day
             org-agenda-files '("/Users/xfu/Dropbox/org/")
@@ -764,6 +785,10 @@ Returns the new TODO keyword, or nil if no state change should occur."
       (org-narrow-to-subtree)
       (org-clock-in)
       )
+;;; Org-latex-fragment
+    (defun org-latex-clear-fragment ()
+      (interactive)
+      (delete-directory org-preview-latex-image-directory t))
 ;;; Org-tag-with-ivy
     (defun spacemacs//org-ctrl-c-ctrl-c-counsel-org-tag ()
       "Hook for `org-ctrl-c-ctrl-c-hook' to use `counsel-org-tag'."
@@ -1032,10 +1057,10 @@ Headline^^            Visit entry^^               Filter^^                    Da
       (kbd "M-SPC") 'spacemacs/org-agenda-transient-state/body
       (kbd "s-M-SPC") 'spacemacs/org-agenda-transient-state/body)
     (define-key org-agenda-mode-map (kbd "<escape>") 'org-agenda-quit)
-    (defun place-agenda-tags ()
-      "Put the agenda tags by the right border of the agenda window."
-      (setq org-agenda-tags-column (- 0 (window-width)))
-      (org-agenda-align-tags))
+    ;; (defun place-agenda-tags ()
+    ;;   "Put the agenda tags by the right border of the agenda window."
+    ;;   (setq org-agenda-tags-column (- 0 (window-width)))
+    ;;   (org-agenda-align-tags))
     (add-hook 'org-finalize-agenda-hook 'place-agenda-tags)
     (add-hook 'org-agenda-mode-hook 'doom-hide-modeline-mode)
     ;; (advice-add 'org-agenda-goto :after
