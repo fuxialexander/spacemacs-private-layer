@@ -20,6 +20,8 @@
     :defer t
     :init
     (spacemacs/set-leader-keys "af" 'elfeed)
+    (defvar elfeed-search-feed-max-width 30)
+    (defvar elfeed-search-feed-min-width 30)
     (setq
      elfeed-search-title-max-width 200
      elfeed-search-title-min-width 70
@@ -55,6 +57,56 @@
 
           (when tags
             (insert "  " tags-str "  "))))
+      (defun elfeed-show-entry (entry)
+        "Display ENTRY in the current buffer."
+        (let ((buff (get-buffer-create "*elfeed-entry*")))
+          (switch-to-buffer-other-window buff)
+          (with-current-buffer buff
+            (elfeed-show-mode)
+            (setq elfeed-show-entry entry)
+            (elfeed-show-refresh))))
+
+      (defun elfeed-adjust-show-entry (entry)
+        "Display ENTRY in the current buffer."
+        (let ((buff (get-buffer-create "*elfeed-entry*")))
+          (switch-to-buffer-other-window buff)
+          (with-current-buffer buff
+            (elfeed-show-mode)
+            (setq elfeed-show-entry entry)
+            (elfeed-show-refresh))))
+
+      (defun elfeed-search-adjust-show-entry (entry)
+        "Display the currently selected item in a buffer."
+        (interactive (list (elfeed-search-selected :ignore-region)))
+        (require 'elfeed-show)
+        (when (elfeed-entry-p entry)
+          (elfeed-untag entry 'unread)
+          (elfeed-search-update-entry entry)
+          (elfeed-adjust-show-entry entry)))
+
+      (defun elfeed-show-next ()
+        "Show the next item in the elfeed-search buffer."
+        (interactive)
+        (quit-window)
+        (with-current-buffer (elfeed-search-buffer)
+          (forward-line)
+          (call-interactively #'elfeed-search-adjust-show-entry)))
+
+      (defun elfeed-show-prev ()
+        "Show the previous item in the elfeed-search buffer."
+        (interactive)
+        (quit-window)
+        (with-current-buffer (elfeed-search-buffer)
+          (forward-line -1)
+          (call-interactively #'elfeed-search-adjust-show-entry)))
+
+      (defun elfeed-show-new-live-search ()
+        "Kill the current buffer, search again in *elfeed-search*."
+        (interactive)
+        (quit-window)
+        (elfeed)
+        (elfeed-search-live-filter))
+
 
 
       (evilified-state-evilify-map elfeed-search-mode-map
@@ -66,13 +118,13 @@
         "E" 'elfeed-search-update--force
         "u" 'elfeed-unjam
         "o" 'elfeed-load-opml
-        "q" 'elfeed
+        "q" 'bury-buffer
         )
       (evilified-state-evilify-map elfeed-show-mode-map
         :mode elfeed-show-mode
         :eval-after-load elfeed-show
         :bindings
-        (kbd "q") 'elfeed
+        (kbd "q") 'quit-window
         (kbd "o") 'ace-link-elfeed
         (kbd "n") 'elfeed-show-next
         (kbd "p") 'elfeed-show-prev))))

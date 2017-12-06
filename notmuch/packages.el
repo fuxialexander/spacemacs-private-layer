@@ -54,6 +54,7 @@
       (add-hook 'notmuch-show-mode-hook #'spacemacs-layouts/add-notmuch-buffer-to-persp)
       (add-hook 'notmuch-message-mode-hook #'spacemacs-layouts/add-notmuch-buffer-to-persp)
       (call-interactively 'notmuch)
+      (purpose-load-window-layout "notmuch")
       )))
 
 ;; For each package, define a function notmuch/init-<package-notmuch>
@@ -132,18 +133,30 @@
     :init (progn
             (remove-hook 'message-mode-hook #'turn-on-auto-fill)
             (remove-hook 'notmuch-message-mode-hook #'turn-on-auto-fill)
+            (defun my-buffer-face-mode-notmuch-show ()
+              "Sets a fixed width (monospace) font in current buffer"
+              (interactive)
+              (setq buffer-face-mode-face '(:family "charter" :height 1.2))
+              (buffer-face-mode)
+              (setq-local line-spacing 0.5)
+              )
             (defun my-buffer-face-mode-notmuch ()
               "Sets a fixed width (monospace) font in current buffer"
               (interactive)
-              (setq buffer-face-mode-face '(:family "Inziu Iosevka SC"))
-              (buffer-face-mode))
+              (setq buffer-face-mode-face '(:family "input mono condensed" :height 1.0))
+              (buffer-face-mode)
+              (setq-local line-spacing 0.2)
+              )
+
+
+            (add-hook 'notmuch-show-mode-hook 'my-buffer-face-mode-notmuch-show)
             (add-hook 'notmuch-tree-mode-hook 'my-buffer-face-mode-notmuch)
             (add-hook 'notmuch-search-mode-hook 'my-buffer-face-mode-notmuch)
             (add-hook 'notmuch-message-mode-hook 'my-buffer-face-mode-notmuch)
             (add-hook 'notmuch-message-mode-hook
                       (lambda ()
                         (set (make-local-variable 'company-backends) '(notmuch-company (company-ispell :with company-yasnippet)))))
-            (add-hook 'notmuch-tree-mode-hook (lambda () (setq line-spacing nil)))
+            (add-hook 'notmuch-tree-mode-hook (lambda () (setq-local line-spacing nil)))
 
 
             (spacemacs/set-leader-keys
@@ -248,39 +261,39 @@
                 (notmuch-tree thread-id initial-input nil)
                 )
 
-              (require 'xwidget)
+              ;; (require 'xwidget)
 
-              (defun xw-gnus-article-html (&optional handle)
-                (let ((article-buffer (current-buffer)))
-                  (unless handle
-                    (setq handle (mm-dissect-buffer t)))
-                  (save-restriction
-                    (narrow-to-region (point) (point))
-                    (save-excursion
-                      (mm-with-part handle
-                        (let* ((coding-system-for-read 'utf-8)
-                               (coding-system-for-write 'utf-8)
-                               (default-process-coding-system
-                                 (cons coding-system-for-read coding-system-for-write))
-                               (charset (mail-content-type-get (mm-handle-type handle)
-                                                               'charset)))
-                          (when (and charset
-                                     (setq charset (mm-charset-to-coding-system
-                                                    charset nil t))
-                                     (not (eq charset 'ascii)))
-                            (insert (prog1
-			                                  (decode-coding-string (buffer-string) charset)
-			                                (erase-buffer)
-			                                (mm-enable-multibyte))))
-	                        (setq tf-handle (make-temp-file "/tmp/test.html"))
-                          (write-region (point-min) (point-max) tf-handle t)
-                          (xwidget-webkit-new-session (concat "file://" tf-handle))
-                          )))
-                    )))
+              ;; (defun xw-gnus-article-html (&optional handle)
+              ;;   (let ((article-buffer (current-buffer)))
+              ;;     (unless handle
+              ;;       (setq handle (mm-dissect-buffer t)))
+              ;;     (save-restriction
+              ;;       (narrow-to-region (point) (point))
+              ;;       (save-excursion
+              ;;         (mm-with-part handle
+              ;;           (let* ((coding-system-for-read 'utf-8)
+              ;;                  (coding-system-for-write 'utf-8)
+              ;;                  (default-process-coding-system
+              ;;                    (cons coding-system-for-read coding-system-for-write))
+              ;;                  (charset (mail-content-type-get (mm-handle-type handle)
+              ;;                                                  'charset)))
+              ;;             (when (and charset
+              ;;                        (setq charset (mm-charset-to-coding-system
+              ;;                                       charset nil t))
+              ;;                        (not (eq charset 'ascii)))
+              ;;               (insert (prog1
+			        ;;                           (decode-coding-string (buffer-string) charset)
+			        ;;                         (erase-buffer)
+			        ;;                         (mm-enable-multibyte))))
+	            ;;             (setq tf-handle (make-temp-file "/tmp/test.html"))
+              ;;             (write-region (point-min) (point-max) tf-handle t)
+              ;;             (xwidget-webkit-new-session (concat "file://" tf-handle))
+              ;;             )))
+              ;;       )))
 
-              (setq mm-text-html-renderer 'xw-gnus-article-html)
+              ;; (setq mm-text-html-renderer 'xw-gnus-article-html)
 
-              (defun my-notmuch-show (thread-id &optional elide-toggle parent-buffer query-context buffer-name)
+              (defun notmuch-show-reuse-buffer (thread-id &optional elide-toggle parent-buffer query-context buffer-name)
                 "Run \"notmuch show\" with the given thread ID and display results.
 
 ELIDE-TOGGLE, if non-nil, inverts the default elide behavior.
@@ -353,9 +366,9 @@ matched."
 
               (defun counsel-notmuch-action-show (thread)
                 "open search result in show view"
-                (setq thread-id (car (split-string thread "\\ +")))
-                (my-notmuch-show thread-id nil nil nil "*counsel-notmuch-show*")
-                )
+                (let ((title (concat "*counsel-notmuch-show*" (substring thread 24)))
+                      (thread-id (car (split-string thread "\\ +"))))
+                  (notmuch-show-reuse-buffer thread-id nil nil nil title)))
 
 
 
@@ -380,18 +393,27 @@ matched."
                           :caller 'counsel-notmuch))
 
               (defun counsel-notmuch-transformer (str)
-                "blah"
+                "search notmuch asynchronously through ivy"
                 (when (string-match "thread:" str)
-
-                  (setq mid (substring str 25))
-                  (setq date (substring str 25 37))
-                  (setq mat (substring mid (string-match "[[]" mid) (+ (string-match "[]]" mid) 1)))
-                  (setq people (truncate-string-to-width (s-trim (nth 1 (split-string mid "[];]"))) 20))
-                  (setq subject (truncate-string-to-width (s-trim (nth 1 (split-string mid "[;]"))) (- (window-width) 32)))
-                  (setq output (format "%s\t%10s\t%20s\t%s" date mat people subject))
-                  output
-                  )
-                )
+                  (let* ((mid (substring str 24))
+                         (date (propertize (substring str 24 37) 'face 'notmuch-search-date))
+                         (mat (propertize
+                               (substring mid (string-match "[[]" mid) (+ (string-match "[]]" mid) 1))
+                               'face
+                               'notmuch-search-count))
+                         (people
+                          (propertize
+                           (truncate-string-to-width (s-trim (nth 1 (split-string mid "[];]"))) 20)
+                           'face
+                           'notmuch-search-matching-authors))
+                         (subject
+                          (propertize
+                           (truncate-string-to-width (s-trim (nth 1 (split-string mid "[;]"))) (- (window-width) 32))
+                           'face
+                           'notmuch-search-subject))
+                         (str (format "%s\t%10s\t%20s\t%s" date mat people subject)))
+                    str
+                    )))
 
               (ivy-set-display-transformer 'counsel-notmuch 'counsel-notmuch-transformer)
 
@@ -466,9 +488,9 @@ matched."
               (evilified-state-evilify-map notmuch-show-mode-map
                 :mode notmuch-show-mode
                 :bindings
-                (kbd "H-i") 'open-message-with-mail-app-notmuch-show
+                (kbd "i") 'open-message-with-mail-app-notmuch-show
                 (kbd "I") 'notmuch-show-view-all-mime-parts
-                (kbd "q") 'notmuch
+                (kbd "q") 'quit-window
                 (kbd "e") 'evil-forward-word-end
                 (kbd "w") 'evil-forward-word-begin
                 (kbd "b") 'evil-backward-word-begin

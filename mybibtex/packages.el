@@ -57,7 +57,6 @@
 
 (defun mybibtex/init-org-ref-ivy ()
   (use-package org-ref-ivy
-    :defer t
     :after org ivy-bibtex
     :commands (org-ref-bibtex-next-entry
                org-ref-bibtex-previous-entry

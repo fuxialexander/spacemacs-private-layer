@@ -63,8 +63,8 @@ This function should only modify configuration layer settings."
      python
      osx
      (spell-checking :variables spell-checking-enable-by-default nil)
-     syntax-checking
-     ipython-notebook
+     (syntax-checking :variables syntax-checking-enable-tooltips nil)
+     ;; ipython-notebook
      display
      personal
      notmuch
@@ -72,7 +72,7 @@ This function should only modify configuration layer settings."
      mybibtex
      (myorg :variables org-enable-bootstrap-support t)
      (myelfeed :variables rmh-elfeed-org-files (list "~/.emacs.d/private/feed.org"))
-     (languagetool :variables langtool-language-tool-jar "/usr/local/Cellar/languagetool/3.8/libexec/languagetool-commandline.jar")
+     (languagetool :variables langtool-language-tool-jar "/usr/local/Cellar/languagetool/3.9/libexec/languagetool-commandline.jar")
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -85,6 +85,7 @@ This function should only modify configuration layer settings."
                                       ;; circadian
                                       helpful
                                       ivy-dired-history
+                                      flycheck-package
                                       cdlatex
                                       tiny
                                       olivetti
@@ -104,6 +105,8 @@ This function should only modify configuration layer settings."
    ;; A list of packages that will not be installed and loaded.
 ;;;; Excluded Packages
    dotspacemacs-excluded-packages '(
+                                    flycheck-pos-tip
+                                    pos-tip
                                     ess-R-object-popup
                                     evil-escape
                                     vi-tilde-fringe
@@ -136,6 +139,9 @@ This function should only modify configuration layer settings."
                                     helm-spacemacs-help
                                     ido-vertical-mode
                                     flx-ido
+                                    ;; ivy-purpose
+                                    ;; window-purpose
+                                    ;; popwin
                                     helm-purpose
                                     helm-make
                                     )
@@ -207,27 +213,22 @@ It should only modify the values of Spacemacs settings."
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
    dotspacemacs-startup-lists nil
    ;; True if the home buffer should respond to resize events. (default t)
-   dotspacemacs-startup-buffer-responsive t
+   dotspacemacs-startup-buffer-responsive nil
    ;; Default major mode of the scratch buffer (default `text-mode')
    dotspacemacs-scratch-mode 'text-mode
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(
-                         (modern-dawn :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
-                         (modern-light :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
-                         (modern-dark :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
-                         solarized-dark
-                         doom-one-light
-                         doom-one
+                         (modern-solarizedlight :location (recipe :fetcher github :repo "fuxialexander/modern-light-theme"))
                          )
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
    ;; (default t)
    dotspacemacs-colorize-cursor-according-to-state nil
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("operator mono"
-                               :size 12
+   dotspacemacs-default-font '("operator mono lig"
+                               :size 14
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -468,8 +469,15 @@ you should place your code here."
     :ensure t
     :bind ("H-/" . helpful-at-point)
     :config
+    (evilified-state-evilify-map helpful-mode-map
+      :mode helpful-mode
+      :bindings
+      (kbd "q") 'quit-window
+      (kbd "RET") 'helpful-visit-reference
+      )
     )
-;; ;;;; XWidget
+
+;;;; XWidget
 ;;   (defun xwidget-webkit-browse-url (url &optional new-session)
 ;;     "Ask xwidget-webkit to browse URL.
 ;; NEW-SESSION specifies whether to create a new xwidget-webkit session.
@@ -487,122 +495,12 @@ you should place your code here."
 ;;         (xwidget-webkit-goto-url url))))
 
 
-;;;; Shackle
 ;;;; Edit
   ;; (use-package tiny
   ;;   :ensure t
   ;;   :config (tiny-setup-default)
   ;;   )
-  ;; (use-package org-super-agenda :config
-  ;;   (let ((org-super-agenda-groups
-  ;;      '(;; Each group has an implicit boolean OR operator between its selectors.
-  ;;        (:name "Today"  ; Optionally specify section name
-  ;;               :time-grid t  ; Items that appear on the time grid
-  ;;               :todo "TODAY")  ; Items that have this TODO keyword
-  ;;        (:name "Important"
-  ;;               :priority "A")
-  ;;        (:todo "WAIT" :order 8)  ; Set order of this section
-  ;;        (:priority<= "B"
-  ;;                     ;; Show this section after "Today" and "Important", because
-  ;;                     ;; their order is unspecified, defaulting to 0. Sections
-  ;;                     ;; are displayed lowest-number-first.
-  ;;                     :order 1)
-  ;;        ;; After the last group, the agenda will display items that didn't
-  ;;        ;; match any of these groups, with the default order position of 99
-  ;;        )))
-  ;; (org-agenda nil "a"))
-  ;;   )
 
-
-  ;; (use-package vimish-fold
-  ;;   )
-  ;; (use-package evil-vimish-fold
-  ;;   :config (evil-vimish-fold-mode 1)
-  ;;   )
-
-  (defvar kk/org-latex-fragment-last nil
-    "Holds last fragment/environment you were on.")
-
-  (defun kk/org-in-latex-fragment-p ()
-    "Return the point where the latex fragment begins, if inside
-  a latex fragment. Else return false"
-    (let* ((el (org-element-context))
-           (el-type (car el)))
-      (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
-          (org-element-property :begin el))))
-
-  (defun kk/org-latex-fragment-toggle ()
-    "Toggle a latex fragment image "
-    (and (eq 'org-mode major-mode)
-	       (let ((begin (kk/org-in-latex-fragment-p)))
-           (cond
-            ;; were on a fragment and now on a new fragment
-            ((and
-              ;; fragment we were on
-              kk/org-latex-fragment-last
-              ;; and are on a fragment now
-              begin
-
-              ;; but not on the last one this is a little tricky. as you edit the
-              ;; fragment, it is not equal to the last one. We use the begin
-              ;; property which is less likely to change for the comparison.
-              (not (and kk/org-latex-fragment-last
-			(= begin
-			   kk/org-latex-fragment-last))))
-             ;; go back to last one and put image back, provided there is still a fragment there
-             (save-excursion
-               (goto-char kk/org-latex-fragment-last)
-               (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment))
-
-               ;; now remove current image
-               (goto-char begin)
-               (let ((ov (loop for ov in (org--list-latex-overlays)
-                               if
-                               (and
-				(<= (overlay-start ov) (point))
-				(>= (overlay-end ov) (point)))
-                               return ov)))
-		 (when ov
-                   (delete-overlay ov)))
-               ;; and save new fragment
-               (setq kk/org-latex-fragment-last begin)))
-
-            ;; were on a fragment and now are not on a fragment
-            ((and
-              ;; not on a fragment now
-              (not begin)
-              ;; but we were on one
-              kk/org-latex-fragment-last)
-             ;; put image back on, provided that there is still a fragment here.
-             (save-excursion
-               (goto-char kk/org-latex-fragment-last)
-               (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment)))
-
-             ;; unset last fragment
-             (setq kk/org-latex-fragment-last nil))
-
-            ;; were not on a fragment, and now are
-            ((and
-              ;; we were not one one
-              (not kk/org-latex-fragment-last)
-              ;; but now we are
-              begin)
-             ;; remove image
-             (save-excursion
-               (goto-char begin)
-               (let ((ov (loop for ov in (org--list-latex-overlays)
-                               if
-                               (and
-				(<= (overlay-start ov) (point))
-				(>= (overlay-end ov) (point)))
-                               return ov)))
-		 (when ov
-                   (delete-overlay ov))))
-             (setq kk/org-latex-fragment-last begin))))))
-
-  (with-eval-after-load 'org
-    (add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
-    )
 
   (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
   (add-to-list 'default-frame-alist '(ns-appearance . 'dark)) ; or 'dark, to switch to white title text
@@ -627,6 +525,7 @@ you should place your code here."
 
 
   (yas-global-mode)
+
 ;;;; UI
 
 
@@ -643,12 +542,13 @@ you should place your code here."
 
 ;;;;; Term line-spacing
 
-  (use-package shx
-    :commands shx
-    )
-  (add-hook 'eshell-mode-hook
-            (lambda ()
-              (setq line-spacing nil)))
+  ;; (use-package shx
+  ;;   :commands shx
+  ;;   )
+
+  ;; (add-hook 'eshell-mode-hook
+  ;;           (lambda ()
+  ;;             (setq line-spacing nil)))
 
   (setf (cdr (assq 'continuation fringe-indicator-alist))
         '(nil nil) ;; no continuation indicators
@@ -679,10 +579,12 @@ you should place your code here."
    ;; browse-url-browser-function 'xwidget-webkit-browse-url
    ;; browse-url-new-window-flag t
    ispell-program-name "/usr/local/bin/aspell"
-   python-shell-interpreter "/usr/local/bin/ipython3"
+   python-shell-interpreter "/usr/local/bin/python3"
+   python-shell-interpreter-args "-i"
+   python-shell-interpreter-interactive-arg "-i"
    counsel-describe-function-function 'helpful-function
    counsel-describe-variable-function 'helpful-variable
-   line-spacing 0.15
+   line-spacing 0.2
    exec-path-from-shell-check-startup-files nil
    display-line-numbers nil
    bidi-paragraph-direction 'left-to-right
@@ -721,9 +623,6 @@ you should place your code here."
    jit-lock-stealth-nice 0.1
    jit-lock-stealth-time 0.2
    jit-lock-stealth-verbose nil
-   ;; `pos-tip' defaults
-   pos-tip-background-color "#000000"
-   pos-tip-border-width 3
    ;; no beeping or blinking please
    ring-bell-function #'ignore
    visible-bell nil
@@ -736,7 +635,7 @@ you should place your code here."
    ;; global-company-mode t
    ;; global-auto-revert-mode t
    ;; global-auto-revert-non-file-buffers t
-   eyebrowse-new-workspace 'ivy-switch-buffer
+   eyebrowse-new-workspace 'purpose-load-window-layout
    frame-resize-pixelwise t
    window-resize-pixelwise t
    window-divider-default-places t
@@ -801,13 +700,17 @@ you should place your code here."
   (define-key key-translation-map (kbd "<escape>") nil)
   (define-key key-translation-map (kbd "ESC") nil)
   (define-key image-mode-map (kbd "<escape>") 'quit-window)
+  ;; (define-key python-mode-map (kbd "C-j") 'counsel-oi)
+  (define-key emacs-lisp-mode-map (kbd "C-j") 'counsel-oi)
 
   (global-set-key (kbd "H-f") 'counsel-company )
+
   (defun org-agenda-show-daily (&optional arg)
     (interactive "P")
     (org-agenda arg "a"))
 
   (global-set-key (kbd "H-g") 'org-agenda-show-daily )
+  (global-set-key (kbd "H-r") 'counsel-org-capture )
 
   (global-set-key (kbd "H-1") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-1-and-exit)
   (global-set-key (kbd "H-2") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-2-and-exit)
@@ -853,7 +756,7 @@ you should place your code here."
   (eval-after-load "org" '(define-key org-mode-map (kbd "C-H-j") 'counsel-org-goto-all))
   (eval-after-load "org" '(define-key org-mode-map (kbd "H-i") 'org-insert-link))
   (eval-after-load "auctex" '(define-key latex-mode-map (kbd "H-l") 'org-ref-ivy-insert-cite-link))
-  (eval-after-load "eshell" '(eshell-git-prompt-use-theme 'powerline))
+  ;; (eval-after-load "eshell" '(eshell-git-prompt-use-theme 'powerline))
   (define-key evil-hybrid-state-map (kbd "C-;") 'hippie-expand)
 
 ;;;; Treemacs
@@ -896,7 +799,9 @@ you should place your code here."
       (defun spacemacs-layouts/add-lisp-buffer-to-persp ()
         (persp-add-buffer (current-buffer) (persp-get-by-name "@Lisp")))
       (add-hook 'emacs-lisp-mode-hook #'spacemacs-layouts/add-lisp-buffer-to-persp)
+      (add-hook 'helpful-mode-hook #'spacemacs-layouts/add-lisp-buffer-to-persp)
       (call-interactively 'spacemacs/find-dotfile)
+      (purpose-load-window-layout "elisp")
       ))
 
   (spacemacs|define-custom-layout "@Research"
@@ -912,6 +817,7 @@ you should place your code here."
       ;; (add-hook 'ess-mode-hook #'spacemacs-layouts/add-research-buffer-to-persp)
       (add-hook 'dired-mode-hook #'spacemacs-layouts/add-research-buffer-to-persp)
       (org-agenda nil "a")
+      (purpose-load-window-layout "org-agenda")
       ))
 
   (spacemacs|define-custom-layout "@Elfeed"
@@ -923,6 +829,7 @@ you should place your code here."
       (add-hook 'elfeed-search-mode-hook #'spacemacs-layouts/add-elfeed-buffer-to-persp)
       (add-hook 'elfeed-show-mode-hook #'spacemacs-layouts/add-elfeed-buffer-to-persp)
       (call-interactively 'elfeed)
+      (purpose-load-window-layout "elfeed")
       ))
 
 
@@ -1158,6 +1065,85 @@ you should place your code here."
 
 ;;;; Ivy
   (with-eval-after-load 'ivy
+    (defvar company-candidates)
+    (defvar company-point)
+    (defvar company-common)
+    (declare-function company-complete "ext:company")
+    (declare-function company-mode "ext:company")
+    (declare-function company-complete-common "ext:company")
+
+    (defun counsel-company-show-doc-buffer (selected)
+      "Temporarily show the documentation buffer for the selection."
+      (interactive)
+      (let (other-window-scroll-buffer)
+        (company--electric-do
+          (let* ((doc-buffer (or (company-call-backend 'doc-buffer selected)
+                                 (user-error "No documentation available")))
+                 start)
+            (when (consp doc-buffer)
+              (setq start (cdr doc-buffer)
+                    doc-buffer (car doc-buffer)))
+            (setq other-window-scroll-buffer (get-buffer doc-buffer))
+            (let ((win (display-buffer doc-buffer t)))
+              (set-window-start win (if start start (point-min))))))))
+
+    (defun counsel-company-action (str)
+      "Insert STR, erasing the previous one.
+The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
+      (when (consp str)
+        (setq str (cdr str)))
+      (when (stringp str)
+        (let ((fake-cursors (and (fboundp 'mc/all-fake-cursors)
+                                 (mc/all-fake-cursors)))
+              (pt (point))
+              (beg ivy-completion-beg)
+              (end ivy-completion-end))
+          (when ivy-completion-beg
+            (delete-region
+             ivy-completion-beg
+             ivy-completion-end))
+          (setq ivy-completion-beg
+                (move-marker (make-marker) (point)))
+          (insert (substring-no-properties str))
+          (setq ivy-completion-end
+                (move-marker (make-marker) (point)))
+          (save-excursion
+            (dolist (cursor fake-cursors)
+              (goto-char (overlay-start cursor))
+              (delete-region (+ (point) (- beg pt))
+                             (+ (point) (- end pt)))
+              (insert (substring-no-properties str))
+              ;; manually move the fake cursor
+              (move-overlay cursor (point) (1+ (point)))
+              (move-marker (overlay-get cursor 'point) (point))
+              (move-marker (overlay-get cursor 'mark) (point))))))
+      (yas-expand)
+      )
+
+    (defun counsel-company ()
+      "Complete using `company-candidates'."
+      (interactive)
+      (company-mode 1)
+      (unless company-candidates
+        (company-complete))
+      (when company-point
+        (when (looking-back company-common (line-beginning-position))
+          (setq ivy-completion-beg (match-beginning 0))
+          (setq ivy-completion-end (match-end 0)))
+        (ivy-read "company cand: " company-candidates
+                  :predicate (lambda (candidate)
+                               (string-prefix-p prefix (car candidate)))
+                  :caller 'counsel-company
+                  :action 'counsel-company-action)))
+
+    (add-to-list 'ivy-display-functions-alist '(counsel-company . ivy-display-function-overlay))
+    (ivy-set-actions
+     'counsel-company
+     '(
+       ("d" counsel-company-show-doc-buffer "Doc")
+       ))
+
+
     (setq
      counsel-org-goto-face-style 'org
      counsel-org-goto-separator " ➜ "
@@ -1238,8 +1224,179 @@ you should place your code here."
   ;; (push 'company-lsp company-backends)
 
 
-  )
 
+  (add-hook 'anaconda-mode-hook #'python-mode-outline-hook)
+  (add-to-list 'purpose-user-mode-purposes '(emacs-lisp-mode . el))
+  (add-to-list 'purpose-user-mode-purposes '(helpful-mode . el-help))
+
+  (add-to-list 'purpose-user-mode-purposes '(elfeed-search-mode . elfeed-search))
+  (add-to-list 'purpose-user-mode-purposes '(elfeed-show-mode . elfeed-show))
+
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-hello-mode . nhello))
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-search-mode . nlist))
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-tree-mode . nlist))
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-show-mode . nshow))
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-message-mode . nmessage))
+
+  (add-to-list 'purpose-user-regexp-purposes '("*Org Src*" . orgsrc))
+  (add-to-list 'purpose-user-mode-purposes '(org-mode . org))
+  (add-to-list 'purpose-user-mode-purposes '(org-agenda-mode . agenda))
+
+  (add-to-list 'purpose-user-mode-purposes '(anaconda-mode-view-mode . doc))
+  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-inspect*" . doc))
+  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-out*" . out))
+  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-debug*" . out))
+  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-traceback*" . out))
+
+  (purpose-compile-user-configuration)
+;;;; Outline-level
+      (defun python-mode-outline-hook ()
+        (outline-minor-mode 1)
+        (setq outline-level 'python-outline-level)
+        (setq outline-regexp
+              (rx (or
+                   ;; Commented outline heading
+                   (group
+                    (* space)	 ; 0 or more spaces
+                    (one-or-more (syntax comment-start))
+                    (one-or-more space)
+                    ;; Heading level
+                    (group (repeat 1 8 "\*"))	 ; Outline stars
+                    (one-or-more space))
+
+                   ;; Python keyword heading
+                   (group
+                    ;; Heading level
+
+                    ;; TODO: Try setting this to python-indent-offset
+                    ;; instead of space.  Might capture the indention levels
+                    ;; better.
+                    (group (* space))	; 0 or more spaces
+                    bow
+                    ;; Keywords
+                    (or "class" "def" "else" "elif" "except" "for" "if" "try" "while")
+                    eow))))
+        (define-key python-mode-map (kbd "C-j") 'counsel-oi)
+        )
+
+      (defun python-outline-level ()
+        ;; Based on this code found at
+        ;; http://blog.zenspider.com/blog/2013/07/my-emacs-setup-ruby-and-outline.html:
+        ;; (or (and (match-string 1)
+        ;;	     (or (cdr (assoc (match-string 1) outline-heading-alist))
+        ;;		 (- (match-end 1) (match-beginning 1))))
+        ;;	(and (match-string 0)
+        ;;	     (cdr (assoc (match-string 0) outline-heading-alist)))
+
+        ;; This doesn't work properly. It sort-of works, but it's not
+        ;; correct. Running this function consecutively on the same line
+        ;; sometimes returns different results. And it doesn't seem to
+        ;; correctly recognize top-level Python functions or classes as
+        ;; top-level headings, so subheadings beneath them don't collapse
+        ;; properly.
+
+        (or
+         ;; Commented outline heading
+         (and (string-match (rx
+                             (* space)
+                             (one-or-more (syntax comment-start))
+                             (one-or-more space)
+                             (group (one-or-more "\*"))
+                             (one-or-more space))
+                            (match-string 0))
+              (- (match-end 0) (match-beginning 0)))
+
+         ;; Python keyword heading, set by number of indentions
+         ;; Add 8 (the highest standard outline level) to every Python keyword heading
+         (+ 8 (- (match-end 0) (match-beginning 0)))))
+
+      (defun ap/sh-outline-level ()
+        (or
+         ;; Commented outline heading
+         (and (string-match (rx
+                             (* space)
+                             (one-or-more (syntax comment-start))
+                             (one-or-more space)
+                             (group (one-or-more "\*"))
+                             (one-or-more space))
+                            (match-string 0))
+              (- (match-end 1) (match-beginning 1) 1))
+
+         ;; Keyword/function heading
+         ;; Add 8 (the highest standard outline level) to every keyword
+         ;; heading
+         (+ 8 (- (match-end 3) (match-beginning 3)))))
+
+      (defun ap/sh-mode-outline-hook ()
+        (outline-minor-mode 1)
+        (setq outline-level 'ap/sh-outline-level)
+        (setq outline-regexp (rx (group (or
+                                         ;; Outline headings
+                                         (and (* space)
+                                              (one-or-more (syntax comment-start))
+                                              (* space)
+                                              (group (one-or-more "\*"))
+                                              (* space))
+
+                                         ;; Keywords and functions
+                                         (and (group (* space))
+                                              (or
+                                               ;; e.g. "function foo"
+                                               (and (or "function" "if" "elif" "else" "for" "while")
+                                                    (one-or-more space))
+
+                                               ;; e.g. "foo()"
+                                               (and (one-or-more (or alnum "_-"))
+                                                    (* space)
+                                                    (syntax open-parenthesis)
+                                                    (syntax close-parenthesis)))))))))
+      (add-hook 'sh-mode-hook 'ap/sh-mode-outline-hook)
+
+      (defun ap/el-outline-level ()
+        (or
+         ;; Commented outline heading
+         (and (string-match (rx
+                             (* space)
+                             (group (one-or-more (syntax comment-start)))
+                             (one-or-more space))
+                            (match-string 0))
+              (- (match-end 0) (match-beginning 0) 1))
+
+         ;; Lisp def heading
+         ;; Add 8 (the highest standard outline level) to every keyword
+         ;; heading
+         (+ 8 (- (match-end 0) (match-beginning 0)))))
+      (defun ap/el-mode-outline-hook ()
+        (outline-minor-mode 1)
+        (setq outline-level 'ap/el-outline-level)
+        (setq outline-regexp "\\(;;[;]\\{1,8\\} \\|\\((defun\\)\\)"))
+      (add-hook 'emacs-lisp-mode-hook 'ap/el-mode-outline-hook)
+
+      (defun ap/general-outline-level ()
+        (or
+         ;; Commented outline heading
+         (and (string-match (rx
+                             (* space)
+                             (one-or-more (syntax comment-start))
+                             (one-or-more space)
+                             (group (one-or-more "\*"))
+                             (one-or-more space))
+                            (match-string 0))
+              (- (match-end 1) (match-beginning 1) 1))))
+
+      (defun ap/general-outline-mode-enable ()
+        (interactive)
+        (outline-minor-mode 1)
+        (setq outline-level 'ap/general-outline-level)
+        (setq outline-regexp (rx (group (* space)
+                                        (one-or-more (syntax comment-start))
+                                        (* space)
+                                        (group (one-or-more "\*"))
+                                        (* space)))))
+
+      (mac-auto-operator-composition-mode)
+
+  )
 
 ;;; Customize
 (defun dotspacemacs/emacs-custom-settings ()
@@ -1254,7 +1411,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (helpful yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection solarized-theme smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain open-junk-file olivetti ob-async notmuch-labeler mwim move-text modern-light-theme modern-dawn-theme modern-dark-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org ein editorconfig dumb-jump doom-themes dired-narrow diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-link ac-ispell)))
+    (use-package pandoc-mode bind-key yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text modern-solarizedlight-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
  '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

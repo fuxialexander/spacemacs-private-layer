@@ -387,10 +387,10 @@ active."
   "Propertized `buffer-file-name' based on `+doom-modeline-buffer-file-name-style'."
   (propertize
    (pcase +doom-modeline-buffer-file-name-style
-     ('truncate-upto-project (+doom-modeline--buffer-file-name 'shrink))
-     ('truncate-upto-root (+doom-modeline--buffer-file-name-truncate))
+     ;; ('truncate-upto-project (+doom-modeline--buffer-file-name 'shrink))
+     ;; ('truncate-upto-root (+doom-modeline--buffer-file-name-truncate))
      ('truncate-all (+doom-modeline--buffer-file-name-truncate t))
-     ('relative-to-project (+doom-modeline--buffer-file-name-relative))
+     ;; ('relative-to-project (+doom-modeline--buffer-file-name-relative))
      ;; ('file-name (propertize (file-name-nondirectory buffer-file-name) 'face `(:inherit ,(or (and (buffer-modified-p) 'doom-modeline-buffer-modified) (and (active) 'doom-modeline-buffer-file)))))
      )
    'help-echo (+doom-modeline--buffer-file-name nil)))
@@ -407,8 +407,8 @@ If TRUNCATE-TAIL is t also truncate the parent directory of the file."
         "%b"
       (let ((dirname (car dirs))
             (basename (cdr dirs))
-            (dir-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-project-root-dir))))
-            (file-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-buffer-file)))))
+            (dir-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-project-root-dir 'bold))))
+            (file-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-buffer-file 'bold)))))
         (concat (propertize dirname 'face dir-faces)
                 (propertize (concat (if truncate-tail (substring basename 0 1) basename) "/")
                             'face dir-faces)
@@ -613,7 +613,7 @@ This segment overrides the modeline functionality of `org-mode-line-string'."
 ;;                             (nth 1 org-pomodoro-mode-line))
 ;;                           :global-override org-pomodoro-mode-line)
 
-;; ;;
+;;
 (def-modeline-segment! vcs
   "Displays the current branch, colored based on its state."
   (when (and vc-mode buffer-file-name)
@@ -654,7 +654,7 @@ This segment overrides the modeline functionality of `org-mode-line-string'."
                             'face (if active face))
                 " ")))))
 
-;;
+
 (defun +doom-ml-icon (icon &optional text face voffset)
   "Displays an octicon ICON with FACE, followed by TEXT. Uses
 `all-the-icons-octicon' to fetch the icon."
@@ -845,14 +845,15 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 ;;
 
 (def-modeline! main
-  ;; (bar matches " " buffer-info "  ")
   (bar matches "  " buffer-info " " buffer-purpose "  ")
-  (major-mode vcs flycheck " " perspname " " workspace-number " "))
+  ;; (bar matches "  " buffer-info " " )
+  (major-mode flycheck vcs " " perspname " " workspace-number " "))
+  ;; (major-mode flycheck vcs " " " " workspace-number " "))
 
 (def-modeline! clock
   ;; (bar matches " " buffer-info "  ")
   (bar matches "  " buffer-info " " buffer-purpose "  ")
-  (org-clock " " major-mode vcs flycheck " " perspname " " workspace-number " "))
+  (org-clock " " major-mode flycheck " " perspname " " workspace-number " "))
 
 ;; (def-modeline! pomodoro
 ;;   (bar matches " " buffer-info "  ")

@@ -12,6 +12,8 @@
 (setq myorg-packages
       '(
         company
+        org-bookmark-heading
+        org-web-tools
         evil-org
         evil-surround
         htmlize
@@ -25,7 +27,8 @@
         org-download
         ;; org-mime is installed by `org-plus-contrib'
         org-mime
-        (ob-ipython :location local)
+        ;; (ob-ipython :location local)
+        ob-ipython
         org-pomodoro
         org-present
         org-super-agenda
@@ -35,9 +38,41 @@
         (ox-hugo :toggle org-enable-hugo-support)))
 
 (defun myorg/post-init-company ()
+  ;; (require 'predictive nil t)
+  ;; (load "dict-english")
+  ;; (defvar company-predictive-syntax-table
+  ;;   (let ((tbl (copy-syntax-table (standard-syntax-table))))
+  ;;     (modify-syntax-entry ?\- "w" tbl)
+  ;;     tbl)
+  ;;   "Make character `-' have syntax word.")
+  ;; (defun company-predictive-grab-word ()
+  ;;   (with-syntax-table company-predictive-syntax-table
+  ;;     (company-grab-word)))
+  ;; (defun company-predictive (command &optional arg &rest ignored)
+  ;;   "A predictive-like `company-mode' completion back-end."
+  ;;   (interactive (list 'interactive))
+  ;;   (case command
+  ;;     ('interactive (company-begin-backend 'company-predictive))
+  ;;     ('prefix (company-predictive-grab-word))
+  ;;     ('candidates (predictive-complete arg))
+  ;;     ('ignore-case t)
+  ;;     ('sorted nil)
+  ;;     ('duplicates t)))
   (spacemacs|add-company-backends :backends company-capf :modes org-mode)
-  (spacemacs|add-company-backends :backends company-ispell :modes org-mode)
+  ;; (spacemacs|add-company-backends :backends company-predictive :modes org-mode)
   )
+
+
+;;;; Org-bookmark-heading
+(defun myorg/init-org-bookmark-heading ()
+  (use-package org-bookmark-heading
+    :config (setq org-bookmark-jump-indirect t)
+    ))
+
+;;;; Org-web-tools
+(defun myorg/init-org-web-tools ()
+  (use-package org-web-tools
+    ))
 
 
 (defun myorg/init-org-super-agenda ()
@@ -46,12 +81,14 @@
     :config
     (setq
      org-super-agenda-groups
-     '((:log t)  ; Automatically named "Log"
+     '((:name "Log"
+              :log t)  ; Automatically named "Log"
        (:name "Schedule"
               :time-grid t)
        (:name "Today"
               :scheduled today)
-       (:habit t)
+       (:name "Habits"
+              :habit t)
        (:name "Due today"
               :deadline today)
        (:name "Overdue"
@@ -139,7 +176,6 @@
             org-id-locations-file (concat spacemacs-cache-directory ".org-id-locations")
             org-publish-timestamp-directory (concat spacemacs-cache-directory ".org-timestamps/")
             org-startup-with-inline-images nil
-            org-image-actual-width '(500)
             org-fontify-whole-heading-line t
             org-fontify-done-headline t
             org-fontify-quote-and-verse-blocks t
@@ -161,20 +197,35 @@
 
       (setq org-directory "/Users/xfu/Dropbox/org/"
             org-capture-templates (quote (
-                  ("j" "Journal" entry
-                   (function my-org-move-point-to-capture)
-                   "* %^{Logging for...} :logs:
+                                          ("t" "Todo" entry
+                                           (file "~/Dropbox/org/inbox.org")
+                                           "* %^{Logging for...}
+:PROPERTIES:
+:Created: %U
+:END:
+%i
+%?" :prepend f :empty-lines 2 :created t)
+                                          ("ic" "Idea from Chrome" entry
+                                           (file "~/Dropbox/org/idea.org")
+                                           "* %^{Logging for...} :idea:
+:PROPERTIES:
+:Created: %U
+:Linked: %(org-as-mac-chrome-get-frontmost-url)
+:END:
+%i
+%?" :prepend f :empty-lines 2 :created t)
+                                          ("j" "Journal" entry
+                                           (function my-org-move-point-to-capture)
+                                           "* %^{Logging for...} :logs:
 :PROPERTIES:
 :Created: %U
 :Linked: %a
 :END:
 %i
 %?" :empty-lines 2 :clock-in t :created t)
-
-
-                  ("M" "Meeting" entry
-                   (file+olp+datetree "~/Dropbox/org/meeting.org")
-                   "* %^{Logging for...} :logs:communication:
+                                          ("M" "Meeting" entry
+                                           (file+olp+datetree "~/Dropbox/org/meeting.org")
+                                           "* %^{Logging for...} :logs:communication:
 %^{Effort}p
 %^T
 
@@ -182,31 +233,27 @@
 
 %i
 %?" :empty-lines 2 :clock-in t :created t)
-
-                  ("m" "Meeting Minutes" entry
-                   (function my-org-move-point-to-capture)
-                   "* %^{Logging for...} :logs:
+                                          ("m" "Meeting Minutes" entry
+                                           (function my-org-move-point-to-capture)
+                                           "* %^{Logging for...} :logs:
 :PROPERTIES:
 :Created: %U
 :Linked: %a
 :END:
 %i
 %?" :empty-lines 2 :clock-in t :created t)
-
-
-                  ("u" "Write-up" entry
-                   (function my-org-move-point-to-capture)
-                   "* %^{Logging for...} :writeup:
+                                          ("u" "Write-up" entry
+                                           (function my-org-move-point-to-capture)
+                                           "* %^{Logging for...} :writeup:
 :PROPERTIES:
 :Created: %U
 :Linked: %a
 :END:
 %i
 %?" :empty-lines 2 :clock-in t :created t)
-
-                  ("a" "Article" entry
-                   (file "~/Dropbox/org/ref.org")
-                   "* %^{Title}  :article:
+                                          ("a" "Article" entry
+                                           (file "~/Dropbox/org/ref.org")
+                                           "* %^{Title}  :article:
 :PROPERTIES:
 :Created: %U
 :Linked: %a
@@ -214,57 +261,52 @@
 %i
 Brief description:
 %?" :prepend f :empty-lines 2 :created t)
-
-                  ("i" "Idea" entry
-                   (file "~/Dropbox/org/idea.org")
-                   "* %A :idea:
+                                          ("i" "Idea" entry
+                                           (file "~/Dropbox/org/idea.org")
+                                           "* %A :idea:
 :PROPERTIES:
 :Created: %U
 :Linked: %a
 :END:
 %i
 %?" :prepend f :empty-lines 2 :created t)
-
-                  ("d" "Daily Review" entry
-                   (file+olp+datetree "~/Dropbox/org/review.org")
-                   "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:daily:%\\1:
+                                          ("d" "Daily Review" entry
+                                           (file+olp+datetree "~/Dropbox/org/review.org")
+                                           "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:daily:%\\1:
 :PROPERTIES:
 :Created: %U
 :Linked: [[file:life.org::*Daily%20review][Daily review]]
 :END:
 %i
 %?" :empty-lines 1 :clock-in t :created t)
-
-                  ("w" "Week Review" entry
-                   (file+olp+datetree "~/Dropbox/org/review.org")
-                   "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:week:%\\1:
+                                          ("w" "Week Review" entry
+                                           (file+olp+datetree "~/Dropbox/org/review.org")
+                                           "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:week:%\\1:
 :PROPERTIES:
 :Created: %U
 :Linked: [[file:life.org::*Week%20review][Week review]]
 :END:
 %i
 %?" :empty-lines 1 :clock-in t :created t)
-
-                  ("r" "Month Review" entry
-                   (file+olp+datetree "~/Dropbox/org/review.org")
-                   "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:month:%\\1:
+                                          ("r" "Month Review" entry
+                                           (file+olp+datetree "~/Dropbox/org/review.org")
+                                           "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:month:%\\1:
 :PROPERTIES:
 :Created: %U
 :Linked: [[file:life.org::*Month%20review][Month review]]
 :END:
 %i
 %?" :empty-lines 1 :clock-in t :created t)
-
-                  ("W" "Web site" entry
-                   (file "~/Dropbox/org/inbox.org")
-                   "* %A :website:
+                                          ("W" "Web site" entry
+                                           (file "~/Dropbox/org/inbox.org")
+                                           "* %A :website:
 :PROPERTIES:
 :Created: %U
 :Linked: %a
 :END:
 %i
 %?" :prepend f :empty-lines 2 :created t)
-                  ))
+                                          ))
             diary-file "/Users/xfu/Dropbox/org/cal.diary"
             org-default-notes-file "/Users/xfu/Dropbox/org/inbox.org"
             org-log-done 'time
@@ -272,7 +314,7 @@ Brief description:
             org-log-redeadline 'note
             org-log-reschedule 'note
             org-enforce-todo-dependencies t
-            org-habit-graph-column 0
+            org-habit-graph-column 1
             org-habit-following-days 0
             org-habit-preceding-days 8
             org-habit-show-habits t
@@ -315,7 +357,8 @@ Brief description:
       (defun my-buffer-face-mode-orgwrite ()
         "Sets a fixed width (monospace) font in current buffer"
         (interactive)
-        (setq buffer-face-mode-face '(:family "CMU Serif"))
+        (setq buffer-face-mode-face '(:family "charter" :height 1.2)
+              line-spacing 0.4)
         (buffer-face-mode))
 
       (setq
@@ -552,6 +595,14 @@ Will work on both org-mode and any mode that accepts plain html."
     :config
     (progn
 
+;;; Org-todo
+      (defun my-org-after-todo-state-change-action ()
+        (pcase org-state
+          ("WAIT" (org-schedule '(4)))
+          ("TODO" (org-schedule '(0)))
+          ('nil (org-schedule '(4)) (org-deadline '(4)))))
+      (add-hook 'org-after-todo-state-change-hook #'my-org-after-todo-state-change-action)
+
 ;;; Org-pandoc
       (setq org-pandoc-options '(
                                  (standalone . t)
@@ -564,7 +615,7 @@ Will work on both org-mode and any mode that accepts plain html."
        'org-babel-load-languages
        '((emacs-lisp . t)
          (ipython . t)
-         (ein . t)
+         ;; (ein . t)
          (python . t)
          (R . t)
          (shell . t)
@@ -574,92 +625,92 @@ Will work on both org-mode and any mode that accepts plain html."
 
 ;;; Org-refile-get-targets
       (defun org-refile-get-targets (&optional default-buffer)
-      "Produce a table with refile targets."
-      (let ((case-fold-search nil)
-            ;; otherwise org confuses "TODO" as a kw and "Todo" as a word
-            (entries (or org-refile-targets '((nil . (:level . 1)))))
-            targets tgs files desc descre)
-        (message "Getting targets...")
-        (with-current-buffer (or default-buffer (current-buffer))
-          (dolist (entry entries)
-            (setq files (car entry) desc (cdr entry))
-            (cond
-             ((null files) (setq files (list (current-buffer))))
-             ((eq files 'org-agenda-files)
-              (setq files (org-agenda-files 'unrestricted)))
-             ((and (symbolp files) (fboundp files))
-              (setq files (funcall files)))
-             ((and (symbolp files) (boundp files))
-              (setq files (symbol-value files))))
-            (when (stringp files) (setq files (list files)))
-            (cond
-             ((eq (car desc) :tag)
-              (setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
-             ((eq (car desc) :todo)
-              (setq descre (concat "^\\*+[ \t]+" (regexp-quote (cdr desc)) "[ \t]")))
-             ((eq (car desc) :regexp)
-              (setq descre (cdr desc)))
-             ((eq (car desc) :level)
-              (setq descre (concat "^\\*\\{" (number-to-string
-                                              (if org-odd-levels-only
-                                                  (1- (* 2 (cdr desc)))
-                                                (cdr desc)))
-                                   "\\}[ \t]")))
-             ((eq (car desc) :maxlevel)
-              (setq descre (concat "^\\*\\{1," (number-to-string
+        "Produce a table with refile targets."
+        (let ((case-fold-search nil)
+              ;; otherwise org confuses "TODO" as a kw and "Todo" as a word
+              (entries (or org-refile-targets '((nil . (:level . 1)))))
+              targets tgs files desc descre)
+          (message "Getting targets...")
+          (with-current-buffer (or default-buffer (current-buffer))
+            (dolist (entry entries)
+              (setq files (car entry) desc (cdr entry))
+              (cond
+               ((null files) (setq files (list (current-buffer))))
+               ((eq files 'org-agenda-files)
+                (setq files (org-agenda-files 'unrestricted)))
+               ((and (symbolp files) (fboundp files))
+                (setq files (funcall files)))
+               ((and (symbolp files) (boundp files))
+                (setq files (symbol-value files))))
+              (when (stringp files) (setq files (list files)))
+              (cond
+               ((eq (car desc) :tag)
+                (setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
+               ((eq (car desc) :todo)
+                (setq descre (concat "^\\*+[ \t]+" (regexp-quote (cdr desc)) "[ \t]")))
+               ((eq (car desc) :regexp)
+                (setq descre (cdr desc)))
+               ((eq (car desc) :level)
+                (setq descre (concat "^\\*\\{" (number-to-string
                                                 (if org-odd-levels-only
                                                     (1- (* 2 (cdr desc)))
                                                   (cdr desc)))
-                                   "\\}[ \t]")))
-             (t (error "Bad refiling target description %s" desc)))
-            (dolist (f files)
-              (with-current-buffer (if (bufferp f) f (org-get-agenda-file-buffer f))
-                (or
-                 (setq tgs (org-refile-cache-get (buffer-file-name) descre))
-                 (progn
-                   (when (bufferp f)
-                     (setq f (buffer-file-name (buffer-base-buffer f))))
-                   (setq f (and f (expand-file-name f)))
-                   (when (eq org-refile-use-outline-path 'file)
-                     (push (list (file-name-nondirectory f) f nil nil) tgs))
-                   (org-with-wide-buffer
-                    (goto-char (point-min))
-                    (setq org-outline-path-cache nil)
-                    (while (re-search-forward descre nil t)
-                      (beginning-of-line)
-                      (let ((case-fold-search nil))
-                        (looking-at org-complex-heading-regexp))
-                      (let ((begin (point))
-                            (heading (match-string-no-properties 4)))
-                        (unless (or (and
-                                     org-refile-target-verify-function
-                                     (not
-                                      (funcall org-refile-target-verify-function)))
-                                    (not heading))
-                          (let ((re (format org-complex-heading-regexp-format
-                                            (regexp-quote heading)))
-                                (target
-                                 (if (not org-refile-use-outline-path) heading
-                                   (concat
-                                    (file-name-nondirectory (buffer-file-name (buffer-base-buffer)))
-                                    " ✦ "
-                                    (org-format-outline-path (org-get-outline-path t t) 1000 nil " ➜ ")
-                                    ))))
+                                     "\\}[ \t]")))
+               ((eq (car desc) :maxlevel)
+                (setq descre (concat "^\\*\\{1," (number-to-string
+                                                  (if org-odd-levels-only
+                                                      (1- (* 2 (cdr desc)))
+                                                    (cdr desc)))
+                                     "\\}[ \t]")))
+               (t (error "Bad refiling target description %s" desc)))
+              (dolist (f files)
+                (with-current-buffer (if (bufferp f) f (org-get-agenda-file-buffer f))
+                  (or
+                   (setq tgs (org-refile-cache-get (buffer-file-name) descre))
+                   (progn
+                     (when (bufferp f)
+                       (setq f (buffer-file-name (buffer-base-buffer f))))
+                     (setq f (and f (expand-file-name f)))
+                     (when (eq org-refile-use-outline-path 'file)
+                       (push (list (file-name-nondirectory f) f nil nil) tgs))
+                     (org-with-wide-buffer
+                      (goto-char (point-min))
+                      (setq org-outline-path-cache nil)
+                      (while (re-search-forward descre nil t)
+                        (beginning-of-line)
+                        (let ((case-fold-search nil))
+                          (looking-at org-complex-heading-regexp))
+                        (let ((begin (point))
+                              (heading (match-string-no-properties 4)))
+                          (unless (or (and
+                                       org-refile-target-verify-function
+                                       (not
+                                        (funcall org-refile-target-verify-function)))
+                                      (not heading))
+                            (let ((re (format org-complex-heading-regexp-format
+                                              (regexp-quote heading)))
+                                  (target
+                                   (if (not org-refile-use-outline-path) heading
+                                     (concat
+                                      (file-name-nondirectory (buffer-file-name (buffer-base-buffer)))
+                                      " ✦ "
+                                      (org-format-outline-path (org-get-outline-path t t) 1000 nil " ➜ ")
+                                      ))))
 
-                            (push (list target f re (org-refile-marker (point)))
-                                  tgs)))
-                        (when (= (point) begin)
-                          ;; Verification function has not moved point.
-                          (end-of-line)))))))
-                (when org-refile-use-cache
-                  (org-refile-cache-put tgs (buffer-file-name) descre))
-                (setq targets (append tgs targets))))))
-        (message "Getting targets...done")
-        (delete-dups (nreverse targets))))
+                              (push (list target f re (org-refile-marker (point)))
+                                    tgs)))
+                          (when (= (point) begin)
+                            ;; Verification function has not moved point.
+                            (end-of-line)))))))
+                  (when org-refile-use-cache
+                    (org-refile-cache-put tgs (buffer-file-name) descre))
+                  (setq targets (append tgs targets))))))
+          (message "Getting targets...done")
+          (delete-dups (nreverse targets))))
 
 ;;; Org-edit-src-code
       (defun org-edit-src-code (&optional code edit-buffer-name)
-      "Edit the source or example block at point.
+        "Edit the source or example block at point.
 \\<org-src-mode-map>
 The code is copied to a separate buffer and the appropriate mode
 is turned on.  When done, exit with `\\[org-edit-src-exit]'.  This \
@@ -673,156 +724,238 @@ buffer instead.
 
 When optional argument EDIT-BUFFER-NAME is non-nil, use it as the
 name of the sub-editing buffer."
-      (interactive)
-      (let* ((element (org-element-at-point))
-             (type (org-element-type element)))
-        (unless (and (memq type '(example-block src-block))
-                     (org-src--on-datum-p element))
-          (user-error "Not in a source or example block"))
-        (let* ((lang
-                (if (eq type 'src-block) (org-element-property :language element)
-                  "example"))
-               (lang-f (and (eq type 'src-block) (org-src--get-lang-mode lang)))
-               (babel-info (and (eq type 'src-block)
-                                (org-babel-get-src-block-info 'light)))
-               deactivate-mark)
-          (when (and (eq type 'src-block) (not (functionp lang-f)))
-            (error "No such language mode: %s" lang-f))
-          (org-src--edit-element
-           element
-           (or edit-buffer-name
-               (org-src--construct-edit-buffer-name (buffer-name) lang))
-           lang-f
-           (and (null code)
-                (lambda () (org-escape-code-in-region (point-min) (point-max))))
-           (and code (org-unescape-code-in-string code)))
-          ;; Finalize buffer.
-          (setq-local org-coderef-label-format
-                      (or (org-element-property :label-fmt element)
-                          org-coderef-label-format))
-          (when (eq type 'src-block)
-            (setq-local org-src--babel-info babel-info)
-            (setq-local params (nth 2 babel-info))
-            (setq-local dir (cdr (assq :dir params)))
-            (if (bound-and-true-p dir)
-              (cd (file-name-as-directory (expand-file-name dir)))
-              )
-            (let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
-              (when (fboundp edit-prep-func)
-                (funcall edit-prep-func babel-info))))
-          t)))
+        (interactive)
+        (let* ((element (org-element-at-point))
+               (type (org-element-type element)))
+          (unless (and (memq type '(example-block src-block))
+                       (org-src--on-datum-p element))
+            (user-error "Not in a source or example block"))
+          (let* ((lang
+                  (if (eq type 'src-block) (org-element-property :language element)
+                    "example"))
+                 (lang-f (and (eq type 'src-block) (org-src--get-lang-mode lang)))
+                 (babel-info (and (eq type 'src-block)
+                                  (org-babel-get-src-block-info 'light)))
+                 deactivate-mark)
+            (when (and (eq type 'src-block) (not (functionp lang-f)))
+              (error "No such language mode: %s" lang-f))
+            (org-src--edit-element
+             element
+             (or edit-buffer-name
+                 (org-src--construct-edit-buffer-name (buffer-name) lang))
+             lang-f
+             (and (null code)
+                  (lambda () (org-escape-code-in-region (point-min) (point-max))))
+             (and code (org-unescape-code-in-string code)))
+            ;; Finalize buffer.
+            (setq-local org-coderef-label-format
+                        (or (org-element-property :label-fmt element)
+                            org-coderef-label-format))
+            (when (eq type 'src-block)
+              (setq-local org-src--babel-info babel-info)
+              (setq-local params (nth 2 babel-info))
+              (setq-local dir (cdr (assq :dir params)))
+              (if (bound-and-true-p dir)
+                  (cd (file-name-as-directory (expand-file-name dir)))
+                )
+              (let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
+                (when (fboundp edit-prep-func)
+                  (funcall edit-prep-func babel-info))))
+            t)))
 ;;; Org-mode fast-todo-selection
-    (defun org-fast-todo-selection ()
-      "Fast TODO keyword selection with single keys.
+      (defun org-fast-todo-selection ()
+        "Fast TODO keyword selection with single keys.
 Returns the new TODO keyword, or nil if no state change should occur."
-      (let* ((fulltable org-todo-key-alist)
-             (done-keywords org-done-keywords) ;; needed for the faces.
-             (maxlen (apply 'max (mapcar
-                                  (lambda (x)
-                                    (if (stringp (car x)) (string-width (car x)) 0))
-                                  fulltable)))
-             (expert t)
-             (fwidth (+ maxlen 3 1 3))
-             (ncol (/ (- (window-width) 4) fwidth))
-             tg cnt e c tbl
-             groups ingroup)
-        (save-excursion
-          (save-window-excursion
-            (if expert
-                (set-buffer (get-buffer-create " *Org todo*"))
-              (org-switch-to-buffer-other-window (get-buffer-create " *Org todo*")))
-            (erase-buffer)
-            (setq-local org-done-keywords done-keywords)
-            (setq tbl fulltable cnt 0)
-            (while (setq e (pop tbl))
-              (cond
-               ((equal e '(:startgroup))
-                (push '() groups) (setq ingroup t)
-                (unless (= cnt 0)
-                  (setq cnt 0)
-                  (insert "\n"))
-                (insert "{ "))
-               ((equal e '(:endgroup))
-                (setq ingroup nil cnt 0)
-                (insert "}\n"))
-               ((equal e '(:newline))
-                (unless (= cnt 0)
-                  (setq cnt 0)
-                  (insert "\n")
-                  (setq e (car tbl))
-                  (while (equal (car tbl) '(:newline))
+        (let* ((fulltable org-todo-key-alist)
+               (done-keywords org-done-keywords) ;; needed for the faces.
+               (maxlen (apply 'max (mapcar
+                                    (lambda (x)
+                                      (if (stringp (car x)) (string-width (car x)) 0))
+                                    fulltable)))
+               (expert t)
+               (fwidth (+ maxlen 3 1 3))
+               (ncol (/ (- (window-width) 4) fwidth))
+               tg cnt e c tbl
+               groups ingroup)
+          (save-excursion
+            (save-window-excursion
+              (if expert
+                  (set-buffer (get-buffer-create " *Org todo*"))
+                (org-switch-to-buffer-other-window (get-buffer-create " *Org todo*")))
+              (erase-buffer)
+              (setq-local org-done-keywords done-keywords)
+              (setq tbl fulltable cnt 0)
+              (while (setq e (pop tbl))
+                (cond
+                 ((equal e '(:startgroup))
+                  (push '() groups) (setq ingroup t)
+                  (unless (= cnt 0)
+                    (setq cnt 0)
+                    (insert "\n"))
+                  (insert "{ "))
+                 ((equal e '(:endgroup))
+                  (setq ingroup nil cnt 0)
+                  (insert "}\n"))
+                 ((equal e '(:newline))
+                  (unless (= cnt 0)
+                    (setq cnt 0)
                     (insert "\n")
-                    (setq tbl (cdr tbl)))))
-               (t
-                (setq tg (car e) c (cdr e))
-                (when ingroup (push tg (car groups)))
-                (setq tg (org-add-props tg nil 'face
-                                        (org-get-todo-face tg)))
-                (when (and (= cnt 0) (not ingroup)) (insert "  "))
-                (insert "[" c "] " tg (make-string
-                                       (- fwidth 4 (length tg)) ?\ ))
-                (when (= (setq cnt (1+ cnt)) ncol)
-                  (insert "\n")
-                  (when ingroup (insert "  "))
-                  (setq cnt 0)))))
-            (insert "\n")
-            (goto-char (point-min))
-            (unless expert (org-fit-window-to-buffer))
-            (message "[T]ODO | [D]ONE | [W]AIT | [K]ILL | [O]UTD | [SPC]:Clear")
-            (setq c (let ((inhibit-quit t)) (read-char-exclusive)))
-            (cond
-             ((or (= c ?\C-g)
-                  (and (= c ?q) (not (rassoc c fulltable))))
-              (setq quit-flag t))
-             ((= c ?\ ) nil)
-             ((setq e (rassoc c fulltable) tg (car e))
-              tg)
-             (t (setq quit-flag t)))))))
+                    (setq e (car tbl))
+                    (while (equal (car tbl) '(:newline))
+                      (insert "\n")
+                      (setq tbl (cdr tbl)))))
+                 (t
+                  (setq tg (car e) c (cdr e))
+                  (when ingroup (push tg (car groups)))
+                  (setq tg (org-add-props tg nil 'face
+                                          (org-get-todo-face tg)))
+                  (when (and (= cnt 0) (not ingroup)) (insert "  "))
+                  (insert "[" c "] " tg (make-string
+                                         (- fwidth 4 (length tg)) ?\ ))
+                  (when (= (setq cnt (1+ cnt)) ncol)
+                    (insert "\n")
+                    (when ingroup (insert "  "))
+                    (setq cnt 0)))))
+              (insert "\n")
+              (goto-char (point-min))
+              (unless expert (org-fit-window-to-buffer))
+              (message "[T]ODO | [D]ONE | [W]AIT | [K]ILL | [O]UTD | [SPC]:Clear")
+              (setq c (let ((inhibit-quit t)) (read-char-exclusive)))
+              (cond
+               ((or (= c ?\C-g)
+                    (and (= c ?q) (not (rassoc c fulltable))))
+                (setq quit-flag t))
+               ((= c ?\ ) nil)
+               ((setq e (rassoc c fulltable) tg (car e))
+                tg)
+               (t (setq quit-flag t)))))))
 
 ;;; Org-mode clock
-    (defun org-modify-and-clock-current-heading ()
-      (interactive)
-      (org-narrow-to-subtree)
-      (org-clock-in)
-      )
+      (defun org-modify-and-clock-current-heading ()
+        (interactive)
+        (org-narrow-to-subtree)
+        (org-clock-in)
+        )
 ;;; Org-latex-fragment
-    (defun org-latex-clear-fragment ()
-      (interactive)
-      (delete-directory org-preview-latex-image-directory t))
+      (defvar kk/org-latex-fragment-last nil
+        "Holds last fragment/environment you were on.")
+
+      (defun kk/org-in-latex-fragment-p ()
+        "Return the point where the latex fragment begins, if inside
+  a latex fragment. Else return false"
+        (let* ((el (org-element-context))
+               (el-type (car el)))
+          (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
+               (org-element-property :begin el))))
+
+      (defun kk/org-latex-fragment-toggle ()
+        "Toggle a latex fragment image "
+        (and (eq 'org-mode major-mode)
+             (let ((begin (kk/org-in-latex-fragment-p)))
+               (cond
+                ;; were on a fragment and now on a new fragment
+                ((and
+                  ;; fragment we were on
+                  kk/org-latex-fragment-last
+                  ;; and are on a fragment now
+                  begin
+
+                  ;; but not on the last one this is a little tricky. as you edit the
+                  ;; fragment, it is not equal to the last one. We use the begin
+                  ;; property which is less likely to change for the comparison.
+                  (not (and kk/org-latex-fragment-last
+                            (= begin
+                               kk/org-latex-fragment-last))))
+                 ;; go back to last one and put image back, provided there is still a fragment there
+                 (save-excursion
+                   (goto-char kk/org-latex-fragment-last)
+                   (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment))
+
+                   ;; now remove current image
+                   (goto-char begin)
+                   (let ((ov (loop for ov in (org--list-latex-overlays)
+                                   if
+                                   (and
+                                    (<= (overlay-start ov) (point))
+                                    (>= (overlay-end ov) (point)))
+                                   return ov)))
+                     (when ov
+                       (delete-overlay ov)))
+                   ;; and save new fragment
+                   (setq kk/org-latex-fragment-last begin)))
+
+                ;; were on a fragment and now are not on a fragment
+                ((and
+                  ;; not on a fragment now
+                  (not begin)
+                  ;; but we were on one
+                  kk/org-latex-fragment-last)
+                 ;; put image back on, provided that there is still a fragment here.
+                 (save-excursion
+                   (goto-char kk/org-latex-fragment-last)
+                   (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment)))
+
+                 ;; unset last fragment
+                 (setq kk/org-latex-fragment-last nil))
+
+                ;; were not on a fragment, and now are
+                ((and
+                  ;; we were not one one
+                  (not kk/org-latex-fragment-last)
+                  ;; but now we are
+                  begin)
+                 ;; remove image
+                 (save-excursion
+                   (goto-char begin)
+                   (let ((ov (loop for ov in (org--list-latex-overlays)
+                                   if
+                                   (and
+                                    (<= (overlay-start ov) (point))
+                                    (>= (overlay-end ov) (point)))
+                                   return ov)))
+                     (when ov
+                       (delete-overlay ov))))
+                 (setq kk/org-latex-fragment-last begin))))))
+
+      (defun org-latex-clear-fragment ()
+        (interactive)
+        (delete-directory org-preview-latex-image-directory t))
+      (add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
+
 ;;; Org-tag-with-ivy
-    (defun spacemacs//org-ctrl-c-ctrl-c-counsel-org-tag ()
-      "Hook for `org-ctrl-c-ctrl-c-hook' to use `counsel-org-tag'."
-      (if (save-excursion (beginning-of-line) (looking-at "[ \t]*$"))
-          (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
-              (user-error "C-c C-c can do nothing useful at this location"))
-        (let* ((context (org-element-context))
-               (type (org-element-type context)))
-          (case type
-            ;; When at a link, act according to the parent instead.
-            (link (setq context (org-element-property :parent context))
-                  (setq type (org-element-type context)))
-            ;; Unsupported object types: refer to the first supported
-            ;; element or object containing it.
-            ((bold code entity export-snippet inline-babel-call inline-src-block
-                   italic latex-fragment line-break macro strike-through subscript
-                   superscript underline verbatim)
-             (setq context
-                   (org-element-lineage
-                    context '(radio-target paragraph verse-block table-cell)))))
-          ;; For convenience: at the first line of a paragraph on the
-          ;; same line as an item, apply function on that item instead.
-          (when (eq type 'paragraph)
-            (let ((parent (org-element-property :parent context)))
-              (when (and (eq (org-element-type parent) 'item)
-                         (= (line-beginning-position)
-                            (org-element-property :begin parent)))
-                (setq context parent type 'item))))
-          (case type
-            ((headline inlinetask)
-             (save-excursion (goto-char (org-element-property :begin context))
-                             (call-interactively 'counsel-org-tag)) t)))))
-    (add-hook 'org-ctrl-c-ctrl-c-hook 'spacemacs//org-ctrl-c-ctrl-c-counsel-org-tag)
-    (add-hook 'org-capture-before-finalize-hook 'counsel-org-tag)
+      (defun spacemacs//org-ctrl-c-ctrl-c-counsel-org-tag ()
+        "Hook for `org-ctrl-c-ctrl-c-hook' to use `counsel-org-tag'."
+        (if (save-excursion (beginning-of-line) (looking-at "[ \t]*$"))
+            (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
+                (user-error "C-c C-c can do nothing useful at this location"))
+          (let* ((context (org-element-context))
+                 (type (org-element-type context)))
+            (case type
+              ;; When at a link, act according to the parent instead.
+              (link (setq context (org-element-property :parent context))
+                    (setq type (org-element-type context)))
+              ;; Unsupported object types: refer to the first supported
+              ;; element or object containing it.
+              ((bold code entity export-snippet inline-babel-call inline-src-block
+                     italic latex-fragment line-break macro strike-through subscript
+                     superscript underline verbatim)
+               (setq context
+                     (org-element-lineage
+                      context '(radio-target paragraph verse-block table-cell)))))
+            ;; For convenience: at the first line of a paragraph on the
+            ;; same line as an item, apply function on that item instead.
+            (when (eq type 'paragraph)
+              (let ((parent (org-element-property :parent context)))
+                (when (and (eq (org-element-type parent) 'item)
+                           (= (line-beginning-position)
+                              (org-element-property :begin parent)))
+                  (setq context parent type 'item))))
+            (case type
+              ((headline inlinetask)
+               (save-excursion (goto-char (org-element-property :begin context))
+                               (call-interactively 'counsel-org-tag)) t)))))
+      (add-hook 'org-ctrl-c-ctrl-c-hook 'spacemacs//org-ctrl-c-ctrl-c-counsel-org-tag)
+      (add-hook 'org-capture-before-finalize-hook 'counsel-org-tag)
 
 
 ;;; Spacemacs
@@ -870,6 +1003,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
       (setq org-agenda-restore-windows-after-quit t
             org-agenda-sticky nil
             org-agenda-block-separator ""
+            org-agenda-overriding-header ""
             org-agenda-clockreport-parameter-plist (quote (:link t :maxlevel 3 :fileskip0 t :stepskip0 t :tags "-COMMENT"))
             org-agenda-dim-blocked-tasks (quote invisible)
             org-agenda-log-mode-items (quote (closed clock))
@@ -878,58 +1012,58 @@ Returns the new TODO keyword, or nil if no state change should occur."
             org-agenda-skip-scheduled-if-done t
             org-agenda-start-with-log-mode nil
             org-agenda-custom-commands '()
-       )
+            )
 
       ;; (defun remove-headline-tags (headline)
       ;;   (if (string-match "\\(.+\\)[ \t]+\\(:.+:\\)"  headline)
       ;;       (string-trim (match-string 1 headline))
       ;;     headline))
       ;; (defun org-agenda-highlight-todo (x)
-    ;; (let ((org-done-keywords org-done-keywords-for-agenda)
-    ;;       (case-fold-search nil) (level nil) (position nil) re)
-    ;;   (if (eq x 'line)
-    ;;       (save-excursion
-    ;;         (beginning-of-line 1)
-    ;;         (setq re (org-get-at-bol 'org-todo-regexp))
-    ;;         (setq position (or (text-property-any (point-at-bol) (point-at-eol) 'org-heading t) (point)))
-    ;;         (goto-char position)
-    ;;         (setq level (get-text-property position 'level))
-    ;;         (when (looking-at (concat "[ \t]*\\.*\\(" re "\\) +"))
-    ;;           (add-text-properties (match-beginning 0) (match-end 1)
-    ;;                                (list 'face (org-get-todo-face 1)))
-    ;;           (let* ((s (buffer-substring (match-beginning 1) (match-end 1)))
-    ;;                  (data (buffer-substring (match-end 1) (line-end-position)))
-    ;;                  (formated_s (format org-agenda-todo-keyword-format s)))
-    ;;             (delete-region (match-beginning 1) (point-at-eol))
-    ;;             (goto-char (match-beginning 1))
-    ;;             (insert (concat "⎥ " formated_s " ⎥ "
-    ;;                             (if (string-match "\\(.+\\)\\(\\[#[A-Z]?\\]\\) \\(.+\\)" data)
-    ;;                                 (concat (string-trim (match-string 2 data))
-    ;;                                         " ⎥" level (remove-headline-tags (match-string 3 data)))
-    ;;                               (concat "     ⎥" level (remove-headline-tags (string-trim data)))))))))
-    ;;     (let ((pl (text-property-any 0 (length x) 'org-heading t x)))
-    ;;       (setq re (get-text-property 0 'org-todo-regexp x))
-    ;;       (when (and re pl (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)") x pl)
-    ;;                               pl))
-    ;;         (add-text-properties
-    ;;          (or (match-end 1) (match-end 0)) (match-end 0)
-    ;;          (list 'face (org-get-todo-face (match-string 2 x)))
-    ;;          x)
-    ;;         (when (match-end 1)
-    ;;           (setq x (concat (substring x 0 (match-end 1)) "⎥ "
-    ;;                           (format org-agenda-todo-keyword-format (match-string 2 x)) " ⎥ "
-    ;;                           (let ((data  (substring x (match-end 3))))
-    ;;                             (if (string-match "\\(.*\\)\\(\\[#[A-Z]?\\]\\) \\(.*\\)" data)
-    ;;                                 (concat (match-string 2 data) " ⎥"
-    ;;                                         (or level (get-text-property 0 'level x))
-    ;;                                         (match-string 1 data)
-    ;;                                         (remove-headline-tags (match-string 3 data)))
-    ;;                               (concat "     ⎥"
-    ;;                                       (or level (get-text-property 0 'level x))
-    ;;                                       (remove-headline-tags data))))
-    ;;                           (org-add-props " " (text-properties-at 0 x))
-    ;;                           )))))
-    ;;     x)))
+      ;; (let ((org-done-keywords org-done-keywords-for-agenda)
+      ;;       (case-fold-search nil) (level nil) (position nil) re)
+      ;;   (if (eq x 'line)
+      ;;       (save-excursion
+      ;;         (beginning-of-line 1)
+      ;;         (setq re (org-get-at-bol 'org-todo-regexp))
+      ;;         (setq position (or (text-property-any (point-at-bol) (point-at-eol) 'org-heading t) (point)))
+      ;;         (goto-char position)
+      ;;         (setq level (get-text-property position 'level))
+      ;;         (when (looking-at (concat "[ \t]*\\.*\\(" re "\\) +"))
+      ;;           (add-text-properties (match-beginning 0) (match-end 1)
+      ;;                                (list 'face (org-get-todo-face 1)))
+      ;;           (let* ((s (buffer-substring (match-beginning 1) (match-end 1)))
+      ;;                  (data (buffer-substring (match-end 1) (line-end-position)))
+      ;;                  (formated_s (format org-agenda-todo-keyword-format s)))
+      ;;             (delete-region (match-beginning 1) (point-at-eol))
+      ;;             (goto-char (match-beginning 1))
+      ;;             (insert (concat "⎥ " formated_s " ⎥ "
+      ;;                             (if (string-match "\\(.+\\)\\(\\[#[A-Z]?\\]\\) \\(.+\\)" data)
+      ;;                                 (concat (string-trim (match-string 2 data))
+      ;;                                         " ⎥" level (remove-headline-tags (match-string 3 data)))
+      ;;                               (concat "     ⎥" level (remove-headline-tags (string-trim data)))))))))
+      ;;     (let ((pl (text-property-any 0 (length x) 'org-heading t x)))
+      ;;       (setq re (get-text-property 0 'org-todo-regexp x))
+      ;;       (when (and re pl (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)") x pl)
+      ;;                               pl))
+      ;;         (add-text-properties
+      ;;          (or (match-end 1) (match-end 0)) (match-end 0)
+      ;;          (list 'face (org-get-todo-face (match-string 2 x)))
+      ;;          x)
+      ;;         (when (match-end 1)
+      ;;           (setq x (concat (substring x 0 (match-end 1)) "⎥ "
+      ;;                           (format org-agenda-todo-keyword-format (match-string 2 x)) " ⎥ "
+      ;;                           (let ((data  (substring x (match-end 3))))
+      ;;                             (if (string-match "\\(.*\\)\\(\\[#[A-Z]?\\]\\) \\(.*\\)" data)
+      ;;                                 (concat (match-string 2 data) " ⎥"
+      ;;                                         (or level (get-text-property 0 'level x))
+      ;;                                         (match-string 1 data)
+      ;;                                         (remove-headline-tags (match-string 3 data)))
+      ;;                               (concat "     ⎥"
+      ;;                                       (or level (get-text-property 0 'level x))
+      ;;                                       (remove-headline-tags data))))
+      ;;                           (org-add-props " " (text-properties-at 0 x))
+      ;;                           )))))
+      ;;     x)))
       (setq org-agenda-sorting-strategy
             '((agenda time-up priority-down category-keep)
               (todo   priority-down category-keep)
@@ -958,12 +1092,12 @@ Returns the new TODO keyword, or nil if no state change should occur."
         "sc" 'org-copy
         )
       (spacemacs|define-transient-state org-agenda
-      :title "Org-agenda transient state"
-      :on-enter (setq which-key-inhibit t)
-      :on-exit (setq which-key-inhibit nil)
-      :foreign-keys run
-      :doc
-      "
+        :title "Org-agenda transient state"
+        :on-enter (setq which-key-inhibit t)
+        :on-exit (setq which-key-inhibit nil)
+        :foreign-keys run
+        :doc
+        "
 Headline^^            Visit entry^^               Filter^^                    Date^^                  Toggle mode^^        View^^             Clock^^        Other^^
 --------^^---------   -----------^^------------   ------^^-----------------   ----^^-------------     -----------^^------  ----^^---------    -----^^------  -----^^-----------
 [_ht_] set status     [_SPC_] in other window     [_ft_] by tag               [_ds_] schedule         [_tf_] follow        [_vd_] day         [_cI_] in      [_gr_] reload
@@ -976,77 +1110,103 @@ Headline^^            Visit entry^^               Filter^^                    Da
 ^^                    ^^                          ^^                          ^^                      ^^                   [_vr_] reset       ^^             ^^
 [_q_] quit
 "
-      :bindings
-      ;; Entry
-      ("h:" org-agenda-set-tags)
-      ("hA" org-agenda-archive-default)
-      ("hk" org-agenda-kill)
-      ("hp" org-agenda-priority)
-      ("hr" org-agenda-refile)
-      ("ht" org-agenda-todo)
+        :bindings
+        ;; Entry
+        ("h:" org-agenda-set-tags)
+        ("hA" org-agenda-archive-default)
+        ("hk" org-agenda-kill)
+        ("hp" org-agenda-priority)
+        ("hr" org-agenda-refile)
+        ("ht" org-agenda-todo)
 
-      ;; Visit entry
-      ("SPC" org-agenda-show-and-scroll-up)
-      ("<tab>" org-agenda-goto :exit t)
-      ("TAB" org-agenda-goto :exit t)
-      ("RET" org-agenda-switch-to :exit t)
-      ("o"   link-hint-open-link :exit t)
+        ;; Visit entry
+        ("SPC" org-agenda-show-and-scroll-up)
+        ("<tab>" org-agenda-goto :exit t)
+        ("TAB" org-agenda-goto :exit t)
+        ("RET" org-agenda-switch-to :exit t)
+        ("o"   link-hint-open-link :exit t)
 
-      ;; Date
-      ("ds" org-agenda-schedule)
-      ("dS" (lambda () (interactive)
-             (let ((current-prefix-arg '(4)))
+        ;; Date
+        ("ds" org-agenda-schedule)
+        ("dS" (lambda () (interactive)
+                (let ((current-prefix-arg '(4)))
                   (call-interactively 'org-agenda-schedule))))
-      ("dd" org-agenda-deadline)
-      ("dt" org-agenda-date-prompt)
-      ("dD" (lambda () (interactive)
-             (let ((current-prefix-arg '(4)))
+        ("dd" org-agenda-deadline)
+        ("dt" org-agenda-date-prompt)
+        ("dD" (lambda () (interactive)
+                (let ((current-prefix-arg '(4)))
                   (call-interactively 'org-agenda-deadline))))
-      ("+" org-agenda-do-date-later)
-      ("-" org-agenda-do-date-earlier)
+        ("+" org-agenda-do-date-later)
+        ("-" org-agenda-do-date-earlier)
 
-      ;; View
-      ("vd" org-agenda-day-view)
-      ("vw" org-agenda-week-view)
-      ("vt" org-agenda-fortnight-view)
-      ("vm" org-agenda-month-view)
-      ("vy" org-agenda-year-view)
-      ("vn" org-agenda-later)
-      ("vp" org-agenda-earlier)
-      ("vr" org-agenda-reset-view)
+        ;; View
+        ("vd" org-agenda-day-view)
+        ("vw" org-agenda-week-view)
+        ("vt" org-agenda-fortnight-view)
+        ("vm" org-agenda-month-view)
+        ("vy" org-agenda-year-view)
+        ("vn" org-agenda-later)
+        ("vp" org-agenda-earlier)
+        ("vr" org-agenda-reset-view)
 
-      ;; Toggle mode
-      ("tf" org-agenda-follow-mode)
-      ("tl" org-agenda-log-mode)
-      ("ta" org-agenda-archives-mode)
-      ("tr" org-agenda-clockreport-mode)
-      ("td" org-agenda-toggle-diary)
+        ;; Toggle mode
+        ("tf" org-agenda-follow-mode)
+        ("tl" org-agenda-log-mode)
+        ("ta" org-agenda-archives-mode)
+        ("tr" org-agenda-clockreport-mode)
+        ("td" org-agenda-toggle-diary)
 
-      ;; Filter
-      ("ft" org-agenda-filter-by-tag)
-      ("fr" org-agenda-filter-by-tag-refine)
-      ("fc" org-agenda-filter-by-category)
-      ("fh" org-agenda-filter-by-top-headline)
-      ("fx" org-agenda-filter-by-regexp)
-      ("fd" org-agenda-filter-remove-all)
+        ;; Filter
+        ("ft" org-agenda-filter-by-tag)
+        ("fr" org-agenda-filter-by-tag-refine)
+        ("fc" org-agenda-filter-by-category)
+        ("fh" org-agenda-filter-by-top-headline)
+        ("fx" org-agenda-filter-by-regexp)
+        ("fd" org-agenda-filter-remove-all)
 
-      ;; Clock
-      ("cI" org-agenda-clock-in :exit t)
-      ("cj" org-agenda-clock-goto :exit t)
-      ("cO" org-agenda-clock-out)
-      ("cq" org-agenda-clock-cancel)
+        ;; Clock
+        ("cI" org-agenda-clock-in :exit t)
+        ("cj" org-agenda-clock-goto :exit t)
+        ("cO" org-agenda-clock-out)
+        ("cq" org-agenda-clock-cancel)
 
-      ;; Other
-      ("q" nil :exit t)
-      ("gr" org-agenda-redo)
-      ("." org-agenda-goto-today)
-      ("gd" org-agenda-goto-date)))
+        ;; Other
+        ("q" nil :exit t)
+        ("gr" org-agenda-redo)
+        ("." org-agenda-goto-today)
+        ("gd" org-agenda-goto-date)))
     :config
+    (defun myorg-agenda-format-date-aligned (date)
+      "Format a DATE string for display in the daily/weekly agenda.
+This function makes sure that dates are aligned for easy reading."
+      (require 'cal-iso)
+      (let* ((dayname (calendar-day-name date))
+             (day (cadr date))
+             (day-of-week (calendar-day-of-week date))
+             (month (car date))
+             (monthname (calendar-month-name month))
+             (year (nth 2 date))
+             (iso-week (org-days-to-iso-week
+                        (calendar-absolute-from-gregorian date)))
+             (weekyear (cond ((and (= month 1) (>= iso-week 52))
+                              (1- year))
+                             ((and (= month 12) (<= iso-week 1))
+                              (1+ year))
+                             (t year)))
+             (weekstring (if (= day-of-week 1)
+                             (format " W%02d" iso-week)
+                           "")))
+        (format "%-10s %2d %s %4d%s\n"
+                dayname day monthname year weekstring)))
+
+    (setq org-agenda-format-date 'myorg-agenda-format-date-aligned)
     (evilified-state-evilify-map org-agenda-mode-map
       :mode org-agenda-mode
       :bindings
       "j" 'org-agenda-next-line
       "k" 'org-agenda-previous-line
+      "h" 'org-habit-toggle-habits
+      "l" 'org-agenda-log-mode
       (kbd "M-j") 'org-agenda-next-item
       (kbd "M-k") 'org-agenda-previous-item
       (kbd "M-h") 'org-agenda-earlier
@@ -1062,11 +1222,10 @@ Headline^^            Visit entry^^               Filter^^                    Da
     ;;   (setq org-agenda-tags-column (- 0 (window-width)))
     ;;   (org-agenda-align-tags))
     (add-hook 'org-finalize-agenda-hook 'place-agenda-tags)
-    (add-hook 'org-agenda-mode-hook 'doom-hide-modeline-mode)
     ;; (advice-add 'org-agenda-goto :after
     ;;             (lambda (&rest args)
     ;;               (org-narrow-to-subtree)))
-))
+    ))
 
 ;;; org-brain
 (defun myorg/init-org-brain ()
@@ -1078,7 +1237,7 @@ Headline^^            Visit entry^^               Filter^^                    Da
             org-id-track-globally t
             org-id-locations-file "~/.emacs.d/.org-id-locations"
             org-brain-visualize-default-choices 'all
-       )
+            )
       (spacemacs/set-leader-keys "aob" 'org-brain-visualize)
       (evil-set-initial-state 'org-brain-visualize-mode 'emacs))))
 

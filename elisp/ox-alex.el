@@ -2418,9 +2418,10 @@ images, set it to:
 (defun org-alex-export-file-uri (filename)
   "Return file URI associated to FILENAME."
   (cond ((org-string-match-p "\\`//" filename) (concat "file:" filename))
-        ((not (file-name-absolute-p filename)) filename)
+        ((file-name-absolute-p filename) filename)
         ((org-file-remote-p filename) (concat "file:/" filename))
-        (t (concat "file://" (expand-file-name filename)))))
+        (t (concat "file://" (expand-file-name filename)))
+        ))
 
 (defun org-alex-fuzzy (file search)
   (cond ((fboundp 'org-publish-resolve-external-fuzzy-link)

@@ -5,6 +5,7 @@
         (outline-ivy :location local)
         ;; (dash-functional :location (recipe :fetcher github :repo "magnars/dash.el"))
         outshine
+        pythonic
         ))
 
 ;;; Dash-functional
@@ -16,8 +17,7 @@
 (defun personal/init-outline-ivy ()
   (use-package outline-ivy
     :after ivy outshine
-    :config
-    (global-set-key (kbd "C-j") 'counsel-oi)))
+    ))
 
 (defun personal/init-outshine ()
   (use-package outshine
@@ -40,3 +40,30 @@
                   (lambda (&rest args) (unless (outline-on-heading-p t)
                                          (outline-previous-visible-heading 1))))
       )))
+
+(defun personal/post-init-pythonic ()
+  (setq anaconda-ob-ipython-interpreter python-shell-interpreter)
+  (defun pythonic-tramp-connection ()
+    "Tramp connection string or nil."
+    (-when-let* ((vars (--filter (tramp-tramp-file-p it)
+                                 (list
+                                  pythonic-environment
+                                  anaconda-ob-ipython-interpreter
+                                  )))
+                 (var (car vars)))
+      (substring var 0 (- (length var) (length (pythonic-file-name var))))))
+  (defun pythonic-executable ()
+    "Python executable."
+    (let* ((windowsp (eq system-type 'windows-nt))
+           (python (if windowsp "pythonw" "python"))
+           (bin (if windowsp "Scripts" "bin")))
+      (if pythonic-environment
+          (f-join (pythonic-file-name pythonic-environment) bin python)
+        (pythonic-file-name anaconda-ob-ipython-interpreter))))
+  (defun pythonic-remote-p ()
+    "Determine remote or local virtual environment."
+    (if pythonic-environment
+        (tramp-tramp-file-p pythonic-environment)
+      (tramp-tramp-file-p anaconda-ob-ipython-interpreter)))
+  )
+

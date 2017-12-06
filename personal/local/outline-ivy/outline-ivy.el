@@ -52,16 +52,17 @@
                           (outline-next-heading)))
       (while start-pos
         (let ((name (oi-get-heading))
-              level)
-          (search-forward " ")
-          (setq level
-                (- (length (buffer-substring-no-properties start-pos (point)))
-                   3))
-          (setq name (concat (make-string (* 2 level) ? ) (nth (- level 1) org-bullets-bullet-list) "  " name))
-          (setq name (counsel-org-goto--add-face name level))
-          (push (cons name (point-marker)) entries))
+               (level (outshine-calc-outline-level)))
+          (if (numberp level)
+              (progn
+                (setq name (concat
+                            (make-string (* 2 (or level 8)) ? )
+                            (nth (- (or level 8) 1) org-bullets-bullet-list) "  " name))
+                (setq name (counsel-org-goto--add-face name (or level 8)))
+                (push (cons name (point-marker)) entries))))
         (setq start-pos (outline-next-heading)))
       (nreverse entries))))
+
 ;;;###autoload
 
 (defun counsel-oi()
