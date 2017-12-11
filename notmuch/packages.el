@@ -498,6 +498,8 @@ matched."
                 (kbd "F") 'evil-snipe-F
                 (kbd "b") 'evil-backward-word-begin
                 (kbd "t") 'notmuch-tree-from-show-current-query
+                (kbd "n") 'notmuch-show-next-thread-show
+                (kbd "p") 'notmuch-show-previous-thread-show
 
                 )
 

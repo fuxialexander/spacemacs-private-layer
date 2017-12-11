@@ -52,6 +52,7 @@ This function should only modify configuration layer settings."
      version-control
      colors
      pandoc
+     markdown
      (treemacs :variables treemacs-use-follow-mode t)
      ;; (shell :variables
      ;;        shell-default-shell 'eshell
@@ -84,6 +85,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-additional-packages '(
                                       ;; circadian
                                       helpful
+                                      shackle
                                       ivy-dired-history
                                       flycheck-package
                                       cdlatex
@@ -139,9 +141,9 @@ This function should only modify configuration layer settings."
                                     helm-spacemacs-help
                                     ido-vertical-mode
                                     flx-ido
-                                    ;; ivy-purpose
-                                    ;; window-purpose
-                                    ;; popwin
+                                    ivy-purpose
+                                    window-purpose
+                                    popwin
                                     helm-purpose
                                     helm-make
                                     )
@@ -464,6 +466,26 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+;;;; Shackle
+  (use-package shackle
+    :config
+    (progn
+      (setq shackle-select-reused-windows nil) ; default nil
+      (setq shackle-default-alignment 'below) ; default below
+      (setq shackle-default-size 0.4) ; default 0.5
+
+      (setq shackle-rules
+            '((flycheck-error-list-mode :select nil :align below :size 0.25)
+              (calendar-mode            :select t   :align below :size 0.25)
+              (help-mode                :select t   :align right :size 0.5)
+              (helpful-mode             :select t   :align right :size 0.5)
+              (compilation-mode         :select t   :align right :size 0.5)
+              ("*Man.*"                 :select t   :align below :size 0.5  :regexp t)
+              ("*Org Src.*"             :select t   :align below :size 0.5  :regexp t)))
+      (shackle-mode t)
+      ))
+
+
 ;;;; Helpful
   (use-package helpful
     :ensure t
@@ -613,7 +635,6 @@ you should place your code here."
    mouse-yank-at-point t           ; middle-click paste at point, not at click
    resize-mini-windows 'grow-only  ; Minibuffer resizing
    show-help-function nil          ; hide :help-echo text
-   split-width-threshold 1000       ; favor horizontal splits
    uniquify-buffer-name-style 'forward
    use-dialog-box nil              ; always avoid GUI
    visible-cursor nil
@@ -628,14 +649,13 @@ you should place your code here."
    visible-bell nil
    truncate-lines t
    split-height-threshold 100
-   split-width-threshold 1000
+   split-width-threshold 100
 
    ;; window-divider-mode t
    ;; global-hl-line-mode t
    ;; global-company-mode t
    ;; global-auto-revert-mode t
    ;; global-auto-revert-non-file-buffers t
-   eyebrowse-new-workspace 'purpose-load-window-layout
    frame-resize-pixelwise t
    window-resize-pixelwise t
    window-divider-default-places t
@@ -1226,29 +1246,30 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
 
 
   (add-hook 'anaconda-mode-hook #'python-mode-outline-hook)
-  (add-to-list 'purpose-user-mode-purposes '(emacs-lisp-mode . el))
-  (add-to-list 'purpose-user-mode-purposes '(helpful-mode . el-help))
 
-  (add-to-list 'purpose-user-mode-purposes '(elfeed-search-mode . elfeed-search))
-  (add-to-list 'purpose-user-mode-purposes '(elfeed-show-mode . elfeed-show))
+  ;; (add-to-list 'purpose-user-mode-purposes '(emacs-lisp-mode . el))
+  ;; (add-to-list 'purpose-user-mode-purposes '(helpful-mode . el-help))
 
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-hello-mode . nhello))
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-search-mode . nlist))
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-tree-mode . nlist))
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-show-mode . nshow))
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-message-mode . nmessage))
+  ;; (add-to-list 'purpose-user-mode-purposes '(elfeed-search-mode . elfeed-search))
+  ;; (add-to-list 'purpose-user-mode-purposes '(elfeed-show-mode . elfeed-show))
 
-  (add-to-list 'purpose-user-regexp-purposes '("*Org Src*" . orgsrc))
-  (add-to-list 'purpose-user-mode-purposes '(org-mode . org))
-  (add-to-list 'purpose-user-mode-purposes '(org-agenda-mode . agenda))
+  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-hello-mode . nhello))
+  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-search-mode . nlist))
+  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-tree-mode . nlist))
+  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-show-mode . nshow))
+  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-message-mode . nmessage))
 
-  (add-to-list 'purpose-user-mode-purposes '(anaconda-mode-view-mode . doc))
-  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-inspect*" . doc))
-  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-out*" . out))
-  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-debug*" . out))
-  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-traceback*" . out))
+  ;; (add-to-list 'purpose-user-regexp-purposes '("*Org Src*" . orgsrc))
+  ;; (add-to-list 'purpose-user-mode-purposes '(org-mode . org))
+  ;; (add-to-list 'purpose-user-mode-purposes '(org-agenda-mode . agenda))
 
-  (purpose-compile-user-configuration)
+  ;; (add-to-list 'purpose-user-mode-purposes '(anaconda-mode-view-mode . doc))
+  ;; (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-inspect*" . doc))
+  ;; (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-out*" . out))
+  ;; (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-debug*" . out))
+  ;; (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-traceback*" . out))
+
+  ;; (purpose-compile-user-configuration)
 ;;;; Outline-level
       (defun python-mode-outline-hook ()
         (outline-minor-mode 1)
@@ -1411,7 +1432,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (use-package pandoc-mode bind-key yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text modern-solarizedlight-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
+    (shackle persp-mode eyebrowse yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils pip-requirements pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text modern-solarizedlight-theme mmm-mode markdown-toc macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide imenu-list hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
  '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

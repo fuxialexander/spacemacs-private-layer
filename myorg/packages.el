@@ -176,6 +176,7 @@
             org-id-locations-file (concat spacemacs-cache-directory ".org-id-locations")
             org-publish-timestamp-directory (concat spacemacs-cache-directory ".org-timestamps/")
             org-startup-with-inline-images nil
+            org-blank-before-new-entry nil
             org-fontify-whole-heading-line t
             org-fontify-done-headline t
             org-fontify-quote-and-verse-blocks t
@@ -270,33 +271,30 @@ Brief description:
 :END:
 %i
 %?" :prepend f :empty-lines 2 :created t)
-                                          ("d" "Daily Review" entry
+                                          ("dr" "Daily Review" entry
                                            (file+olp+datetree "~/Dropbox/org/review.org")
-                                           "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:daily:%\\1:
+                                           "* %^{Review} :review:daily:
 :PROPERTIES:
 :Created: %U
-:Linked: [[file:life.org::*Daily%20review][Daily review]]
+:Linked: %a
 :END:
-%i
-%?" :empty-lines 1 :clock-in t :created t)
-                                          ("w" "Week Review" entry
+%?" :created t)
+                                          ("wr" "Week Review" entry
                                            (file+olp+datetree "~/Dropbox/org/review.org")
-                                           "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:week:%\\1:
+                                           "* %^{Review} :review:week:
 :PROPERTIES:
 :Created: %U
-:Linked: [[file:life.org::*Week%20review][Week review]]
+:Linked: %a
 :END:
-%i
-%?" :empty-lines 1 :clock-in t :created t)
-                                          ("r" "Month Review" entry
+%?" :created t)
+                                          ("mr" "Month Review" entry
                                            (file+olp+datetree "~/Dropbox/org/review.org")
-                                           "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:month:%\\1:
+                                           "* %^{Review} :review:month:
 :PROPERTIES:
 :Created: %U
-:Linked: [[file:life.org::*Month%20review][Month review]]
+:Linked: %a
 :END:
-%i
-%?" :empty-lines 1 :clock-in t :created t)
+%?" :created t)
                                           ("W" "Web site" entry
                                            (file "~/Dropbox/org/inbox.org")
                                            "* %A :website:
@@ -320,6 +318,131 @@ Brief description:
             org-habit-show-habits t
             Org-hide-block-startup t
             org-tags-column 0
+            org-tag-persistent-alist '(
+                                       (:startgrouptag)
+                                       ("Mood")
+                                       (:grouptags)
+                                       ("happy")
+                                       ("sad")
+                                       ("pity")
+                                       ("excited")
+                                       ("bored")
+                                       ("tired")
+                                       ("giveup")
+                                       ("eager")
+                                       ("hope")
+                                       ("warm")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("People")
+                                       (:grouptags)
+                                       ("KevinGroup")
+                                       ("HSCR")
+                                       ("Friends")
+                                       ("Family")
+                                       ("Office")
+                                       ("Acquaintances")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("KevinGroup")
+                                       (:grouptags)
+                                       ("kevin")
+                                       ("qin")
+                                       ("danny")
+                                       ("qiong")
+                                       ("christina")
+                                       ("yong")
+                                       ("chengyang")
+                                       ("kelly")
+                                       ("le")
+                                       ("saudan")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("Field")
+                                       (:grouptags)
+                                       ("bioinfo")
+                                       ("biomed")
+                                       ("statistics")
+                                       ("cs")
+                                       ("math")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("bioinfo")
+                                       (:grouptags)
+                                       ("genomics")
+                                       ("tools")
+                                       ("dataviz")
+                                       ("epigenomics")
+                                       ("genome_arch")
+                                       ("gene_regulation")
+                                       ("enhancer")
+                                       ("promoter")
+                                       ("alignment")
+                                       ("assembly")
+                                       ("sequencing")
+                                       ("mrpa")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("cs")
+                                       (:grouptags)
+                                       ("network")
+                                       ("deep_learning")
+                                       ("machine_learning")
+                                       ("algorithm")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("biomed")
+                                       (:grouptags)
+                                       ("development")
+                                       ("cellbio")
+                                       ("crispr")
+                                       ("disease")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("statistics")
+                                       (:grouptags)
+                                       ("hypo_test")
+                                       ("bayesian")
+                                       ("linear_model")
+                                       ("penalized_regression")
+                                       ("significance")
+                                       ("fdr")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("math")
+                                       (:grouptags)
+                                       ("linear_algebra")
+                                       ("calculus")
+                                       ("fdr")
+                                       ("optimization")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("Research")
+                                       (:grouptags)
+                                       ("search")
+                                       ("read")
+                                       ("literature")
+                                       ("website")
+                                       ("learn")
+                                       ("coding")
+                                       ("analysis")
+                                       ("organize")
+                                       ("plot")
+                                       ("discuss")
+                                       ("talk")
+                                       (:endgrouptag)
+
+
+                                       )
             org-agenda-tags-column 'auto
             org-agenda-restore-windows-after-quit t
             org-agenda-span 'day

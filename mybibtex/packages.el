@@ -181,8 +181,8 @@
             '((org-mode      . bibtex-completion-format-citation-pandoc-citeproc)
               (default       . bibtex-completion-format-citation-default))
 
-            bibtex-completion-bibliography "/Users/xfu/Dropbox/org/ref.bib"
-            bibtex-completion-library-path "/Users/xfu/Dropbox/Library.papers3/Files/"
+            bibtex-completion-bibliography "/Users/xfu/Dropbox/org/Bibliography.bib"
+            bibtex-completion-library-path "/Users/xfu/Documents/Bookends/Attachments/"
             bibtex-completion-notes-path "/Users/xfu/Dropbox/org/ref.org"
             bibtex-completion-pdf-field "file"
             bibtex-completion-pdf-open-function (lambda (fpath) (start-process "open" "*open*" "open" fpath))
