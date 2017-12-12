@@ -278,23 +278,23 @@ Brief description:
 :Created: %U
 :Linked: %a
 :END:
-%?" :created t)
+%?" :created t :clock-in t)
                                           ("wr" "Week Review" entry
                                            (file+olp+datetree "~/Dropbox/org/review.org")
-                                           "* %^{Review} :review:week:
+                                           "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:week:%\\1:
+
 :PROPERTIES:
 :Created: %U
-:Linked: %a
 :END:
-%?" :created t)
-                                          ("mr" "Month Review" entry
+%?" :created t :clock-in t)
+                                          ("wr" "Month Review" entry
                                            (file+olp+datetree "~/Dropbox/org/review.org")
-                                           "* %^{Review} :review:month:
+                                           "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:month:%\\1:
+
 :PROPERTIES:
 :Created: %U
-:Linked: %a
 :END:
-%?" :created t)
+%?" :created t :clock-in t)
                                           ("W" "Web site" entry
                                            (file "~/Dropbox/org/inbox.org")
                                            "* %A :website:
