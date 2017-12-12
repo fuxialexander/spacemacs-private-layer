@@ -282,10 +282,10 @@
               ;;                                       charset nil t))
               ;;                        (not (eq charset 'ascii)))
               ;;               (insert (prog1
-			        ;;                           (decode-coding-string (buffer-string) charset)
-			        ;;                         (erase-buffer)
-			        ;;                         (mm-enable-multibyte))))
-	            ;;             (setq tf-handle (make-temp-file "/tmp/test.html"))
+              ;;                           (decode-coding-string (buffer-string) charset)
+              ;;                         (erase-buffer)
+              ;;                         (mm-enable-multibyte))))
+              ;;             (setq tf-handle (make-temp-file "/tmp/test.html"))
               ;;             (write-region (point-min) (point-max) tf-handle t)
               ;;             (xwidget-webkit-new-session (concat "file://" tf-handle))
               ;;             )))
@@ -492,16 +492,16 @@ Supports the following entries in OPTIONS as a plist:
                                  (if notmuch-saved-search-sort-function
                                      (funcall notmuch-saved-search-sort-function
                                               notmuch-saved-searches)
-		                               notmuch-saved-searches)
-		                             :show-empty-searches notmuch-show-empty-saved-searches)))
+                                   notmuch-saved-searches)
+                                 :show-empty-searches notmuch-show-empty-saved-searches)))
                   (when searches
                     (widget-insert (propertize "Notmuch" 'face 'org-agenda-date-today))
                     (widget-insert "\n\n")
                     (widget-insert (propertize "Saved searches" 'face 'org-agenda-structure))
                     (widget-insert "\n\n")
                     (let ((start (point)))
-	                    (notmuch-hello-insert-buttons searches)
-	                    (indent-rigidly start (point) notmuch-hello-indent)))))
+                      (notmuch-hello-insert-buttons searches)
+                      (indent-rigidly start (point) notmuch-hello-indent)))))
 
               (defun notmuch-hello-insert-buttons (searches)
                 "Insert buttons for SEARCHES.
@@ -539,19 +539,19 @@ with `notmuch-hello-query-counts'."
                                    (msg-count (plist-get elem :count)))
                               (widget-insert (format "%8s "
                                                      (notmuch-hello-nice-number msg-count)))
-		                          (widget-create 'push-button
-			                                       :notify #'notmuch-hello-widget-search
-			                                       :notmuch-search-terms query
-			                                       :notmuch-search-oldest-first oldest-first
-			                                       :notmuch-search-type search-type
-			                                       name)
-		                          (setq column-indent
-		                                (1+ (max 0 (- column-width (length name)))))))
-	                        (setq count (1+ count))
-	                        (when (eq (% count tags-per-line) 0)
-	                          (setq column-indent 0)
-	                          (widget-insert "\n")))
-	                      reordered-list)
+                              (widget-create 'push-button
+                                             :notify #'notmuch-hello-widget-search
+                                             :notmuch-search-terms query
+                                             :notmuch-search-oldest-first oldest-first
+                                             :notmuch-search-type search-type
+                                             name)
+                              (setq column-indent
+                                    (1+ (max 0 (- column-width (length name)))))))
+                          (setq count (1+ count))
+                          (when (eq (% count tags-per-line) 0)
+                            (setq column-indent 0)
+                            (widget-insert "\n")))
+                        reordered-list)
 
                   ;; If the last line was not full (and hence did not include a
                   ;; carriage return), insert one now.
