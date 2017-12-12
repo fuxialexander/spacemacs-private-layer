@@ -435,7 +435,128 @@ matched."
               (defun notmuch-search-spam () (interactive) (notmuch-search-add-tag (list "+spam" "-inbox" "-unread")) (notmuch-search-next-thread))
               (defun notmuch-tree-spam () (interactive) (notmuch-tree-add-tag (list "+spam" "-inbox" "-unread")) (notmuch-tree-next-message))
 
+              (defun notmuch-hello-insert-searches (title query-list &rest options)
+                "Insert a section with TITLE showing a list of buttons made from QUERY-LIST.
 
+QUERY-LIST should ideally be a plist but for backwards
+compatibility other forms are also accepted (see
+`notmuch-saved-searches' for details).  The plist should
+contain keys :name and :query; if :count-query is also present
+then it specifies an alternate query to be used to generate the
+count for the associated search.
+
+Supports the following entries in OPTIONS as a plist:
+:initially-hidden - if non-nil, section will be hidden on startup
+:show-empty-searches - show buttons with no matching messages
+:hide-if-empty - hide if no buttons would be shown
+   (only makes sense without :show-empty-searches)
+:filter - This can be a function that takes the search query as its argument and
+   returns a filter to be used in conjuction with the query for that search or nil
+   to hide the element. This can also be a string that is used as a combined with
+   each query using \"and\".
+:filter-count - Separate filter to generate the count displayed each search. Accepts
+   the same values as :filter. If :filter and :filter-count are specified, this
+   will be used instead of :filter, not in conjunction with it."
+                (widget-insert (propertize title 'face 'org-agenda-structure))
+                (if (and notmuch-hello-first-run (plist-get options :initially-hidden))
+                    (add-to-list 'notmuch-hello-hidden-sections title))
+                (let ((is-hidden (member title notmuch-hello-hidden-sections))
+                      (widget-push-button-prefix "")
+                      (widget-push-button-suffix "")
+                      (start (point)))
+                  (if is-hidden
+                      (widget-create 'push-button
+                                     :notify `(lambda (widget &rest ignore)
+                                                (setq notmuch-hello-hidden-sections
+                                                      (delete ,title notmuch-hello-hidden-sections))
+                                                (notmuch-hello-update))
+                                     (propertize " +" 'face 'org-agenda-structure))
+                    (widget-create 'push-button
+                                   :notify `(lambda (widget &rest ignore)
+                                              (add-to-list 'notmuch-hello-hidden-sections
+                                                           ,title)
+                                              (notmuch-hello-update))
+                                   " -"))
+                  (widget-insert "\n")
+                  (when (not is-hidden)
+                    (let ((searches (apply 'notmuch-hello-query-counts query-list options)))
+                      (when (or (not (plist-get options :hide-if-empty))
+                                searches)
+                        (widget-insert "\n")
+                        (notmuch-hello-insert-buttons searches)
+                        (indent-rigidly start (point) notmuch-hello-indent))))))
+
+              (defun notmuch-hello-insert-saved-searches ()
+                "Insert the saved-searches section."
+                (let ((searches (notmuch-hello-query-counts
+                                 (if notmuch-saved-search-sort-function
+                                     (funcall notmuch-saved-search-sort-function
+                                              notmuch-saved-searches)
+		                               notmuch-saved-searches)
+		                             :show-empty-searches notmuch-show-empty-saved-searches)))
+                  (when searches
+                    (widget-insert (propertize "Notmuch" 'face 'org-agenda-date-today))
+                    (widget-insert "\n\n")
+                    (widget-insert (propertize "Saved searches" 'face 'org-agenda-structure))
+                    (widget-insert "\n\n")
+                    (let ((start (point)))
+	                    (notmuch-hello-insert-buttons searches)
+	                    (indent-rigidly start (point) notmuch-hello-indent)))))
+
+              (defun notmuch-hello-insert-buttons (searches)
+                "Insert buttons for SEARCHES.
+
+SEARCHES must be a list of plists each of which should contain at
+least the properties :name NAME :query QUERY and :count COUNT,
+where QUERY is the query to start when the button for the
+corresponding entry is activated, and COUNT should be the number
+of messages matching the query.  Such a plist can be computed
+with `notmuch-hello-query-counts'."
+                (let* ((widest (notmuch-hello-longest-label searches))
+                       (tags-and-width (notmuch-hello-tags-per-line widest))
+                       (tags-per-line (car tags-and-width))
+                       (column-width (cdr tags-and-width))
+                       (column-indent 0)
+                       (count 0)
+                       (reordered-list (notmuch-hello-reflect searches tags-per-line))
+                       ;; Hack the display of the buttons used.
+                       (widget-push-button-prefix "")
+                       (widget-push-button-suffix ""))
+                  ;; dme: It feels as though there should be a better way to
+                  ;; implement this loop than using an incrementing counter.
+                  (mapc (lambda (elem)
+                          ;; (not elem) indicates an empty slot in the matrix.
+                          (when elem
+                            (if (> column-indent 0)
+                                (widget-insert (make-string column-indent ? )))
+                            (let* ((name (plist-get elem :name))
+                                   (query (plist-get elem :query))
+                                   (oldest-first (case (plist-get elem :sort-order)
+                                                   (newest-first nil)
+                                                   (oldest-first t)
+                                                   (otherwise notmuch-search-oldest-first)))
+                                   (search-type (eq (plist-get elem :search-type) 'tree))
+                                   (msg-count (plist-get elem :count)))
+                              (widget-insert (format "%8s "
+                                                     (notmuch-hello-nice-number msg-count)))
+		                          (widget-create 'push-button
+			                                       :notify #'notmuch-hello-widget-search
+			                                       :notmuch-search-terms query
+			                                       :notmuch-search-oldest-first oldest-first
+			                                       :notmuch-search-type search-type
+			                                       name)
+		                          (setq column-indent
+		                                (1+ (max 0 (- column-width (length name)))))))
+	                        (setq count (1+ count))
+	                        (when (eq (% count tags-per-line) 0)
+	                          (setq column-indent 0)
+	                          (widget-insert "\n")))
+	                      reordered-list)
+
+                  ;; If the last line was not full (and hence did not include a
+                  ;; carriage return), insert one now.
+                  (unless (eq (% count tags-per-line) 0)
+                    (widget-insert "\n"))))
 
               (setq notmuch-fcc-dirs nil
                     notmuch-show-logo nil
@@ -461,6 +582,7 @@ matched."
                 (kbd "T") 'notmuch-tree-from-search-current-query
                 (kbd "d") 'notmuch-search-delete
                 (kbd "q") 'notmuch
+                (kbd "\\") 'ace-window
                 (kbd "x") 'notmuch-search-spam
                 )
               (evilified-state-evilify-map notmuch-tree-mode-map
@@ -470,7 +592,8 @@ matched."
                 (kbd "k") 'notmuch-tree-prev-message
                 (kbd "S") 'notmuch-search-from-tree-current-query
                 (kbd "t") 'notmuch-tree
-                (kbd "q") 'notmuch
+                (kbd "q") 'notmuch-tree-quit
+                (kbd "\\") 'ace-window
                 (kbd "r") 'notmuch-search-reply-to-thread-sender
                 (kbd "i") 'open-message-with-mail-app-notmuch-tree
                 (kbd "d") 'notmuch-tree-delete
@@ -481,6 +604,9 @@ matched."
                 :mode notmuch-hello-mode
                 :bindings
                 (kbd "t") 'notmuch-tree
+                (kbd "k") 'widget-backward
+                (kbd "j") 'widget-forward
+                (kbd "\\") 'ace-window
                 (kbd "q") 'notmuch-hello-update
                 (kbd "e") 'notmuch-update
                 )
@@ -491,6 +617,7 @@ matched."
                 (kbd "i") 'open-message-with-mail-app-notmuch-show
                 (kbd "I") 'notmuch-show-view-all-mime-parts
                 (kbd "q") 'quit-window
+                (kbd "\\") 'ace-window
                 (kbd "e") 'evil-forward-word-end
                 (kbd "w") 'evil-forward-word-begin
                 (kbd "b") 'evil-backward-word-begin
@@ -500,7 +627,6 @@ matched."
                 (kbd "t") 'notmuch-tree-from-show-current-query
                 (kbd "n") 'notmuch-show-next-thread-show
                 (kbd "p") 'notmuch-show-previous-thread-show
-
                 )
 
 

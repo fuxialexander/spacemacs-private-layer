@@ -859,16 +859,16 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 ;;
 
 (def-modeline! main
-  (bar matches "  " buffer-info " " buffer-purpose " ")
-  ;; (bar matches "  " buffer-info " " )
-  (major-mode " " flycheck " " vcs " " perspname " " workspace-number "  "))
-  ;; (major-mode flycheck vcs " "))
+  (bar matches "  " buffer-info "  " buffer-purpose "  ")
+  ;; (bar matches "  " buffer-info "  " )
+  (major-mode "  " flycheck "  " vcs "  " perspname "  " workspace-number "  "))
+;; (major-mode flycheck vcs "  "))
 
 (def-modeline! clock
-  ;; (bar matches " " buffer-info "  ")
-  (bar matches "  " buffer-info " " buffer-purpose " ")
-  (org-clock " " major-mode " "  flycheck " " perspname " " workspace-number "  "))
-  ;; (org-clock " " major-mode flycheck " "))
+  ;; (bar matches "  " buffer-info "  ")
+  (bar matches "  " buffer-info "  " buffer-purpose "  ")
+  (org-clock "  " major-mode "  " flycheck "  " perspname "  " workspace-number "  "))
+;; (org-clock "  " major-mode flycheck "  "))
 
 ;; (def-modeline! pomodoro
 ;;   (bar matches " " buffer-info "  ")

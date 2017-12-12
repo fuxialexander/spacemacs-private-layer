@@ -66,6 +66,7 @@
 ;;;; Org-bookmark-heading
 (defun myorg/init-org-bookmark-heading ()
   (use-package org-bookmark-heading
+    :after org
     :config (setq org-bookmark-jump-indirect t)
     ))
 
