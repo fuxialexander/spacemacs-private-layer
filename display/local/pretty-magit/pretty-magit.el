@@ -23,7 +23,6 @@
 (defun add-magit-faces ()
   "Add face properties and compose symbols for buffer from pretty-magit."
   (interactive)
-  (doom-hide-modeline-mode)
   (with-silent-modifications
     (--each pretty-magit-alist
       (-let (((rgx icon props) it))

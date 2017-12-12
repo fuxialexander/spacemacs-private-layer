@@ -235,8 +235,13 @@ DEFAULT is non-nil, set the default mode-line for all buffers."
   :group '+doom-modeline)
 
 (defface doom-modeline-workspace-number
-  '((t (:bold t)))
-  "Face used for persp name."
+  '((t (:bold nil)))
+  "Face used for workspace number."
+  :group '+doom-modeline)
+
+(defface doom-modeline-workspace-number-inactive
+  '((t (:bold nil)))
+  "Face used for workspace number."
   :group '+doom-modeline)
 
 
@@ -585,7 +590,7 @@ enabled."
                     tag
                   (when num (int-to-string num)))))
       ;; (or (when spaceline-workspace-numbers-unicode
-      (propertize (get-unicode-number str) 'face (if (active) 'doom-modeline-workspace-number))
+      (propertize (get-unicode-number str) 'face (if (active) 'doom-modeline-workspace-number 'doom-modeline-workspace-number-inactive))
       )))
 
 
@@ -623,49 +628,59 @@ This segment overrides the modeline functionality of `org-mode-line-string'."
             (active  (active))
             (all-the-icons-scale-factor 0.8)
             (all-the-icons-default-adjust -0.0))
-        (concat "  "
+        (concat
                 (cond ((memq state '(edited added))
                        (if active (setq face 'doom-modeline-info))
                        (all-the-icons-octicon
                         "git-compare"
                         :face face
-                        ;; :height 1.0
-                        ;; :v-adjust -0.05
+                        :height 1.5
+                        :v-adjust -0.1
                         ))
                       ((eq state 'needs-merge)
                        (if active (setq face 'doom-modeline-info))
-                       (all-the-icons-octicon "git-merge" :face face))
+                       (all-the-icons-octicon "git-merge"
+                                              :face face
+                                              :height 1.5
+                                              :v-adjust -0.1
+                                              ))
                       ((eq state 'needs-update)
                        (if active (setq face 'doom-modeline-warning))
-                       (all-the-icons-octicon "arrow-down" :face face))
+                       (all-the-icons-octicon "arrow-down" :face face
+                                              :height 1.5
+                                              :v-adjust -0.1
+                                              ))
                       ((memq state '(removed conflict unregistered))
                        (if active (setq face 'doom-modeline-urgent))
-                       (all-the-icons-octicon "alert" :face face))
+                       (all-the-icons-octicon "alert" :face face
+                                              :height 1.5
+                                              :v-adjust -0.1
+                                              ))
                       (t
                        (if active (setq face 'font-lock-doc-face))
                        (all-the-icons-octicon
                         "git-compare"
                         :face face
-                        ;; :height 1.2
-                        ;; :v-adjust -0.05
+                        :height 1.5
+                        :v-adjust -0.1
                         )))
                 " "
                 (propertize (substring vc-mode (+ (if (eq backend 'Hg) 2 3) 2))
                             'face (if active face))
-                " ")))))
+                )))))
 
 
-(defun +doom-ml-icon (icon &optional text face voffset)
+(defun +doom-fa-icon (icon &optional text face voffset)
   "Displays an octicon ICON with FACE, followed by TEXT. Uses
 `all-the-icons-octicon' to fetch the icon."
-  (concat (if vc-mode " " "  ")
-          (when icon
-            (concat
-             (all-the-icons-material icon :face face :height 1.1 :v-adjust (or voffset -0.2))
-             (if text +doom-modeline-vspc)))
-          (when text
-            (propertize text 'face face))
-          (if vc-mode "  " " ")))
+  (concat
+   (when icon
+     (concat
+      (all-the-icons-faicon icon :face face :height 1.0 :v-adjust (or voffset 0.03))
+      (if text +doom-modeline-vspc)))
+   (when text
+     (propertize text 'face face))
+   ))
 
 (def-modeline-segment! flycheck
   "Displays color-coded flycheck error status in the current buffer with pretty
@@ -675,16 +690,15 @@ icons."
       ('finished (if flycheck-current-errors
                      (let-alist (flycheck-count-errors flycheck-current-errors)
                        (let ((sum (+ (or .error 0) (or .warning 0))))
-                         (+doom-ml-icon "do_not_disturb_alt"
+                         (+doom-fa-icon "bomb"
                                         (number-to-string sum)
-                                        (if .error 'doom-modeline-urgent 'doom-modeline-warning)
-                                        -0.25)))
-                   (+doom-ml-icon "check" nil 'doom-modeline-info)))
-      ('running     (+doom-ml-icon "access_time" nil 'font-lock-doc-face -0.25))
-      ('no-checker  (+doom-ml-icon "sim_card_alert" "-" 'font-lock-doc-face))
-      ('errored     (+doom-ml-icon "sim_card_alert" "Error" 'doom-modeline-urgent))
-      ('interrupted (+doom-ml-icon "pause" "Interrupted" 'font-lock-doc-face)))))
-;; ('interrupted (+doom-ml-icon "x" "Interrupted" 'font-lock-doc-face)))))
+                                        (if .error 'doom-modeline-urgent 'doom-modeline-warning))))
+                   (+doom-fa-icon "check" nil 'doom-modeline-info)))
+      ('running     (+doom-fa-icon "cogs" nil 'font-lock-doc-face))
+      ('no-checker  (+doom-fa-icon "battery-empty" "-" 'font-lock-doc-face))
+      ('errored     (+doom-fa-icon "bug" "Error" 'doom-modeline-urgent))
+      ('interrupted (+doom-fa-icon "pause-circle" "Interrupted" 'font-lock-doc-face)))))
+;; ('interrupted (+doom-fa-icon "x" "Interrupted" 'font-lock-doc-face)))))
 
 ;;
 (defsubst doom-column (pos)
@@ -845,15 +859,15 @@ with `evil-ex-substitute', and/or 4. The number of active `iedit' regions."
 ;;
 
 (def-modeline! main
-  (bar matches "  " buffer-info " " buffer-purpose "  ")
+  (bar matches "  " buffer-info " " buffer-purpose " ")
   ;; (bar matches "  " buffer-info " " )
-  (major-mode flycheck vcs " " perspname " " workspace-number " "))
+  (major-mode " " flycheck " " vcs " " perspname " " workspace-number "  "))
   ;; (major-mode flycheck vcs " "))
 
 (def-modeline! clock
   ;; (bar matches " " buffer-info "  ")
-  (bar matches "  " buffer-info " " buffer-purpose "  ")
-  (org-clock " " major-mode flycheck " " perspname " " workspace-number " "))
+  (bar matches "  " buffer-info " " buffer-purpose " ")
+  (org-clock " " major-mode " "  flycheck " " perspname " " workspace-number "  "))
   ;; (org-clock " " major-mode flycheck " "))
 
 ;; (def-modeline! pomodoro
