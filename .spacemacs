@@ -85,7 +85,6 @@ This function should only modify configuration layer settings."
    dotspacemacs-additional-packages '(
                                       ;; circadian
                                       helpful
-                                      shackle
                                       ivy-dired-history
                                       flycheck-package
                                       cdlatex
@@ -141,9 +140,6 @@ This function should only modify configuration layer settings."
                                     helm-spacemacs-help
                                     ido-vertical-mode
                                     flx-ido
-                                    ivy-purpose
-                                    window-purpose
-                                    popwin
                                     helm-purpose
                                     helm-make
                                     )
@@ -320,7 +316,7 @@ It should only modify the values of Spacemacs settings."
    ;; another same-purpose window is available. If non-nil, `switch-to-buffer'
    ;; displays the buffer in a same-purpose window even if the buffer can be
    ;; displayed in the current window. (default nil)
-   dotspacemacs-switch-to-buffer-prefers-purpose nil
+   dotspacemacs-switch-to-buffer-prefers-purpose t
    ;; If non-nil a progress bar is displayed when spacemacs is loading. This
    ;; may increase the boot time on some systems and emacs builds, set it to
    ;; nil to boost the loading time. (default t)
@@ -466,25 +462,6 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
-;;;; Shackle
-  (use-package shackle
-    :config
-    (progn
-      (setq shackle-select-reused-windows nil) ; default nil
-      (setq shackle-default-alignment 'below) ; default below
-      (setq shackle-default-size 0.4) ; default 0.5
-
-      (setq shackle-rules
-            '((flycheck-error-list-mode :select nil :align below :size 0.25)
-              (calendar-mode            :select t   :align below :size 0.25)
-              (help-mode                :select t   :align right :size 0.5)
-              (helpful-mode             :select t   :align right :size 0.5)
-              (compilation-mode         :select t   :align right :size 0.5)
-              ("*Man.*"                 :select t   :align below :size 0.5  :regexp t)
-              ("*Org Src.*"             :select t   :align below :size 0.5  :regexp t)))
-      (shackle-mode t)
-      ))
-
 
 ;;;; Helpful
   (use-package helpful
@@ -495,7 +472,11 @@ you should place your code here."
       :mode helpful-mode
       :bindings
       (kbd "q") 'quit-window
+      (kbd "l") 'helpful-forward-button
+      (kbd "h") 'helpful-backward-button
+      (kbd "q") 'quit-window
       (kbd "RET") 'helpful-visit-reference
+      (kbd "\\") 'ace-window
       )
     )
 
@@ -722,7 +703,8 @@ you should place your code here."
   (define-key image-mode-map (kbd "<escape>") 'quit-window)
   ;; (define-key python-mode-map (kbd "C-j") 'counsel-oi)
   (define-key emacs-lisp-mode-map (kbd "C-j") 'counsel-oi)
-
+  (define-key evil-motion-state-map (kbd "\\") 'ace-window)
+  (define-key evil-evilified-state-map (kbd "\\") 'ace-window)
   (global-set-key (kbd "H-f") 'counsel-company )
 
   (defun org-agenda-show-daily (&optional arg)
@@ -732,18 +714,28 @@ you should place your code here."
   (global-set-key (kbd "H-g") 'org-agenda-show-daily )
   (global-set-key (kbd "H-r") 'counsel-org-capture )
 
-  (global-set-key (kbd "H-1") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-1-and-exit)
-  (global-set-key (kbd "H-2") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-2-and-exit)
-  (global-set-key (kbd "H-3") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-3-and-exit)
-  (global-set-key (kbd "H-4") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-4-and-exit)
-  (global-set-key (kbd "H-5") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-5-and-exit)
-  (global-set-key (kbd "H-6") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-6-and-exit)
-  (global-set-key (kbd "H-7") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-7-and-exit)
-  (global-set-key (kbd "H-8") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-8-and-exit)
-  (global-set-key (kbd "H-9") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-9-and-exit)
+  (define-key winum-keymap (kbd "M-1") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-1-and-exit)
+  (define-key winum-keymap (kbd "M-2") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-2-and-exit)
+  (define-key winum-keymap (kbd "M-3") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-3-and-exit)
+  (define-key winum-keymap (kbd "M-4") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-4-and-exit)
+  (define-key winum-keymap (kbd "M-5") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-5-and-exit)
+  (define-key winum-keymap (kbd "M-6") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-6-and-exit)
+  (define-key winum-keymap (kbd "M-7") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-7-and-exit)
+  (define-key winum-keymap (kbd "M-8") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-8-and-exit)
+  (define-key winum-keymap (kbd "M-9") 'spacemacs/workspaces-transient-state/eyebrowse-switch-to-window-config-9-and-exit)
+
+  (global-set-key (kbd "H-1") 'winum-select-window-1)
+  (global-set-key (kbd "H-2") 'winum-select-window-2)
+  (global-set-key (kbd "H-3") 'winum-select-window-3)
+  (global-set-key (kbd "H-4") 'winum-select-window-4)
+  (global-set-key (kbd "H-5") 'winum-select-window-5)
+  (global-set-key (kbd "H-6") 'winum-select-window-6)
+  (global-set-key (kbd "H-7") 'winum-select-window-7)
+  (global-set-key (kbd "H-8") 'winum-select-window-8)
+  (global-set-key (kbd "H-9") 'winum-select-window-9)
+
 
   (global-set-key (kbd "H-,") 'customize )
-  (global-set-key (kbd "M-w") 'ace-window )
   (global-set-key (kbd "H-o") 'org-store-link )
   (global-set-key (kbd "H-d") 'split-window-right-and-focus )
   (global-set-key (kbd "H-D") 'split-window-below-and-focus )
@@ -1247,29 +1239,29 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
 
   (add-hook 'anaconda-mode-hook #'python-mode-outline-hook)
 
-  ;; (add-to-list 'purpose-user-mode-purposes '(emacs-lisp-mode . el))
-  ;; (add-to-list 'purpose-user-mode-purposes '(helpful-mode . el-help))
+  (add-to-list 'purpose-user-mode-purposes '(emacs-lisp-mode . el))
+  (add-to-list 'purpose-user-mode-purposes '(helpful-mode . el-help))
 
-  ;; (add-to-list 'purpose-user-mode-purposes '(elfeed-search-mode . elfeed-search))
-  ;; (add-to-list 'purpose-user-mode-purposes '(elfeed-show-mode . elfeed-show))
+  (add-to-list 'purpose-user-mode-purposes '(elfeed-search-mode . elfeed-search))
+  (add-to-list 'purpose-user-mode-purposes '(elfeed-show-mode . elfeed-show))
 
-  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-hello-mode . nhello))
-  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-search-mode . nlist))
-  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-tree-mode . nlist))
-  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-show-mode . nshow))
-  ;; (add-to-list 'purpose-user-mode-purposes '(notmuch-message-mode . nmessage))
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-hello-mode . nhello))
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-search-mode . nlist))
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-tree-mode . nlist))
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-show-mode . nshow))
+  (add-to-list 'purpose-user-mode-purposes '(notmuch-message-mode . nmessage))
 
-  ;; (add-to-list 'purpose-user-regexp-purposes '("*Org Src*" . orgsrc))
-  ;; (add-to-list 'purpose-user-mode-purposes '(org-mode . org))
-  ;; (add-to-list 'purpose-user-mode-purposes '(org-agenda-mode . agenda))
+  (add-to-list 'purpose-user-regexp-purposes '("*Org Src*" . orgsrc))
+  (add-to-list 'purpose-user-mode-purposes '(org-mode . org))
+  (add-to-list 'purpose-user-mode-purposes '(org-agenda-mode . agenda))
 
-  ;; (add-to-list 'purpose-user-mode-purposes '(anaconda-mode-view-mode . doc))
-  ;; (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-inspect*" . doc))
-  ;; (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-out*" . out))
-  ;; (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-debug*" . out))
-  ;; (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-traceback*" . out))
+  (add-to-list 'purpose-user-mode-purposes '(anaconda-mode-view-mode . doc))
+  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-inspect*" . doc))
+  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-out*" . out))
+  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-debug*" . out))
+  (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-traceback*" . out))
 
-  ;; (purpose-compile-user-configuration)
+  (purpose-compile-user-configuration)
 ;;;; Outline-level
       (defun python-mode-outline-hook ()
         (outline-minor-mode 1)
@@ -1432,7 +1424,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (shackle persp-mode eyebrowse yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils pip-requirements pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text modern-solarizedlight-theme mmm-mode markdown-toc macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide imenu-list hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
+    (modern-solarizedlight-theme yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text mmm-mode markdown-toc macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
  '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
