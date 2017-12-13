@@ -799,9 +799,7 @@ you should place your code here."
                               (string-prefix-p "*" (buffer-name b))
                               (not (string-match-p "*Org Src" (buffer-name b)))
                               ;; (not (string-match-p "*Org Agenda" (buffer-name b)))
-                              )
-                             )))
-    )
+                              )))))
 
   (spacemacs|define-custom-layout "@Lisp"
     :binding "l"

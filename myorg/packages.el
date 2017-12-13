@@ -1327,6 +1327,8 @@ This function makes sure that dates are aligned for easy reading."
     (evilified-state-evilify-map org-agenda-mode-map
       :mode org-agenda-mode
       :bindings
+      "q" 'org-agenda-filter-by-tag
+      "\\" 'ace-window
       "j" 'org-agenda-next-line
       "k" 'org-agenda-previous-line
       "h" 'org-habit-toggle-habits
