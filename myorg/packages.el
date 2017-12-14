@@ -82,25 +82,25 @@
     :config
     (setq
      org-super-agenda-groups
-     '((:name "Log"
+     '((:name "Log "
               :log t)  ; Automatically named "Log"
-       (:name "Schedule"
+       (:name "Schedule "
               :time-grid t)
-       (:name "Today"
+       (:name "Today "
               :scheduled today)
-       (:name "Habits"
+       (:name "Habits "
               :habit t)
-       (:name "Due today"
+       (:name "Due today "
               :deadline today)
-       (:name "Overdue"
+       (:name "Overdue "
               :deadline past)
-       (:name "Due soon"
+       (:name "Due soon "
               :deadline future)
        ;; (:name "Unimportant" :todo ("SOMEDAY" "MAYBE" "CHECK" "TO-READ" "TO-WATCH") :order 100)
-       (:name "Waiting..."
+       (:name "Waiting "
               :todo "WAIT"
               :order 98)
-       (:name "Scheduled earlier"
+       (:name "Scheduled earlier "
               :scheduled past))
      )
     (org-super-agenda-mode)

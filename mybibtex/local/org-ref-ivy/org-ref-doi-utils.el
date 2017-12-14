@@ -172,7 +172,7 @@ Optional argument STATUS Unknown why this is optional."
   (while *org-ref-doi-utils-waiting* (sleep-for 0.1)))
 
 
-;;** APS journals
+;;;; APS journals
 (defun aps-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://journals.aps.org" *org-ref-doi-utils-redirect*)
@@ -180,29 +180,35 @@ Optional argument STATUS Unknown why this is optional."
      "/abstract/" "/pdf/" *org-ref-doi-utils-redirect*)))
 
 
-;;** Science
+;;;; Science
 (defun science-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://www.sciencemag.org" *org-ref-doi-utils-redirect*)
     (concat *org-ref-doi-utils-redirect* ".full.pdf")))
 
 
-;;** Nature
-(defun nature-pdf-url (*org-ref-doi-utils-redirect*)
-  "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
-  (when (string-match "^http://www.nature.com" *org-ref-doi-utils-redirect*)
-    (let ((result *org-ref-doi-utils-redirect*))
-      (setq result (replace-regexp-in-string "/full/" "/pdf/" result))
-      (replace-regexp-in-string "\.html$" "\.pdf" result))))
+;;;; Nature
+(defun nature-pdf-url (*doi-utils-redirect*)
+  "Get url to the pdf from *DOI-UTILS-REDIRECT*."
+  (when (string-match "^http://www.nature.com" *doi-utils-redirect*)
+    (let ((result *doi-utils-redirect*))
+      (concat result "\.pdf"))))
+
+;;;; Biorxiv
+(defun biorxiv-pdf-url (*doi-utils-redirect*)
+  "Get url to the pdf from *DOI-UTILS-REDIRECT*."
+  (when (string-match "^http://www.biorxiv.org" *doi-utils-redirect*)
+    (let ((result (replace-regexp-in-string "early" "biorxiv/early" *doi-utils-redirect*)))
+      (concat result "\.full\.pdf"))))
 
 
-;;** Elsevier/ScienceDirect
+;;;; Elsevier/ScienceDirect
 ;; You cannot compute these pdf links; they are embedded in the redirected pages.
 
 (defvar *org-ref-doi-utils-pdf-url* nil
   "Stores url to pdf download from a callback function.")
 
-;;** Wiley
+;;;; Wiley
 ;; http://onlinelibrary.wiley.com/doi/10.1002/anie.201402680/abstract
 ;; http://onlinelibrary.wiley.com/doi/10.1002/anie.201402680/pdf
 
@@ -238,7 +244,7 @@ Argument REDIRECT-URL URL you are redirected to."
     *org-ref-doi-utils-pdf-url*))
 
 
-;;** Springer
+;;;; Springer
 (defun springer-chapter-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://link.springer.com/chapter/"
@@ -254,7 +260,7 @@ Argument REDIRECT-URL URL you are redirected to."
                               (concat *org-ref-doi-utils-redirect* ".pdf"))))
 
 
-;;** ACS
+;;;; ACS
 ;; here is a typical url http://pubs.acs.org/doi/abs/10.1021/nl500037x
 ;; the pdf is found at http://pubs.acs.org/doi/pdf/10.1021/nl500037x
 
@@ -275,14 +281,14 @@ Argument REDIRECT-URL URL you are redirected to."
                               *org-ref-doi-utils-redirect*)))
 
 
-;;** IOP
+;;;; IOP
 (defun iop-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://iopscience.iop.org" *org-ref-doi-utils-redirect*)
     (replace-regexp-in-string "/meta" "/pdf" *org-ref-doi-utils-redirect*)))
 
 
-;;** JSTOR
+;;;; JSTOR
 (defun jstor-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://www.jstor.org" *org-ref-doi-utils-redirect*)
@@ -290,7 +296,7 @@ Argument REDIRECT-URL URL you are redirected to."
                                       *org-ref-doi-utils-redirect*) ".pdf")))
 
 
-;;** AIP
+;;;; AIP
 (defun aip-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://scitation.aip.org" *org-ref-doi-utils-redirect*)
@@ -305,7 +311,7 @@ Argument REDIRECT-URL URL you are redirected to."
               p1 p2 p3))))
 
 
-;;** Taylor and Francis
+;;;; Taylor and Francis
 (defun tandfonline-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://www.tandfonline.com"
@@ -314,7 +320,7 @@ Argument REDIRECT-URL URL you are redirected to."
                               *org-ref-doi-utils-redirect*)))
 
 
-;;** ECS
+;;;; ECS
 (defun ecs-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://jes.ecsdl.org" *org-ref-doi-utils-redirect*)
@@ -330,7 +336,7 @@ Argument REDIRECT-URL URL you are redirected to."
     (concat *org-ref-doi-utils-redirect* ".full.pdf")))
 
 
-;;** RSC
+;;;; RSC
 (defun rsc-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://pubs.rsc.org" *org-ref-doi-utils-redirect*)
@@ -339,7 +345,7 @@ Argument REDIRECT-URL URL you are redirected to."
       url)))
 
 
-;;** Science Direct
+;;;; Science Direct
 (defun org-ref-doi-utils-get-science-direct-pdf-url (redirect-url)
   "Science direct hides the pdf url in html.  We get it out here.
 REDIRECT-URL is where the pdf url will be in."
@@ -348,9 +354,11 @@ REDIRECT-URL is where the pdf url will be in."
    redirect-url
    (lambda (status)
      (goto-char (point-min))
-     (re-search-forward "pdfurl=\"\\([^\"]*\\)\"" nil t)
+     (re-search-forward "citation_pdf_url.*content=\"\\([^\"]*\\)\"" nil t)
      (setq *org-ref-doi-utils-pdf-url* (match-string 1)
-           *org-ref-doi-utils-waiting* nil)))
+           *org-ref-doi-utils-waiting* nil)
+     (setq *org-ref-doi-utils-pdf-url*
+           (replace-regexp-in-string "amp;" "" *org-ref-doi-utils-pdf-url* ))))
   (while *org-ref-doi-utils-waiting* (sleep-for 0.1))
   *org-ref-doi-utils-pdf-url*)
 
@@ -375,7 +383,33 @@ REDIRECT-URL is where the pdf url will be in."
                             *org-ref-doi-utils-redirect*)))
       *org-ref-doi-utils-pdf-url*)))
 
-;;** PNAS
+;;;; OUP
+(defun oup-pdf-url (*org-ref-doi-utils-redirect*)
+  "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
+  (while *org-ref-doi-utils-waiting* (sleep-for 0.1))
+  (when (string-match "academic.oup.com" *org-ref-doi-utils-redirect*)
+    (org-ref-doi-utils-get-oup-pdf-url *org-ref-doi-utils-redirect*)
+    *org-ref-doi-utils-pdf-url*))
+
+(defun org-ref-doi-utils-get-oup-pdf-url (redirect-url)
+  "Science direct hides the pdf url in html.  We get it out here.
+REDIRECT-URL is where the pdf url will be in."
+  (setq *org-ref-doi-utils-waiting* t)
+  (url-retrieve
+   redirect-url
+   (lambda (status)
+     (goto-char (point-min))
+     (re-search-forward "al-link pdf article-pdfLink.*href=\"\\([^\"]*\\)\"" nil t)
+     (setq *org-ref-doi-utils-pdf-url* (match-string 1)
+           *org-ref-doi-utils-waiting* nil)
+     (setq *org-ref-doi-utils-pdf-url*
+           (concat "https://academic.oup.com" *org-ref-doi-utils-pdf-url*))
+     ))
+  (while *org-ref-doi-utils-waiting* (sleep-for 0.1))
+  *org-ref-doi-utils-pdf-url*)
+
+
+;;;; PNAS
 ;; http://www.pnas.org/content/early/2014/05/08/1319030111
 ;; http://www.pnas.org/content/early/2014/05/08/1319030111.full.pdf
 
@@ -388,27 +422,27 @@ REDIRECT-URL is where the pdf url will be in."
     (concat *org-ref-doi-utils-redirect* ".full.pdf?with-ds=yes")))
 
 
-;;** Sage
+;;;; Sage
 (defun sage-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://pss.sagepub.com" *org-ref-doi-utils-redirect*)
     (concat *org-ref-doi-utils-redirect* ".full.pdf")))
 
 
-;;** Journal of Neuroscience
+;;;; Journal of Neuroscience
 (defun jneurosci-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^http://www.jneurosci.org" *org-ref-doi-utils-redirect*)
     (concat *org-ref-doi-utils-redirect* ".full.pdf")))
 
-;;** Generic .full.pdf
+;;;; Generic .full.pdf
 (defun generic-full-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (let ((pdf (concat *org-ref-doi-utils-redirect* ".full.pdf")))
     (when (url-http-file-exists-p pdf)
       pdf)))
 
-;;** IEEE
+;;;; IEEE
 ;; 10.1109/re.2014.6912247
 ;; http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=6912247
 ;; http://ieeexplore.ieee.org/ielx7/6903646/6912234/06912247.pdf
@@ -452,7 +486,7 @@ REDIRECT-URL is where the pdf url will be in."
       (when (re-search-forward "<a name=\"FullTextPDF\".*href=\"\\([[:ascii:]]*?\\)\"" nil t)
         (concat "http://dl.acm.org/" (match-string 1))))))
 
-;;** Optical Society of America (OSA)
+;;;; Optical Society of America (OSA)
 (defun osa-pdf-url (*org-ref-doi-utils-redirect*)
   "Get url to the pdf from *ORG-REF-DOI-UTILS-REDIRECT*."
   (when (string-match "^https://www.osapublishing.org" *org-ref-doi-utils-redirect*)
@@ -461,7 +495,7 @@ REDIRECT-URL is where the pdf url will be in."
 
 
 
-;;** ASME Biomechanical Journal
+;;;; ASME Biomechanical Journal
 
 (defun asme-biomechanical-pdf-url (*doi-utils-redirect*)
   "Typical URL:  http://biomechanical.asmedigitalcollection.asme.org/article.aspx?articleid=1427237
@@ -493,12 +527,13 @@ It would be better to parse this, but here I just use a regexp.
 
 
 
-;;** Add all functions
+;;;; Add all functions
 (setq org-ref-doi-utils-pdf-url-functions
       (list
        'aps-pdf-url
        'science-pdf-url
        'nature-pdf-url
+       'biorxiv-pdf-url
        'wiley-pdf-url
        'springer-chapter-pdf-url
        'springer-pdf-url
@@ -520,10 +555,11 @@ It would be better to parse this, but here I just use a regexp.
        'ieee2-pdf-url
        'acm-pdf-url
        'osa-pdf-url
+       'oup-pdf-url
        'asme-biomechanical-pdf-url
        'generic-full-pdf-url))
 
-;;** Get the pdf url for a doi
+;;;; Get the pdf url for a doi
 
 (defun org-ref-doi-utils-get-pdf-url (doi)
   "Return a url to a pdf for the DOI if one can be calculated.
@@ -539,7 +575,7 @@ until one is found."
         (when this-pdf-url
           (throw 'pdf-url this-pdf-url))))))
 
-;;** Finally, download the pdf
+;;;; Finally, download the pdf
 
 ;;;###autoload
 (defun org-ref-doi-utils-get-bibtex-entry-pdf (&optional arg)

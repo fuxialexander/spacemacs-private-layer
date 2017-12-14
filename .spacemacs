@@ -84,7 +84,9 @@ This function should only modify configuration layer settings."
 
    dotspacemacs-additional-packages '(
                                       ;; circadian
+                                      zotxt
                                       helpful
+                                      gscholar-bibtex
                                       ivy-dired-history
                                       flycheck-package
                                       cdlatex
@@ -1235,18 +1237,30 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
 
 
   (add-hook 'anaconda-mode-hook #'python-mode-outline-hook)
+  (purpose-set-extension-configuration
+   :notmuch
+   (purpose-conf :mode-purposes '((notmuch-hello-mode . nhello)
+                                  (notmuch-search-mode . nlist)
+                                  (notmuch-tree-mode . nlist)
+                                  (notmuch-show-mode . nshow)
+                                  (notmuch-message-mode . nmessage))
+                 ;; :regexp-purposes '(("^test-.*\\.py$" . test))
+                 ))
 
-  (add-to-list 'purpose-user-mode-purposes '(emacs-lisp-mode . el))
-  (add-to-list 'purpose-user-mode-purposes '(helpful-mode . el-help))
+  (purpose-set-extension-configuration
+   :elfeed
+   (purpose-conf :mode-purposes '((elfeed-search-mode . ef)
+                                  (elfeed-show-mode . efs))))
 
-  (add-to-list 'purpose-user-mode-purposes '(elfeed-search-mode . elfeed-search))
-  (add-to-list 'purpose-user-mode-purposes '(elfeed-show-mode . elfeed-show))
+  (purpose-set-extension-configuration
+   :elisp
+   (purpose-conf :regexp-purposes '(("^*org-src-fontification.*$" . general))
+   :mode-purposes '((emacs-lisp-mode . el)
+                    (helpful-mode . el-help)))
+   )
 
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-hello-mode . nhello))
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-search-mode . nlist))
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-tree-mode . nlist))
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-show-mode . nshow))
-  (add-to-list 'purpose-user-mode-purposes '(notmuch-message-mode . nmessage))
+
+  (purpose-compile-extended-configuration)
 
   (add-to-list 'purpose-user-regexp-purposes '("*Org Src*" . orgsrc))
   (add-to-list 'purpose-user-mode-purposes '(org-mode . org))
@@ -1259,6 +1273,9 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
   (add-to-list 'purpose-user-regexp-purposes '("*ob-ipython-traceback*" . out))
 
   (purpose-compile-user-configuration)
+  (add-to-list 'purpose-special-action-sequences
+               '(efs (lambda (buffer alist) (purpose-display-at-bottom buffer alist 30))))
+
 ;;;; Outline-level
       (defun python-mode-outline-hook ()
         (outline-minor-mode 1)
@@ -1284,7 +1301,7 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
                     (group (* space))	; 0 or more spaces
                     bow
                     ;; Keywords
-                    (or "class" "def" "else" "elif" "except" "for" "if" "try" "while")
+                    (or "class" "with" "def" "else" "elif" "except" "for" "if" "try" "while")
                     eow))))
         (define-key python-mode-map (kbd "C-j") 'counsel-oi)
         )
@@ -1406,6 +1423,9 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
 
       (mac-auto-operator-composition-mode)
 
+      (add-to-list 'load-path "~/.emacs.d/private/elisp/pubmode")
+      (autoload 'pub-med "pub" "PubMed Interface for Emacs" t)
+
   )
 
 ;;; Customize
@@ -1419,11 +1439,9 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(evil-want-Y-yank-to-eol nil)
- '(mac-frame-tabbing nil)
  '(package-selected-packages
    (quote
-    (modern-solarizedlight-theme counsel yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text mmm-mode markdown-toc macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
+    (magit zotxt yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text modern-solarizedlight-theme mmm-mode markdown-toc magit-popup macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ gscholar-bibtex google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ ghub fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
  '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

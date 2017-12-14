@@ -57,9 +57,9 @@
 
 (defun mybibtex/init-org-ref-ivy ()
   (use-package org-ref-ivy
-    :after org ivy-bibtex
     :commands (org-ref-bibtex-next-entry
                org-ref-bibtex-previous-entry
+               org-ref-doi-utils-get-bibtex-entry-pdf
                org-ref-open-in-browser
                org-ref-open-bibtex-notes
                org-ref-open-bibtex-pdf
@@ -102,10 +102,12 @@
         "lp" 'pubmed-insert-bibtex-from-pmid))
     :config
     (progn
+      (require 'org-ref-pdf)
       ;; (setf (cdr (assoc "p" org-ref-ivy-cite-actions)) '(ivy-bibtex-open-papers "Open in Papers"))
       (setq org-ref-completion-library 'org-ref-ivy-cite
             org-ref-default-bibliography '("/Users/xfu/Dropbox/org/ref.bib")
             org-ref-bibliography-notes "/Users/xfu/Dropbox/org/ref.org"
+            org-ref-pdf-directory "/Users/xfu/Dropbox/org/ref/"
             org-ref-note-title-format "** %y - %t
  :PROPERTIES:
   :Custom_ID: %k
@@ -118,17 +120,10 @@
   :URL: %U
  :END:
 "
-            )
-
-      )
-    ))
-
+            ))))
 
 (defun mybibtex/init-ivy-bibtex ()
   (use-package ivy-bibtex
-    :defer t
-    :after (:any org auctex)
-    :init
     :config
     (with-eval-after-load 'ivy-bibtex
 ;;; bibtex-completion customize function
@@ -181,8 +176,8 @@
             '((org-mode      . bibtex-completion-format-citation-pandoc-citeproc)
               (default       . bibtex-completion-format-citation-default))
 
-            bibtex-completion-bibliography "/Users/xfu/Dropbox/org/Bibliography.bib"
-            bibtex-completion-library-path "/Users/xfu/Documents/Bookends/Attachments/"
+            bibtex-completion-bibliography "/Users/xfu/Dropbox/org/ref.bib"
+            bibtex-completion-library-path "/Users/xfu/Dropbox/org/ref/"
             bibtex-completion-notes-path "/Users/xfu/Dropbox/org/ref.org"
             bibtex-completion-pdf-field "file"
             bibtex-completion-pdf-open-function (lambda (fpath) (start-process "open" "*open*" "open" fpath))

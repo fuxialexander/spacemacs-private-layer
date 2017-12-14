@@ -4,7 +4,7 @@
 # --
 #+HTML_HEAD_EXTRA: <script type="text/javascript">
 #+HTML_HEAD_EXTRA:   $(document).ready(function() {
-#+HTML_HEAD_EXTRA:     $('#$2).DataTable(); } );
+#+HTML_HEAD_EXTRA:     $('#$2').DataTable(); } );
 #+HTML_HEAD_EXTRA: </script>
 #+CAPTION: $1
 #+ATTR_HTML: :id $2
