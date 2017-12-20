@@ -3,7 +3,6 @@
 
 ;; TODO torgeir added this
 (setq +doom-modeline-height 30)
-(defun doom-project-root () (t/project-root))
 
 (defun doom--resolve-hooks (hooks)
   (cl-loop with quoted-p = (eq (car-safe hooks) 'quote)
@@ -307,16 +306,18 @@ active."
 ;;
 
 ;; Show version string for multi-version managers like rvm, rbenv, pyenv, etc.
-(defvar-local +doom-modeline-env-version nil)
-(defvar-local +doom-modeline-env-command nil)
-(add-hook! '(focus-in-hook find-file-hook) #'+doom-modeline|update-env)
-(defun +doom-modeline|update-env ()
-  (when +doom-modeline-env-command
-    (let* ((default-directory (doom-project-root))
-           (s (shell-command-to-string +doom-modeline-env-command)))
-      (setq +doom-modeline-env-version (if (string-match "[ \t\n\r]+\\'" s)
-                                           (replace-match "" t t s)
-                                         s)))))
+;; (defvar-local +doom-modeline-env-version nil)
+;; (defvar-local +doom-modeline-env-command nil)
+;; (add-hook! '(focus-in-hook find-file-hook) #'+doom-modeline|update-env)
+;; (defun +doom-modeline|update-env ()
+;;   (when +doom-modeline-env-command
+;;     (let* (
+;;            (default-directory (doom-project-root)
+;;              )
+;;            (s (shell-command-to-string +doom-modeline-env-command)))
+;;       (setq +doom-modeline-env-version (if (string-match "[ \t\n\r]+\\'" s)
+;;                                            (replace-match "" t t s)
+;;                                          s)))))
 
 ;; Only support python and ruby for now
 ;; (add-hook! 'python-mode-hook (setq +doom-modeline-env-command "python --version 2>&1 | cut -d' ' -f2"))
@@ -419,19 +420,19 @@ If TRUNCATE-TAIL is t also truncate the parent directory of the file."
                             'face dir-faces)
                 (propertize (file-name-nondirectory buffer-file-name) 'face file-faces))))))
 
-(defun +doom-modeline--buffer-file-name-relative ()
-  "Propertized `buffer-file-name' showing directories relative to project's root only."
-  (let* ((modified-faces (if (buffer-modified-p) 'doom-modeline-buffer-modified))
-         (active (active))
-         (root (doom-project-root)))
-    (if (null root)
-        "%b"
-      (let ((relative-dirs (file-relative-name (file-name-directory buffer-file-name) root))
-            (relative-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-buffer-path))))
-            (file-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-buffer-file)))))
-        (if (equal "./" relative-dirs) (setq relative-dirs ""))
-        (concat (propertize relative-dirs 'face relative-faces)
-                (propertize (file-name-nondirectory buffer-file-name) 'face file-faces))))))
+;; (defun +doom-modeline--buffer-file-name-relative ()
+;;   "Propertized `buffer-file-name' showing directories relative to project's root only."
+;;   (let* ((modified-faces (if (buffer-modified-p) 'doom-modeline-buffer-modified))
+;;          (active (active))
+;;          (root (doom-project-root)))
+;;     (if (null root)
+;;         "%b"
+;;       (let ((relative-dirs (file-relative-name (file-name-directory buffer-file-name) root))
+;;             (relative-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-buffer-path))))
+;;             (file-faces `(:inherit ,(or modified-faces (if active 'doom-modeline-buffer-file)))))
+;;         (if (equal "./" relative-dirs) (setq relative-dirs ""))
+;;         (concat (propertize relative-dirs 'face relative-faces)
+;;                 (propertize (file-name-nondirectory buffer-file-name) 'face file-faces))))))
 
 (defun +doom-modeline--buffer-file-name (truncate-project-root-parent)
   "Propertized `buffer-file-name'.
@@ -442,7 +443,7 @@ Example:
 ~/Projects/FOSS/emacs/lisp/comint.el => ~/P/F/emacs/lisp/comint.el"
   (let* ((modified-faces (if (buffer-modified-p) 'doom-modeline-buffer-modified))
          (active (active))
-         (project-root (doom-project-root))
+         (project-root "")
          (file-name-split (shrink-path-file-mixed project-root
                                                   (file-name-directory
                                                    (or buffer-file-truename
@@ -471,18 +472,18 @@ Example:
 ;; Segments
 ;;
 
-(def-modeline-segment! buffer-project
-  "Displays `doom-project-root'. This is for special buffers like the scratch
-buffer where knowing the current project directory is important."
-  (let ((face (if (active) 'doom-modeline-buffer-path)))
-    (concat (if (display-graphic-p) " ")
-            (all-the-icons-octicon
-             "file-directory"
-             :face face
-             :v-adjust -0.05
-             :height 1.25)
-            (propertize (concat " " (abbreviate-file-name (doom-project-root)))
-                        'face face))))
+;; (def-modeline-segment! buffer-project
+;;   "Displays `doom-project-root'. This is for special buffers like the scratch
+;; buffer where knowing the current project directory is important."
+;;   (let ((face (if (active) 'doom-modeline-buffer-path)))
+;;     (concat (if (display-graphic-p) " ")
+;;             (all-the-icons-octicon
+;;              "file-directory"
+;;              :face face
+;;              :v-adjust -0.05
+;;              :height 1.25)
+;;             (propertize (concat " " (abbreviate-file-name (doom-project-root)))
+;;                         'face face))))
 
 ;;
 (def-modeline-segment! buffer-info
@@ -556,8 +557,7 @@ directory, the file name, and its state (modified, read-only or non-existent)."
    (concat (format-mode-line mode-name)
            (when (stringp mode-line-process)
              mode-line-process)
-           (when +doom-modeline-env-version
-             (concat " " +doom-modeline-env-version))
+           ;; (when +doom-modeline-env-version (concat " " +doom-modeline-env-version))
            (and (featurep 'face-remap)
                 (/= text-scale-mode-amount 0)
                 (format " (%+d)" text-scale-mode-amount)))

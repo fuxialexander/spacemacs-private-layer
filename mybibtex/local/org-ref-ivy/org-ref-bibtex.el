@@ -1,4 +1,4 @@
-;;; org-ref-bibtex.el -- org-ref-bibtex utilities
+;;; orgorg-ref-bibtex utilities
 
 ;; Copyright(C) 2014 John Kitchin
 
@@ -906,19 +906,22 @@ _U_: Update field  _S_: Sentence case  _F_: File funcs            _q_: quit
   (interactive)
   (save-excursion
     (bibtex-beginning-of-entry)
-    (let* ((key (reftex-get-bib-field "=key=" (bibtex-parse-entry t)))
+    (let* (
+           (key (reftex-get-bib-field "=key=" (bibtex-parse-entry t)))
+           (entry (bibtex-completion-get-entry key))
+           (title (bibtex-completion-get-value "title" entry))
+           (citation (bibtex-completion-apa-format-reference key))
            pdf)
       ;; when we have org-ref defined we may have pdf to find.
       (when (boundp 'org-ref-pdf-directory)
         (setq pdf (expand-file-name
                    (concat key ".pdf")
                    org-ref-pdf-directory)))
-      (bibtex-copy-entry-as-kill)
       (compose-mail)
       (message-goto-body)
-      (insert (pop bibtex-entry-kill-ring))
+      (insert citation "\n")
       (message-goto-subject)
-      (insert key)
+      (insert "Paper Sharing: " title)
       (message "%s exists %s" pdf (file-exists-p pdf))
       (when (file-exists-p pdf)
         (mml-attach-file pdf))

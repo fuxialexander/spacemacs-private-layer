@@ -54,10 +54,10 @@ This function should only modify configuration layer settings."
      pandoc
      markdown
      (treemacs :variables treemacs-use-follow-mode t)
-     ;; (shell :variables
-     ;;        shell-default-shell 'eshell
-     ;;        shell-default-height 40
-     ;;        )
+     (shell :variables
+            shell-default-shell 'eshell
+            shell-default-height 40
+            )
      ivy
      (latex :variables latex-build-command "LatexMk")
      (ess :variables ess-enable-smart-equals t)
@@ -66,6 +66,7 @@ This function should only modify configuration layer settings."
      (spell-checking :variables spell-checking-enable-by-default nil)
      (syntax-checking :variables syntax-checking-enable-tooltips nil)
      ;; ipython-notebook
+     plantuml
      display
      personal
      notmuch
@@ -84,11 +85,15 @@ This function should only modify configuration layer settings."
 
    dotspacemacs-additional-packages '(
                                       ;; circadian
-                                      zotxt
+                                      wordnut
+                                      electric-operator
+                                      ascii-art-to-unicode
+                                      synosaurus
+                                      evil-multiedit
                                       helpful
-                                      gscholar-bibtex
                                       ivy-dired-history
                                       flycheck-package
+                                      ;; helm
                                       cdlatex
                                       tiny
                                       olivetti
@@ -109,6 +114,9 @@ This function should only modify configuration layer settings."
 ;;;; Excluded Packages
    dotspacemacs-excluded-packages '(
                                     flycheck-pos-tip
+                                    multiterm
+                                    ansi-term
+                                    term
                                     pos-tip
                                     ess-R-object-popup
                                     evil-escape
@@ -129,6 +137,7 @@ This function should only modify configuration layer settings."
                                     disaster
                                     fancy-battery
                                     helm-flyspell
+                                    helm-pydoc
                                     flyspell-correct-helm
                                     lorem-ipsum
                                     symon
@@ -228,7 +237,7 @@ It should only modify the values of Spacemacs settings."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("operator mono lig"
-                               :size 14
+                               :size 13
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -435,11 +444,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
   ;; (setq gc-cons-threshold 1000000)
   (add-to-list 'load-path "~/.emacs.d/private/elisp/")
-  (defun t/project-root ()
-    "Get project root without throwing"
-    (let (projectile-require-project-root strict-p)
-      (projectile-project-root)))
-
   (defun t/init-modeline () (+doom-modeline|init))
   (defun export-diary-from-cal ()
     (interactive)
@@ -464,6 +468,146 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+;;;; Org-Skim
+  (with-eval-after-load 'org-ref-ivy
+      (org-link-set-parameters "skim" :follow #'my-org-mac-skim-open)
+      (defun my-org-mac-skim-open (uri)
+        "Visit page of pdf in Skim"
+        (let* ((note (when (string-match ";;\\(.+\\)\\'" uri) (match-string 1 uri)))
+               (page (when (string-match "::\\(.+\\);;" uri) (match-string 1 uri)))
+               (document (substring uri 0 (match-beginning 0))))
+          (do-applescript
+           (concat
+            "tell application \"Skim\"\n"
+            "activate\n"
+            "set theDoc to \"" document "\"\n"
+            "set thepage to " page "\n"
+            "set theNote to " note "\n"
+            "open theDoc\n"
+            "go document 1 to page thePage of document 1\n"
+            "if theNote is not 0\n"
+            "    go document 1 to item theNote of notes of page thePage of document 1\n"
+            "    set active note of document 1 to item theNote of notes of page thePage of document 1\n"
+            "end if\n"
+            "end tell"))))
+      (defadvice org-capture-finalize
+          (after org-capture-finalize-after activate)
+        "Advise capture-finalize to close the frame"
+        (if (equal "SA" (org-capture-get :key))
+            (do-applescript "tell application \"Skim\"\n    activate\nend tell")))
+      (defun my-as-get-skim-page-link ()
+        (do-applescript
+         (concat
+          "tell application \"Skim\"\n"
+          "set theDoc to front document\n"
+          "set theTitle to (name of theDoc)\n"
+          "set thePath to (path of theDoc)\n"
+          "set thePage to (get index for current page of theDoc)\n"
+          "set theSelection to selection of theDoc\n"
+          "set theContent to (contents of (get text for theSelection))\n"
+          "try\n"
+          "    set theNote to active note of theDoc\n"
+          "end try\n"
+          "if theNote is not missing value then\n"
+          "    set theContent to contents of (get text for theNote)\n"
+          "    set theNotePage to get page of theNote\n"
+          "    set thePage to (get index for theNotePage)\n"
+          "    set theNoteIndex to (get index for theNote on theNotePage)\n"
+          "else\n"
+          "    if theContent is missing value then\n"
+          "        set theContent to theTitle & \", p. \" & thePage\n"
+          "        set theNoteIndex to 0\n"
+          "    else\n"
+          "        tell theDoc\n"
+          "            set theNote to make new note with data theSelection with properties {type:highlight note}\n"
+          "            set active note of theDoc to theNote\n"
+          "            set text of theNote to (get text for theSelection)\n"
+          "            set theNotePage to get page of theNote\n"
+          "            set thePage to (get index for theNotePage)\n"
+          "            set theNoteIndex to (get index for theNote on theNotePage)\n"
+          "            set theContent to contents of (get text for theNote)\n"
+          "        end tell\n"
+          "    end if\n"
+          "end if\n"
+          "set theLink to \"skim://\" & thePath & \"::\" & thePage & \";;\" & theNoteIndex & "
+          "\"::split::\" & theContent\n"
+          "end tell\n"
+          "return theLink as string\n")))
+      (defun my-as-get-skim-bibtex-key ()
+        (let* ((name (do-applescript
+                      (concat
+                       "tell application \"Skim\"\n"
+                       "set theDoc to front document\n"
+                       "set theTitle to (name of theDoc)\n"
+                       "end tell\n"
+                       "return theTitle as string\n")))
+               (key (when (string-match "\"\\(.+\\).pdf\"" name) (match-string 1 name))))
+          key)
+        )
+      (defun my-as-get-skim-page ()
+        (let* ((page (do-applescript
+                      (concat
+                       "tell application \"Skim\"\n"
+                       "set theDoc to front document\n"
+                       "set thePage to (get index for current page of theDoc)\n"
+                       "end tell\n"
+                       "return thePage as integer\n"))))
+          page))
+      (defun my-org-mac-skim-get-page ()
+        (interactive)
+        (message "Applescript: Getting Skim page link...")
+        (org-mac-paste-applescript-links (my-as-get-skim-page-link)))
+      (defun my-org-mac-skim-insert-page ()
+        (interactive)
+        (insert (my-org-mac-skim-get-page)))
+      (defun my-org-move-point-to-capture ()
+        (cond ((org-at-heading-p) (org-beginning-of-line))
+              (t (org-previous-visible-heading 1))))
+      (defun my-org-ref-find-entry-in-notes (key)
+        "Find or create bib note for KEY"
+        (let* ((entry (bibtex-completion-get-entry key)))
+        (widen)
+        (goto-char (point-min))
+        (unless (derived-mode-p 'org-mode)
+          (error
+           "Target buffer \"%s\" for jww/find-journal-tree should be in Org mode"
+           (current-buffer)))
+        (let* ((headlines (org-element-map
+                              (org-element-parse-buffer)
+                              'headline 'identity))
+               (keys (mapcar
+                      (lambda (hl) (org-element-property :CUSTOM_ID hl))
+                      headlines)))
+          ;; put new entry in notes if we don't find it.
+          (if (-contains? keys key)
+              (progn
+                (org-open-link-from-string (format "[[#%s]]" key))
+                (lambda nil
+                  (cond ((org-at-heading-p)
+                         (org-beginning-of-line))
+                        (t (org-previous-visible-heading 1))))
+                )
+            ;; no entry found, so add one
+            (goto-char (point-max))
+            (insert (org-ref-reftex-format-citation
+                     entry (concat "\n" org-ref-note-title-format)))
+            (mapc (lambda (x)
+                    (save-restriction
+                      (save-excursion
+                        (funcall x))))
+                  org-ref-create-notes-hook)
+            (org-open-link-from-string (format "[[#%s]]" key))
+            (lambda nil
+              (cond ((org-at-heading-p)
+                     (org-beginning-of-line))
+                    (t (org-previous-visible-heading 1))))
+            ))
+        ))
+      (defun my-org-move-point-to-capture-skim-annotation ()
+        (let* ((keystring (my-as-get-skim-bibtex-key)))
+          (my-org-ref-find-entry-in-notes keystring)
+          ))
+    )
 ;;;; Helpful
   (use-package helpful
     :ensure t
@@ -530,6 +674,11 @@ you should place your code here."
 
   (yas-global-mode)
 
+;;;; wordnut
+  (use-package wordnut
+    :config
+    (progn
+      ))
 ;;;; UI
 
 
@@ -644,10 +793,10 @@ you should place your code here."
    window-divider-default-bottom-width 0
    window-divider-default-right-width 1)
 
-  (window-divider-mode                 )
-  (global-hl-line-mode                 )
-  (global-company-mode                 )
-  (global-auto-revert-mode             )
+  (window-divider-mode)
+  (global-hl-line-mode)
+  (global-company-mode)
+  (global-auto-revert-mode)
 
 
   ;; standardize default fringe width
@@ -664,7 +813,19 @@ you should place your code here."
   ;; NOTE Adjust these bitmaps if you change `doom-fringe-size'
   (with-eval-after-load 'flycheck
     ;; because git-gutter is in the left fringe
-    (setq flycheck-indication-mode 'right-fringe)
+    (defconst flycheck-error-list-format
+      `[("Line" 5 flycheck-error-list-entry-< :right-align t)
+        ("Col" 3 nil :right-align t)
+        ("Level" 8 flycheck-error-list-entry-level-<)
+        ("ID" 6 t)
+        (,(format "Message (%s)" (propertize
+                                  (symbol-name 'Checker)
+                                  'face 'flycheck-error-list-checker-name)) 0 t)]
+      "Table format for the error list.")
+
+    (setq flycheck-indication-mode 'right-fringe
+          flycheck-display-errors-function nil
+          )
     ;; A non-descript, left-pointing arrow
     (fringe-helper-define 'flycheck-fringe-bitmap-double-arrow 'center
       "...X...."
@@ -1067,13 +1228,19 @@ you should place your code here."
 ;;;; Tramp
   (setq tramp-default-method "ssh")
   (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
-  (setq projectile-mode-line "Projectile")
+  (setq projectile-mode-line nil)
+  (setq projectile-enable-caching t)
   (setq tramp-remote-process-environment (quote ("TMOUT=0" "LC_CTYPE=''" "TERM=dumb" "INSIDE_EMACS='25.2.1,tramp:2.2.13.25.2'" "CDPATH=" "HISTORY=" "MAIL=" "MAILCHECK=" "MAILPATH=" "PAGER=cat" "autocorrect=" "correct=" "http_proxy=http://proxy.cse.cuhk.edu.hk:8000" "https_proxy=http://proxy.cse.cuhk.edu.hk:8000" "ftp_proxy=http://proxy.cse.cuhk.edu.hk:8000")))
   (with-eval-after-load 'tramp-sh
     (add-to-list 'tramp-remote-path "/research/kevinyip10/xfu/miniconda3/bin")
     (add-to-list 'tramp-remote-path "/uac/gds/xfu/bin")
     )
 
+;;;; evil-multiedit
+  (use-package evil-multiedit
+    :config
+    (evil-multiedit-default-keybinds)
+    )
 ;;;; Ivy
   (with-eval-after-load 'ivy
     (defvar company-candidates)
@@ -1276,6 +1443,15 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
   (add-to-list 'purpose-special-action-sequences
                '(efs (lambda (buffer alist) (purpose-display-at-bottom buffer alist 30))))
 
+;;;; python
+  (with-eval-after-load 'anaconda-mode
+    (setq python-shell-interpreter "ipython"
+          python-shell-interpreter-args "-i --simple-prompt --no-color-info"
+          python-shell-prompt-regexp "In \\[[0-9]+\\]: "
+          python-shell-prompt-block-regexp "\\.\\.\\.\\.: "
+          python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
+          )
+    )
 ;;;; Outline-level
       (defun python-mode-outline-hook ()
         (outline-minor-mode 1)
@@ -1310,10 +1486,10 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
         ;; Based on this code found at
         ;; http://blog.zenspider.com/blog/2013/07/my-emacs-setup-ruby-and-outline.html:
         ;; (or (and (match-string 1)
-        ;;	     (or (cdr (assoc (match-string 1) outline-heading-alist))
+        ;;       (or (cdr (assoc (match-string 1) outline-heading-alist))
         ;;		 (- (match-end 1) (match-beginning 1))))
         ;;	(and (match-string 0)
-        ;;	     (cdr (assoc (match-string 0) outline-heading-alist)))
+        ;;       (cdr (assoc (match-string 0) outline-heading-alist)))
 
         ;; This doesn't work properly. It sort-of works, but it's not
         ;; correct. Running this function consecutively on the same line
@@ -1423,9 +1599,11 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
 
       (mac-auto-operator-composition-mode)
 
-      (add-to-list 'load-path "~/.emacs.d/private/elisp/pubmode")
-      (autoload 'pub-med "pub" "PubMed Interface for Emacs" t)
-
+      ;; (add-to-list 'load-path "~/.emacs.d/private/elisp/pubmode")
+      ;; (autoload 'pub-med "pub" "PubMed Interface for Emacs" t)
+      (setq synosaurus-choose-method 'default)
+      (setq plantuml-jar-path "~/Source/plantuml.jar")
+      (add-hook 'python-mode-hook #'electric-operator-mode)
   )
 
 ;;; Customize
@@ -1439,9 +1617,10 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(mac-frame-tabbing nil)
  '(package-selected-packages
    (quote
-    (magit zotxt yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text modern-solarizedlight-theme mmm-mode markdown-toc magit-popup macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ gscholar-bibtex google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ ghub fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
+    (xterm-color wordnut synosaurus shell-pop plantuml-mode pdf-tools tablist multi-term mmm-mode markdown-toc markdown-mode flycheck-package package-lint evil-multiedit eshell-z eshell-prompt-extras esh-help electric-operator names ascii-art-to-unicode yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text modern-solarizedlight-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
  '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

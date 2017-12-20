@@ -60,6 +60,7 @@
     :commands (org-ref-bibtex-next-entry
                org-ref-bibtex-previous-entry
                org-ref-doi-utils-get-bibtex-entry-pdf
+               org-ref-ivy-insert-cite-link
                org-ref-open-in-browser
                org-ref-open-bibtex-notes
                org-ref-open-bibtex-pdf
@@ -105,9 +106,9 @@
       (require 'org-ref-pdf)
       ;; (setf (cdr (assoc "p" org-ref-ivy-cite-actions)) '(ivy-bibtex-open-papers "Open in Papers"))
       (setq org-ref-completion-library 'org-ref-ivy-cite
-            org-ref-default-bibliography '("/Users/xfu/Dropbox/org/ref.bib")
+            org-ref-default-bibliography '("/Users/xfu/Dropbox/org/Bibliography.bib")
             org-ref-bibliography-notes "/Users/xfu/Dropbox/org/ref.org"
-            org-ref-pdf-directory "/Users/xfu/Dropbox/org/ref/"
+            org-ref-pdf-directory "/Users/xfu/Documents/Bookends/Attachments"
             org-ref-note-title-format "** %y - %t
  :PROPERTIES:
   :Custom_ID: %k
@@ -176,11 +177,12 @@
             '((org-mode      . bibtex-completion-format-citation-pandoc-citeproc)
               (default       . bibtex-completion-format-citation-default))
 
-            bibtex-completion-bibliography "/Users/xfu/Dropbox/org/ref.bib"
-            bibtex-completion-library-path "/Users/xfu/Dropbox/org/ref/"
+            bibtex-completion-bibliography "/Users/xfu/Dropbox/org/Bibliography.bib"
+            bibtex-completion-library-path "/Users/xfu/Documents/Bookends/Attachments"
             bibtex-completion-notes-path "/Users/xfu/Dropbox/org/ref.org"
             bibtex-completion-pdf-field "file"
             bibtex-completion-pdf-open-function (lambda (fpath) (start-process "open" "*open*" "open" fpath))
+            ;; bibtex-completion-pdf-open-function 'find-file
             )
 
       )

@@ -178,27 +178,32 @@ ENTRY is selected from `org-ref-bibtex-candidates'."
            (concat entry-keywords ", " keywords)
          keywords)))))
 
-
 (defun org-ref-ivy-bibtex-email-entry (entry)
   "Insert selected ENTRY and attach pdf file to an email.
 Create email unless called from an email."
-  (with-ivy-window
-    (let ((goto-to nil))
-      (unless (memq major-mode '(message-mode mu4e-compose-mode))
-        (setq goto-to t)
-        (compose-mail)
-        (message-goto-body))
-      (save-window-excursion
-        (org-ref-ivy-bibtex-open-entry entry)
-        (bibtex-copy-entry-as-kill))
-      (insert (pop bibtex-entry-kill-ring))
-      (insert "\n")
-      (let ((pdf (expand-file-name (format "%s.pdf" (cdr (assoc "=key=" entry)))
-                                   org-ref-pdf-directory)))
-        (if (file-exists-p pdf)
-            (mml-attach-file pdf)))
-      (when goto-to
-        (message-goto-to)))))
+  ;; (with-ivy-window
+  (let* (
+         (key (cdr (assoc "=key=" entry)))
+         (entry (bibtex-completion-get-entry key))
+         (title (cdr (assoc "title" entry)))
+         (citation (bibtex-completion-apa-format-reference key))
+         pdf)
+    ;; when we have org-ref defined we may have pdf to find.
+    (when (boundp 'org-ref-pdf-directory)
+      (setq pdf (expand-file-name
+                 (concat key ".pdf")
+                 org-ref-pdf-directory)))
+    (compose-mail)
+    (message-goto-body)
+    (insert citation "\n")
+    (message-goto-subject)
+    (insert "Paper Sharing: " title)
+    (message "%s exists %s" pdf (file-exists-p pdf))
+    (when (file-exists-p pdf)
+      (mml-attach-file pdf))
+    (message-goto-to))
+  ;; )
+  )
 
 
 (defun org-ref-ivy-bibtex-formatted-citation (entry)

@@ -193,12 +193,19 @@
             org-imenu-depth 8)
 
 ;;;;; Org-TODO
-      (defun my-org-move-point-to-capture ()
-        (cond ((org-at-heading-p) (org-beginning-of-line))
-              (t (org-previous-visible-heading 1))))
-
       (setq org-directory "/Users/xfu/Dropbox/org/"
             org-capture-templates (quote (
+                                          ("SA" "Skim Annotation" entry
+                                           (file+function org-ref-bibliography-notes my-org-move-point-to-capture-skim-annotation)
+                                           "* %^{Logging for...} :skim_annotation:read:literature:
+:PROPERTIES:
+:Created: %U
+:CITE: cite:%(my-as-get-skim-bibtex-key)
+:SKIM_NOTE: %(my-org-mac-skim-get-page)
+:SKIM_PAGE: %(my-as-get-skim-page)
+:END:
+%i
+%?" :prepend f :empty-lines 1)
                                           ("t" "Todo" entry
                                            (file "~/Dropbox/org/inbox.org")
                                            "* %^{Logging for...}
@@ -279,7 +286,7 @@ Brief description:
 :Created: %U
 :Linked: %a
 :END:
-%?" :created t :clock-in t)
+%?" :created t )
                                           ("wr" "Week Review" entry
                                            (file+olp+datetree "~/Dropbox/org/review.org")
                                            "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:week:%\\1:
@@ -287,7 +294,7 @@ Brief description:
 :PROPERTIES:
 :Created: %U
 :END:
-%?" :created t :clock-in t)
+%?" :created t )
                                           ("mr" "Month Review" entry
                                            (file+olp+datetree "~/Dropbox/org/review.org")
                                            "* %^{Review for...|Mood|Research|Learn|Entertainment|Life} :review:month:%\\1:
@@ -295,7 +302,7 @@ Brief description:
 :PROPERTIES:
 :Created: %U
 :END:
-%?" :created t :clock-in t)
+%?" :created t )
                                           ("W" "Web site" entry
                                            (file "~/Dropbox/org/inbox.org")
                                            "* %A :website:
@@ -339,11 +346,21 @@ Brief description:
                                        ("People")
                                        (:grouptags)
                                        ("KevinGroup")
-                                       ("HSCR")
+                                       ("hscr")
                                        ("Friends")
                                        ("Family")
                                        ("Office")
                                        ("Acquaintances")
+                                       (:endgrouptag)
+
+                                       (:startgrouptag)
+                                       ("hscr")
+                                       (:grouptags)
+                                       ("merce")
+                                       ("pak")
+                                       ("clara")
+                                       ("elly")
+                                       ("kathy")
                                        (:endgrouptag)
 
                                        (:startgrouptag)
@@ -429,8 +446,11 @@ Brief description:
                                        (:startgrouptag)
                                        ("Research")
                                        (:grouptags)
+                                       ("hic")
+                                       ("hscr")
                                        ("search")
                                        ("read")
+                                       ("think")
                                        ("literature")
                                        ("website")
                                        ("learn")
@@ -718,7 +738,22 @@ Will work on both org-mode and any mode that accepts plain html."
       (define-key global-map "\C-cc" 'org-capture))
     :config
     (progn
+;;; Org-subtree
+      (defun org-advance ()
+        (interactive)
+        (when (buffer-narrowed-p)
+          (beginning-of-buffer)
+          (widen)
+          (org-forward-heading-same-level 1))
+        (org-narrow-to-subtree))
 
+      (defun org-retreat ()
+        (interactive)
+        (when (buffer-narrowed-p)
+          (beginning-of-buffer)
+          (widen)
+          (org-backward-heading-same-level 1))
+        (org-narrow-to-subtree))
 ;;; Org-todo
       (defun my-org-after-todo-state-change-action ()
         (pcase org-state
@@ -733,12 +768,13 @@ Will work on both org-mode and any mode that accepts plain html."
                                  (self-contained . t)
                                  ))
 
-
+      (setq org-plantuml-jar-path "~/Source/plantuml.jar")
 ;;; Org-babel
       (org-babel-do-load-languages
        'org-babel-load-languages
        '((emacs-lisp . t)
          (ipython . t)
+         (plantuml . t)
          ;; (ein . t)
          (python . t)
          (R . t)
@@ -1365,7 +1401,78 @@ This function makes sure that dates are aligned for easy reading."
             org-brain-visualize-default-choices 'all
             )
       (spacemacs/set-leader-keys "aob" 'org-brain-visualize)
-      (evil-set-initial-state 'org-brain-visualize-mode 'emacs))))
+      (evil-set-initial-state 'org-brain-visualize-mode 'emacs)
+      )
+    :config
+    (progn
+      (defun org-brain-insert-resource-icon (link)
+        "Insert an icon, based on content of org-mode LINK."
+        (insert (format "%s "
+                        (cond ((string-prefix-p "http" link)
+                               (cond ((string-match "wikipedia\\.org" link)
+                                      (all-the-icons-faicon "wikipedia-w"))
+                                     ((string-match "github\\.com" link)
+                                      (all-the-icons-octicon "mark-github"))
+                                     ((string-match "vimeo\\.com" link)
+                                      (all-the-icons-faicon "vimeo"))
+                                     ((string-match "youtube\\.com" link)
+                                      (all-the-icons-faicon "youtube"))
+                                     (t
+                                      (all-the-icons-faicon "globe"))))
+                              ((string-prefix-p "brain:" link)
+                               (all-the-icons-fileicon "brain"))
+                              (t
+                               (all-the-icons-icon-for-file link))))))
+      (add-hook 'org-brain-after-resource-button-functions #'org-brain-insert-resource-icon)
+      (defun aa2u-buffer ()
+        (aa2u (point-min) (point-max)))
+      (add-hook 'org-brain-after-visualize-hook #'aa2u-buffer)
+      (defun org-brain-set-tags (entry)
+        "Use `org-set-tags' on headline ENTRY.
+If run interactively, get ENTRY from context."
+        (interactive (list (org-brain-entry-at-pt)))
+        (when (org-brain-filep entry)
+          (error "Can only set tags on headline entries"))
+        (org-with-point-at (org-brain-entry-marker entry)
+          (counsel-org-tag)
+          (save-buffer))
+        (org-brain--revert-if-visualizing))
+
+
+      (spacemacs/set-leader-keys-for-major-mode 'org-brain-visualize-mode
+        "," 'org-brain-set-tags
+        )
+      (evilified-state-evilify-map org-brain-visualize-mode-map
+        :mode org-brain-visualize-mode
+        :bindings
+        "a" 'org-brain-visualize-attach
+        "b" 'org-brain-visualize-back
+        "c" 'org-brain-add-child
+        "C" 'org-brain-remove-child
+        "p" 'org-brain-add-parent
+        "P" 'org-brain-remove-parent
+        "f" 'org-brain-add-friendship
+        "F" 'org-brain-remove-friendship
+        "d" 'org-brain-delete-entry
+        "g" 'revert-buffer
+        "_" 'org-brain-new-child
+        "j" 'forward-button
+        "k" 'backward-button
+        "l" 'org-brain-add-resource
+        "L" 'org-brain-visualize-paste-resource
+        "t" 'org-brain-set-title
+        "m" 'org-brain-pin
+        "o" 'link-hint-open-link
+        "q" 'org-brain-visualize-quit
+        "r" 'org-brain-visualize-random
+        "R" 'org-brain-visualize-wander
+        "s" 'org-brain-visualize
+        "S" 'org-brain-goto
+        (kbd "TAB") 'org-brain-goto-current
+        "\\" 'ace-window
+        "C-d" 'scroll-down-command
+        "C-u" 'scroll-up-command
+        ))))
 
 (defun myorg/init-org-expiry ()
   (use-package org-expiry
@@ -1388,8 +1495,6 @@ This function makes sure that dates are aligned for easy reading."
       (add-hook 'org-mode-hook 'org-download-enable)
       (setq org-download-screenshot-method "screencapture -i %s"
             org-download-image-dir "./image/"
-            org-download-image-html-width 500
-            org-download-image-latex-width 500
             )
       (spacemacs/declare-prefix-for-mode 'org-mode "miD" "download")
       (spacemacs/set-leader-keys-for-major-mode 'org-mode
