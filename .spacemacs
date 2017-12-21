@@ -86,6 +86,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-additional-packages '(
                                       ;; circadian
                                       wordnut
+                                      org-edna
                                       electric-operator
                                       ascii-art-to-unicode
                                       synosaurus
@@ -553,10 +554,14 @@ you should place your code here."
                        "end tell\n"
                        "return thePage as integer\n"))))
           page))
+      (defun my-as-clean-skim-page-link (link)
+        (let* ((link (replace-regexp-in-string "\n" " " link))
+               (link (replace-regexp-in-string "- " " " link)))
+          link))
       (defun my-org-mac-skim-get-page ()
         (interactive)
         (message "Applescript: Getting Skim page link...")
-        (org-mac-paste-applescript-links (my-as-get-skim-page-link)))
+        (org-mac-paste-applescript-links (my-as-clean-skim-page-link (my-as-get-skim-page-link))))
       (defun my-org-mac-skim-insert-page ()
         (interactive)
         (insert (my-org-mac-skim-get-page)))
@@ -1617,10 +1622,9 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(mac-frame-tabbing nil)
  '(package-selected-packages
    (quote
-    (xterm-color wordnut synosaurus shell-pop plantuml-mode pdf-tools tablist multi-term mmm-mode markdown-toc markdown-mode flycheck-package package-lint evil-multiedit eshell-z eshell-prompt-extras esh-help electric-operator names ascii-art-to-unicode yapfify ws-butler winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim move-text modern-solarizedlight-theme macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-pos-tip flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view elisp-slime-nav elfeed-org editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
+    (modern-solarizedlight-theme yapfify xterm-color ws-butler wordnut winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny synosaurus string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin plantuml-mode pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edna org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim multi-term move-text mmm-mode markdown-toc macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-multiedit evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help elisp-slime-nav elfeed-org electric-operator editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk ascii-art-to-unicode all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
  '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

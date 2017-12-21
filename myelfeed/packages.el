@@ -107,6 +107,26 @@
         (elfeed)
         (elfeed-search-live-filter))
 
+      (defun elfeed-send-to-bookend (url)
+        (let ((uri (concat "bookends:///?&beurl=" (url-hexify-string url))))
+        (start-process "elfeed-bookends" nil "open" "-g" uri)))
+
+      (defun elfeed-search-send-to-bookend ()
+        (interactive)
+        (let ((entries (elfeed-search-selected)))
+          (cl-loop for entry in entries
+                   do (elfeed-untag entry 'unread)
+                   when (elfeed-entry-link entry)
+                   do (elfeed-send-to-bookend it))
+          (mapc #'elfeed-search-update-entry entries)
+          (unless (use-region-p) (forward-line))))
+
+      (defun elfeed-show-send-to-bookend ()
+        (interactive)
+        (let ((link (elfeed-entry-link elfeed-show-entry)))
+          (when link
+            (message "Sent to bookends: %s" link)
+              (elfeed-send-to-bookend link))))
 
 
       (evilified-state-evilify-map elfeed-search-mode-map
@@ -117,17 +137,19 @@
         "e" 'elfeed-update
         "E" 'elfeed-search-update--force
         "u" 'elfeed-unjam
-        "o" 'elfeed-load-opml
+        "b" 'elfeed-search-send-to-bookend
+        "o" 'elfeed-search-browse-url
         "q" 'bury-buffer
         )
       (evilified-state-evilify-map elfeed-show-mode-map
         :mode elfeed-show-mode
         :eval-after-load elfeed-show
         :bindings
-        (kbd "q") 'quit-window
-        (kbd "o") 'ace-link-elfeed
-        (kbd "n") 'elfeed-show-next
-        (kbd "p") 'elfeed-show-prev))))
+        "q" 'quit-window
+        "o" 'ace-link-elfeed
+        "b" 'elfeed-show-send-to-bookend
+        "n" 'elfeed-show-next
+        "p" 'elfeed-show-prev))))
 
 (defun myelfeed/init-elfeed-org ()
   (use-package elfeed-org
