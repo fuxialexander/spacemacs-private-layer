@@ -757,7 +757,7 @@ This function is copied from `ivy-bibtex'."
     (outline-show-all)
     (goto-char (point-min))
     (if (re-search-forward
-         (format ":Custom_ID: +%s\\( \\|$\\)" (regexp-quote key)) nil t)
+         (format ":ORGREF_ID: +%s\\( \\|$\\)" (regexp-quote key)) nil t)
         ;; Existing entry found:
         (when (eq major-mode 'org-mode)
           (org-narrow-to-subtree)

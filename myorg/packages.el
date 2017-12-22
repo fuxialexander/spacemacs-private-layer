@@ -191,6 +191,19 @@
             (quote
              (org-bibtex org-docview org-habit org-info org-protocol org-mac-iCal org-mac-link org-notmuch))
             org-imenu-depth 8)
+;;;;; Org-ID
+      (defun my-org-add-ids-to-headlines-in-file ()
+        "Add CUSTOM_ID properties to all headlines in the current file"
+        (interactive)
+        (save-excursion
+          (widen)
+          (goto-char (point-min))
+          (org-map-entries 'org-id-get-create)))
+
+      (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
+      (add-hook 'org-mode-hook
+                (lambda ()
+                  (add-hook 'before-save-hook 'my-org-add-ids-to-headlines-in-file nil 'local)))
 
 ;;;;; Org-TODO
       (setq org-directory "/Users/xfu/Dropbox/org/"
@@ -202,7 +215,7 @@
 :Created: %U
 :CITE: cite:%(my-as-get-skim-bibtex-key)
 :SKIM_NOTE: %(my-org-mac-skim-get-page)
-:SKIM_PAGE: %(my-as-get-skim-page)
+:SKIM_PAGE: %(int-to-string (my-as-get-skim-page))
 :END:
 %i
 %?" :prepend f :empty-lines 1)
@@ -777,6 +790,7 @@ Will work on both org-mode and any mode that accepts plain html."
          (plantuml . t)
          ;; (ein . t)
          (python . t)
+         (applescript . t)
          (R . t)
          (shell . t)
          (org . t)

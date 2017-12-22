@@ -2,7 +2,7 @@
 
 ;; List of all packages to install and/or initialize. Built-in packages
 ;; which require an initialization must be listed explicitly in the list.
-(setq notmuch-packages
+(setq mynotmuch-packages
       '(notmuch
         counsel
         company
@@ -12,27 +12,27 @@
         avy
         wid-edit
         persp-mode
-        notmuch-labeler
+        ;; notmuch-labeler
         ))
 
-(defun notmuch/init-org-mime ()
+(defun mynotmuch/init-org-mime ()
   (use-package org-mime
     :after notmuch org
     :init (setq org-mime-library 'mml)
     )
   )
 
-(defun notmuch/post-init-company-mode ()
+(defun mynotmuch/post-init-company-mode ()
   (spacemacs|add-company-backends
     :backends (company-capf notmuch-company company-yasnippet)
     :modes notmuch-message-mode
     )
   )
 
-(defun notmuch/post-init-yasnippet-mode ())
+(defun mynotmuch/post-init-yasnippet-mode ())
 
 
-(defun notmuch/post-init-persp-mode ()
+(defun mynotmuch/post-init-persp-mode ()
   ;; do not save erc buffers
   (with-eval-after-load 'persp-mode
     (push (lambda (b) (with-current-buffer b (eq major-mode 'notmuch-hello-mode))) persp-filter-save-buffers-functions)
@@ -58,8 +58,8 @@
       )))
 
 ;; For each package, define a function notmuch/init-<package-notmuch>
-(defun notmuch/post-init-counsel ())
-(defun notmuch/post-init-avy ()
+(defun mynotmuch/post-init-counsel ())
+(defun mynotmuch/post-init-avy ()
   (use-package avy
     :ensure t
     :config
@@ -122,10 +122,10 @@
     )
   )
 
-(defun notmuch/post-init-wid-edit ())
-(defun notmuch/post-init-org ())
-(defun notmuch/init-notmuch-labeler ())
-(defun notmuch/init-notmuch ()
+(defun mynotmuch/post-init-wid-edit ())
+(defun mynotmuch/post-init-org ())
+;; (defun mynotmuch/init-notmuch-labeler ())
+(defun mynotmuch/init-notmuch ()
   "Initialize my package"
   (use-package notmuch
     :commands (notmuch-tree)

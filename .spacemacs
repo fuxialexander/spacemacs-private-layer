@@ -69,7 +69,7 @@ This function should only modify configuration layer settings."
      plantuml
      display
      personal
-     notmuch
+     mynotmuch
      myshellscripts
      mybibtex
      (myorg :variables org-enable-bootstrap-support t)
@@ -86,6 +86,8 @@ This function should only modify configuration layer settings."
    dotspacemacs-additional-packages '(
                                       ;; circadian
                                       wordnut
+                                      applescript-mode
+                                      ob-applescript
                                       org-edna
                                       electric-operator
                                       ascii-art-to-unicode
@@ -123,7 +125,7 @@ This function should only modify configuration layer settings."
                                     evil-escape
                                     vi-tilde-fringe
                                     spaceline
-                                    exec-path-from-shell
+                                    ;; exec-path-from-shell
                                     neotree
                                     magit-gitflow
                                     magit-gh-pulls
@@ -237,8 +239,8 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-colorize-cursor-according-to-state nil
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("operator mono lig"
-                               :size 13
+   dotspacemacs-default-font '("input mono narrow"
+                               :size 12
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -444,6 +446,25 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
   ;; (setq gc-cons-threshold 1000000)
+  ;; (setq exec-path '(
+  ;;                   "."
+  ;;                   "/usr/local/opt/curl/bin"
+  ;;                   "/usr/local/bin"
+  ;;                   "/usr/bin"
+  ;;                   "/Users/xfu/bin"
+  ;;                   "/Users/xfu/go/bin"
+  ;;                   "/usr/local/opt/openssl/bin"
+  ;;                   "/usr/local/opt/texinfo/bin"
+  ;;                   "/usr/local/sbin"
+  ;;                   "/usr/sbin"
+  ;;                   "/usr/texbin"
+  ;;                   "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/bin"
+  ;;                   "/Library/TeX/texbin"
+  ;;                   "/opt/X11/bin"
+  ;;                   "/sbin"
+  ;;                   "/bin"
+  ;;                   ))
+  ;; (setenv "PATH" ".:/usr/local/opt/curl/bin:/usr/local/bin:/usr/bin:/Users/xfu/bin:/Users/xfu/go/bin:/usr/local/opt/openssl/bin:/usr/local/opt/texinfo/bin:/usr/local/sbin:/usr/sbin:/usr/texbin:/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/bin:/Library/TeX/texbin:/opt/X11/bin:/sbin:/bin")
   (add-to-list 'load-path "~/.emacs.d/private/elisp/")
   (defun t/init-modeline () (+doom-modeline|init))
   (defun export-diary-from-cal ()
@@ -496,6 +517,30 @@ you should place your code here."
         "Advise capture-finalize to close the frame"
         (if (equal "SA" (org-capture-get :key))
             (do-applescript "tell application \"Skim\"\n    activate\nend tell")))
+      (add-hook 'org-capture-prepare-finalize-hook #'(lambda () (my-as-set-skim-org-link (org-id-get-create))))
+      (defun my-as-set-skim-org-link (id)
+        (do-applescript (concat
+                         "tell application \"Skim\"\n"
+                         "set runstatus to \"not set\"\n"
+                         "set theDoc to front document\n"
+                         "try\n"
+                         "    set theNote to active note of theDoc\n"
+                         "end try\n"
+                         "if theNote is not missing value then\n"
+                         "    set newText to text of theNote\n"
+                         "    set startpoint to  (offset of \"org-id:{\" in newtext)\n"
+                         "    set endpoint to  (offset of \"}:org-id\" in newtext)\n"
+                         "    if (startpoint is equal to endpoint) and (endpoint is equal to 0) then\n"
+                         "        set newText to text of theNote & \"\norg-id:{\" & "
+                         (applescript-quote-string id)
+                         " & \"}:org-id\"\n"
+                         "        set text of theNote to newText\n"
+                         "        return \"set success\"\n"
+                         "    end if\n"
+                         "end if\n"
+                         "end tell\n"
+                         "return \"unset\"\n"
+                         )))
       (defun my-as-get-skim-page-link ()
         (do-applescript
          (concat
@@ -542,7 +587,7 @@ you should place your code here."
                        "set theTitle to (name of theDoc)\n"
                        "end tell\n"
                        "return theTitle as string\n")))
-               (key (when (string-match "\"\\(.+\\).pdf\"" name) (match-string 1 name))))
+               (key (when (string-match "\\(.+\\).pdf" name) (match-string 1 name))))
           key)
         )
       (defun my-as-get-skim-page ()
@@ -732,24 +777,32 @@ you should place your code here."
       :backends company-files
       :modes shell-script-mode))
 
-
+  (with-eval-after-load 'company
+    (require 'company-childframe))
+  (setq python-shell-interpreter "ipython"
+        python-shell-interpreter-args "-i --simple-prompt --no-color-info"
+        python-shell-prompt-regexp "In \\[[0-9]+\\]: "
+        python-shell-prompt-block-regexp "\\.\\.\\.\\.: "
+        python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
+        ;; python-shell-completion-setup-code "from IPython.core.completerlib import module_completion"
+        ;; python-shell-completion-string-code "';'.join(get_ipython().Completer.all_completions('''%s'''))\n"
+        )
   (setq-default
    ;; browse-url-browser-function 'xwidget-webkit-browse-url
    ;; browse-url-new-window-flag t
    ispell-program-name "/usr/local/bin/aspell"
-   python-shell-interpreter "/usr/local/bin/python3"
-   python-shell-interpreter-args "-i"
-   python-shell-interpreter-interactive-arg "-i"
    counsel-describe-function-function 'helpful-function
    counsel-describe-variable-function 'helpful-variable
-   line-spacing 0.2
+   line-spacing nil
    exec-path-from-shell-check-startup-files nil
    display-line-numbers nil
    bidi-paragraph-direction 'left-to-right
-   company-frontends '(company-preview-frontend company-echo-metadata-frontend)
+   company-frontends '(company-childframe-frontend company-echo-metadata-frontend)
    company-statistics-mode t
    company-require-match nil
+   company-tooltip-minimum-width 60
    company-minimum-prefix-length 2
+   company-tooltip-align-annotations nil
    custom-buffer-done-kill t
    auto-revert-remote-files nil
    ;; mac-mouse-wheel-smooth-scroll t
@@ -1090,17 +1143,17 @@ you should place your code here."
           (concat "\"" result (substring argument start) "\"")))))
 
 ;;;;; Papers
-  (defun export-papers-bib ()
-    (interactive)
-    (do-applescript
-     (format
-      "tell application id \"com.mekentosj.papers3\"
-         set outFile to \"/Users/xfu/Dropbox/org/ref.bib\"
-         export (every publication item of application id \"com.mekentosj.papers3\" as list) to outFile
-       end tell"
-      ))
-    (start-process-shell-command "modify bib" nil "sleep 4;~/.emacs.d/private/local/cleanbib.sh")
-    )
+  ;; (defun export-papers-bib ()
+  ;;   (interactive)
+  ;;   (do-applescript
+  ;;    (format
+  ;;     "tell application id \"com.mekentosj.papers3\"
+  ;;        set outFile to \"/Users/xfu/Dropbox/org/ref.bib\"
+  ;;        export (every publication item of application id \"com.mekentosj.papers3\" as list) to outFile
+  ;;      end tell"
+  ;;     ))
+  ;;   (start-process-shell-command "modify bib" nil "sleep 4;~/.emacs.d/private/local/cleanbib.sh")
+  ;;   )
 
   (setq org-latex-pdf-process
         '("pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f"
@@ -1319,7 +1372,7 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
                   :caller 'counsel-company
                   :action 'counsel-company-action)))
 
-    (add-to-list 'ivy-display-functions-alist '(counsel-company . ivy-display-function-overlay))
+    ;; (add-to-list 'ivy-display-functions-alist '(counsel-company . ivy-display-function-overlay))
     (ivy-set-actions
      'counsel-company
      '(
@@ -1602,8 +1655,41 @@ The previous string is between `ivy-completion-beg' and `ivy-completion-end'."
                                         (group (one-or-more "\*"))
                                         (* space)))))
 
-      (mac-auto-operator-composition-mode)
 
+      ;; (cond
+      ;;  ((eq (frame-live-p (selected-frame)) 'mac)
+      ;;   (mac-auto-operator-composition-mode))
+      ;;  ((eq (frame-live-p (selected-frame)) 'ns)
+      ;;   (let ((alist '((33 . ".\\(?:\\(?:==\\|!!\\)\\|[!=]\\)")
+      ;;                  (35 . ".\\(?:###\\|##\\|_(\\|[#(?[_{]\\)")
+      ;;                  (36 . ".\\(?:>\\)")
+      ;;                  (37 . ".\\(?:\\(?:%%\\)\\|%\\)")
+      ;;                  (38 . ".\\(?:\\(?:&&\\)\\|&\\)")
+      ;;                  (42 . ".\\(?:\\(?:\\*\\*/\\)\\|\\(?:\\*[*/]\\)\\|[*/>]\\)")
+      ;;                  (43 . ".\\(?:\\(?:\\+\\+\\)\\|[+>]\\)")
+      ;;                  (45 . ".\\(?:\\(?:-[>-]\\|<<\\|>>\\)\\|[<>}~-]\\)")
+      ;;                  (46 . ".\\(?:\\(?:\\.[.<]\\)\\|[.=-]\\)")
+      ;;                  (47 . ".\\(?:\\(?:\\*\\*\\|//\\|==\\)\\|[*/=>]\\)")
+      ;;                  (48 . ".\\(?:x[a-zA-Z]\\)")
+      ;;                  (58 . ".\\(?:::\\|[:=]\\)")
+      ;;                  (59 . ".\\(?:;;\\|;\\)")
+      ;;                  (60 . ".\\(?:\\(?:!--\\)\\|\\(?:~~\\|->\\|\\$>\\|\\*>\\|\\+>\\|--\\|<[<=-]\\|=[<=>]\\||>\\)\\|[*$+~/<=>|-]\\)")
+      ;;                  (61 . ".\\(?:\\(?:/=\\|:=\\|<<\\|=[=>]\\|>>\\)\\|[<=>~]\\)")
+      ;;                  (62 . ".\\(?:\\(?:=>\\|>[=>-]\\)\\|[=>-]\\)")
+      ;;                  (63 . ".\\(?:\\(\\?\\?\\)\\|[:=?]\\)")
+      ;;                  (91 . ".\\(?:]\\)")
+      ;;                  (92 . ".\\(?:\\(?:\\\\\\\\\\)\\|\\\\\\)")
+      ;;                  (94 . ".\\(?:=\\)")
+      ;;                  (119 . ".\\(?:ww\\)")
+      ;;                  (123 . ".\\(?:-\\)")
+      ;;                  (124 . ".\\(?:\\(?:|[=|]\\)\\|[=>|]\\)")
+      ;;                  (126 . ".\\(?:~>\\|~~\\|[>=@~-]\\)")
+      ;;                  )
+      ;;                ))
+      ;;     (dolist (char-regexp alist)
+      ;;       (set-char-table-range composition-function-table (car char-regexp)
+      ;;                             `([,(cdr char-regexp) 0 font-shape-gstring]))))
+      ;;   ))
       ;; (add-to-list 'load-path "~/.emacs.d/private/elisp/pubmode")
       ;; (autoload 'pub-med "pub" "PubMed Interface for Emacs" t)
       (setq synosaurus-choose-method 'default)
@@ -1624,8 +1710,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (modern-solarizedlight-theme yapfify xterm-color ws-butler wordnut winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny synosaurus string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin plantuml-mode pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edna org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-ipython ob-async notmuch-labeler mwim multi-term move-text mmm-mode markdown-toc macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-multiedit evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help elisp-slime-nav elfeed-org electric-operator editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk ascii-art-to-unicode all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell)))
- '(tramp-syntax (quote default) nil (tramp)))
+    (overseer ob-ipython yapfify xterm-color ws-butler wordnut winum which-key wgrep volatile-highlights uuidgen use-package unfill treemacs-projectile treemacs-evil toc-org tiny synosaurus string-inflection smex smeargle shx shrink-path shr-tag-pre-highlight shell-pop reveal-in-osx-finder restart-emacs request rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort prodigy prettify-utils popwin plantuml-mode pip-requirements persp-mode pcre2el pbcopy password-generator paradox pandoc-mode ox-twbs ox-pandoc outshine osx-trash osx-dictionary orgit org-web-tools org-super-agenda org-present org-pomodoro org-mime org-edna org-edit-latex org-download org-bullets org-brain org-bookmark-heading open-junk-file olivetti ob-async ob-applescript notmuch-labeler nameless mwim multi-term move-text modern-solarizedlight-theme mmm-mode markdown-toc macrostep live-py-mode link-hint launchctl langtool kurecolor ivy-purpose ivy-hydra ivy-dired-history ivy-bibtex insert-shebang info+ indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers hide-comnt helpful help-fns+ google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ fuzzy flyspell-correct-ivy flycheck-package flycheck-bashate flx fill-column-indicator eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-org evil-numbers evil-nerd-commenter evil-multiedit evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-data-view eshell-z eshell-prompt-extras esh-help elisp-slime-nav elfeed-org electric-operator editorconfig dumb-jump dired-narrow diminish diff-hl cython-mode counsel-projectile company-statistics company-auctex company-anaconda column-enforce-mode color-identifiers-mode cdlatex browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk ascii-art-to-unicode applescript-mode all-the-icons aggressive-indent adaptive-wrap ace-link ac-ispell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

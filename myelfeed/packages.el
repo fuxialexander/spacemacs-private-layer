@@ -134,7 +134,6 @@
         :eval-after-load elfeed-search
         :bindings
         "c" 'elfeed-db-compact
-        "e" 'elfeed-update
         "E" 'elfeed-search-update--force
         "u" 'elfeed-unjam
         "b" 'elfeed-search-send-to-bookend
